@@ -1,0 +1,44 @@
+{
+  "id": 20,
+  "name": "Ascent & Abyss",
+  "totalSugar": 300,
+  "gravity": 0.14,
+  "hasGravityToggle": true,
+  "canvasHeight": 700.0,
+  "emitters": [
+    {
+      "x": 180.0,
+      "y": 340.0,
+      "rate": 3,
+      "color": "#FFFFFF",
+      "totalToEmit": 300
+    }
+  ],
+  "cups": [
+    {
+      "x": 70.0,
+      "y": 580.0,
+      "width": 40.0,
+      "height": 56.0,
+      "color": "#FFFFFF",
+      "targetAmount": 100
+    },
+    {
+      "x": 280.0,
+      "y": 105.0,
+      "width": 40.0,
+      "height": 56.0,
+      "color": "#70C1B3",
+      "targetAmount": 100
+    }
+  ],
+  "filters": [
+    {
+      "x": 240.0,
+      "y": 240.0,
+      "width": 80.0,
+      "height": 25.0,
+      "targetColor": "#70C1B3"
+    }
+  ]
+}

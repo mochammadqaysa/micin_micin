@@ -1,0 +1,398 @@
+{
+  "schema_version": 1,
+  "project_name": "Micin Micin",
+  "art_direction_brief": "docs/design/art-direction-brief.md",
+  "virtual_resolution": {
+    "width": 400,
+    "height": 700,
+    "adapter": "VirtualCoordinateAdapter"
+  },
+  "color_palette_system": {
+    "background_slate": "#13171C",
+    "background_elevation": "#191F26",
+    "particle_white": "#FFFFFF",
+    "pastel_rose": "#F4A7B9",
+    "soft_aqua": "#70C1B3",
+    "muted_gold": "#E8C547",
+    "sage_green": "#95B8A2",
+    "accent_gold": "#FFD54F"
+  },
+  "assets": [
+    {
+      "id": "target_cup",
+      "role": "Target receptacle vessel collecting falling particles with integrated numeral countdown and rim membrane",
+      "rendering_type": "hybrid_vector_painter",
+      "path": "micin_micin/lib/screens/game/painters/level_painter.dart",
+      "asset_vector_source": "micin_micin/assets/images/vessels/cup_beveled_template.svg",
+      "status": "specified",
+      "technical": {
+        "dimensions": "40x56 to 50x64 (virtual px)",
+        "alpha": true,
+        "anchor": "top-left",
+        "frames": 1,
+        "filtering": "bilinear",
+        "format": "vector_path"
+      },
+      "visual_locks": [
+        "corner_radius_bottom_8px",
+        "rim_aperture_beveled_lip",
+        "basalt_interior_fill_191F26",
+        "counter_typography_outfit_semibold",
+        "color_matched_aperture_glow"
+      ],
+      "source": {
+        "kind": "authored-procedural-vector",
+        "creator": "Antigravity Design Engine",
+        "created_at": "2026-09-08",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "User Approved (2026-09-08)"
+      }
+    },
+    {
+      "id": "particle_emitter",
+      "role": "Zen spout discharging micro granular particles with soft concentric halo",
+      "rendering_type": "procedural_vector_primitive",
+      "path": "micin_micin/lib/screens/game/painters/level_painter.dart",
+      "asset_vector_source": "micin_micin/assets/images/emitters/emitter_zen_glyph.svg",
+      "status": "specified",
+      "technical": {
+        "dimensions": "16x16 (virtual px)",
+        "alpha": true,
+        "anchor": "center",
+        "frames": 1,
+        "filtering": "bilinear",
+        "format": "vector_path"
+      },
+      "visual_locks": [
+        "concentric_double_ring",
+        "inner_aperture_radius_3.5px",
+        "outer_atmospheric_halo_radius_8px",
+        "breathing_pulse_smooth",
+        "particle_aligned_origin"
+      ],
+      "source": {
+        "kind": "authored-procedural-vector",
+        "creator": "Antigravity Design Engine",
+        "created_at": "2026-09-08",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "User Approved (2026-09-08)"
+      }
+    },
+    {
+      "id": "color_filter_gate",
+      "role": "Prismatic optical gate zone shifting particle color upon intersection",
+      "rendering_type": "procedural_vector_primitive",
+      "path": "micin_micin/lib/screens/game/painters/level_painter.dart",
+      "asset_vector_source": "micin_micin/assets/images/gates/filter_prism_template.svg",
+      "status": "specified",
+      "technical": {
+        "dimensions": "Variable (e.g. 120x35 virtual px)",
+        "alpha": true,
+        "anchor": "top-left",
+        "frames": 1,
+        "filtering": "bilinear",
+        "format": "vector_rrect"
+      },
+      "visual_locks": [
+        "corner_radius_6px",
+        "translucent_fill_opacity_0.18",
+        "luminescent_border_opacity_0.75",
+        "center_resonance_core_radius_2.5px",
+        "border_stroke_1.5px"
+      ],
+      "source": {
+        "kind": "authored-procedural-vector",
+        "creator": "Antigravity Design Engine",
+        "created_at": "2026-09-08",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "User Approved (2026-09-08)"
+      }
+    },
+    {
+      "id": "hud_icon_pause",
+      "role": "Minimalist pause button icon on in-game HUD",
+      "rendering_type": "vector_svg",
+      "path": "micin_micin/assets/images/icons/hud_pause.svg",
+      "status": "specified",
+      "technical": {
+        "dimensions": "24x24 (virtual px)",
+        "alpha": true,
+        "anchor": "center",
+        "frames": 1,
+        "filtering": "bilinear",
+        "format": "svg"
+      },
+      "visual_locks": [
+        "stroke_width_2px",
+        "stroke_cap_round",
+        "twin_capsule_spacing_6px",
+        "color_resting_E2E8F0_alpha_0.8"
+      ],
+      "source": {
+        "kind": "authored-vector-svg",
+        "creator": "Antigravity Design Engine",
+        "created_at": "2026-09-08",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "User Approved (2026-09-08)"
+      }
+    },
+    {
+      "id": "hud_icon_restart",
+      "role": "Minimalist level reset button icon on in-game HUD",
+      "rendering_type": "vector_svg",
+      "path": "micin_micin/assets/images/icons/hud_restart.svg",
+      "status": "specified",
+      "technical": {
+        "dimensions": "24x24 (virtual px)",
+        "alpha": true,
+        "anchor": "center",
+        "frames": 1,
+        "filtering": "bilinear",
+        "format": "svg"
+      },
+      "visual_locks": [
+        "stroke_width_2px",
+        "stroke_cap_round",
+        "zen_continuous_sweep_270deg",
+        "arrow_head_beveled_rounded",
+        "color_resting_E2E8F0_alpha_0.8"
+      ],
+      "source": {
+        "kind": "authored-vector-svg",
+        "creator": "Antigravity Design Engine",
+        "created_at": "2026-09-08",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "User Approved (2026-09-08)"
+      }
+    },
+    {
+      "id": "hud_icon_gravity",
+      "role": "Minimalist vertical gravity toggle button icon for inverted stages",
+      "rendering_type": "vector_svg",
+      "path": "micin_micin/assets/images/icons/hud_gravity_toggle.svg",
+      "status": "specified",
+      "technical": {
+        "dimensions": "24x24 (virtual px)",
+        "alpha": true,
+        "anchor": "center",
+        "frames": 1,
+        "filtering": "bilinear",
+        "format": "svg"
+      },
+      "visual_locks": [
+        "stroke_width_2px",
+        "stroke_cap_round",
+        "dual_vertical_opposing_arrows",
+        "color_active_FFD54F",
+        "zen_geometric_symmetry"
+      ],
+      "source": {
+        "kind": "authored-vector-svg",
+        "creator": "Antigravity Design Engine",
+        "created_at": "2026-09-08",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "User Approved (2026-09-08)"
+      }
+    },
+    {
+      "id": "hud_icon_audio",
+      "role": "Minimalist sound toggle button icon (Active state)",
+      "rendering_type": "vector_svg",
+      "path": "micin_micin/assets/images/icons/hud_audio.svg",
+      "status": "specified",
+      "technical": {
+        "dimensions": "24x24 (virtual px)",
+        "alpha": true,
+        "anchor": "center",
+        "frames": 1,
+        "filtering": "bilinear",
+        "format": "svg"
+      },
+      "visual_locks": [
+        "stroke_width_2px",
+        "stroke_cap_round",
+        "minimalist_acoustic_wave_arc",
+        "color_resting_E2E8F0_alpha_0.8"
+      ],
+      "source": {
+        "kind": "authored-vector-svg",
+        "creator": "Antigravity Design Engine",
+        "created_at": "2026-09-08",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "User Approved (2026-09-08)"
+      }
+    },
+    {
+      "id": "hud_icon_audio_muted",
+      "role": "Minimalist sound toggle button icon (Muted state)",
+      "rendering_type": "vector_svg",
+      "path": "micin_micin/assets/images/icons/hud_audio_muted.svg",
+      "status": "specified",
+      "technical": {
+        "dimensions": "24x24 (virtual px)",
+        "alpha": true,
+        "anchor": "center",
+        "frames": 1,
+        "filtering": "bilinear",
+        "format": "svg"
+      },
+      "visual_locks": [
+        "stroke_width_2px",
+        "stroke_cap_round",
+        "minimalist_acoustic_wave_arc",
+        "diagonal_slash_on_mute",
+        "color_resting_E2E8F0_alpha_0.8"
+      ],
+      "source": {
+        "kind": "authored-vector-svg",
+        "creator": "Antigravity Design Engine",
+        "created_at": "2026-09-08",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "User Approved (2026-09-08)"
+      }
+    },
+    {
+      "id": "background_pattern",
+      "role": "Subtle ambient texture / micro-grain ensuring depth without visual particle noise",
+      "rendering_type": "procedural_custom_painter",
+      "path": "micin_micin/lib/screens/game/painters/background_painter.dart",
+      "asset_raster_fallback": "micin_micin/assets/images/textures/ambient_grain_subtle.png",
+      "status": "specified",
+      "technical": {
+        "dimensions": "400x700 (procedural viewport)",
+        "alpha": true,
+        "anchor": "top-left",
+        "frames": 1,
+        "filtering": "nearest",
+        "format": "canvas_procedural_points"
+      },
+      "visual_locks": [
+        "base_color_13171C",
+        "subtle_radial_gradient_center_181E24",
+        "micro_grain_opacity_under_2_percent",
+        "zero_interference_with_1.1px_particles",
+        "deterministic_seed_42"
+      ],
+      "source": {
+        "kind": "authored-procedural-shader",
+        "creator": "Antigravity Design Engine",
+        "created_at": "2026-09-08",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "User Approved (2026-09-08)"
+      }
+    },
+    {
+      "id": "stroke_barrier_brush",
+      "role": "Dynamic player-drawn obstacle barrier with birth glow and rounded endpoints",
+      "rendering_type": "procedural_custom_painter",
+      "path": "micin_micin/lib/screens/game/painters/line_painter.dart",
+      "status": "specified",
+      "technical": {
+        "dimensions": "dynamic",
+        "alpha": true,
+        "anchor": "path-origin",
+        "frames": 1,
+        "filtering": "anti-aliased",
+        "format": "canvas_path"
+      },
+      "visual_locks": [
+        "stroke_width_3.0px",
+        "stroke_cap_round",
+        "stroke_join_round",
+        "semi_matte_pure_white_core",
+        "birth_glow_radius_2.5px_decay_400ms"
+      ],
+      "source": {
+        "kind": "authored-procedural-painter",
+        "creator": "Antigravity Design Engine",
+        "created_at": "2026-09-08",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "User Approved (2026-09-08)"
+      }
+    },
+    {
+      "id": "sand_mound_renderer",
+      "role": "Dynamic sand piling heightmap cascade displaying settled particle mounds",
+      "rendering_type": "procedural_custom_painter",
+      "path": "micin_micin/lib/screens/game/painters/particle_painter.dart",
+      "status": "specified",
+      "technical": {
+        "dimensions": "cup_bounded",
+        "alpha": true,
+        "anchor": "cup_bottom",
+        "frames": 1,
+        "filtering": "nearest",
+        "format": "canvas_batch_points"
+      },
+      "visual_locks": [
+        "bin_width_2.0px",
+        "crystalline_opacity_jitter_0.85_to_1.0",
+        "angle_of_repose_relaxation_35deg",
+        "color_matched_to_settled_cup",
+        "batch_draw_points_zero_allocation"
+      ],
+      "source": {
+        "kind": "authored-procedural-painter",
+        "creator": "Antigravity Design Engine",
+        "created_at": "2026-09-08",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "User Approved (2026-09-08)"
+      }
+    }
+  ]
+}

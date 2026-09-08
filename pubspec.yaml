@@ -1,0 +1,44 @@
+name: micin_micin
+description: "Micin Micin — Flutter Android Game Clone of Sugar Sugar"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.1
+  audioplayers: ^6.1.0
+  shared_preferences: ^2.3.2
+  go_router: ^14.6.0
+  google_fonts: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/fonts/
+    - assets/levels/
+    - assets/audio/
+    - assets/images/icons/
+    - assets/images/vessels/
+    - assets/images/emitters/
+    - assets/images/gates/
+
+  fonts:
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Outfit-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Outfit-Bold.ttf
+          weight: 700

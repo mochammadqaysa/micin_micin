@@ -1,0 +1,58 @@
+{
+  "id": 13,
+  "name": "Crossed Ribbons",
+  "totalSugar": 300,
+  "gravity": 0.14,
+  "hasGravityToggle": false,
+  "canvasHeight": 700.0,
+  "emitters": [
+    {
+      "x": 70.0,
+      "y": 50.0,
+      "rate": 3,
+      "color": "#FFFFFF",
+      "totalToEmit": 150
+    },
+    {
+      "x": 330.0,
+      "y": 50.0,
+      "rate": 3,
+      "color": "#FFFFFF",
+      "totalToEmit": 150
+    }
+  ],
+  "cups": [
+    {
+      "x": 120.0,
+      "y": 580.0,
+      "width": 40.0,
+      "height": 56.0,
+      "color": "#F4A7B9",
+      "targetAmount": 100
+    },
+    {
+      "x": 240.0,
+      "y": 580.0,
+      "width": 40.0,
+      "height": 56.0,
+      "color": "#70C1B3",
+      "targetAmount": 100
+    }
+  ],
+  "filters": [
+    {
+      "x": 240.0,
+      "y": 220.0,
+      "width": 80.0,
+      "height": 25.0,
+      "targetColor": "#F4A7B9"
+    },
+    {
+      "x": 80.0,
+      "y": 220.0,
+      "width": 80.0,
+      "height": 25.0,
+      "targetColor": "#70C1B3"
+    }
+  ]
+}

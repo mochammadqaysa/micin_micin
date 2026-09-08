@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <!-- Minimalist Zen Gravity: Dual opposing vertical rounded arrows -->
+  <!-- Downward arrow (left) -->
+  <line x1="8" y1="5" x2="8" y2="18" stroke="#FFD54F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <polyline points="5 15 8 18 11 15" stroke="#FFD54F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Upward arrow (right) -->
+  <line x1="16" y1="19" x2="16" y2="6" stroke="#FFD54F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <polyline points="13 9 16 6 19 9" stroke="#FFD54F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

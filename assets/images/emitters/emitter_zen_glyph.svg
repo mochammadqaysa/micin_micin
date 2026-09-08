@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <!-- Minimalist Zen Particle Emitter Glyph -->
+  <!-- Outer Atmospheric Breathing Halo -->
+  <circle cx="12" cy="12" r="10" stroke="#FFFFFF" stroke-width="1" stroke-opacity="0.15" />
+  <!-- Concentric Halo Ring -->
+  <circle cx="12" cy="12" r="7.5" fill="#FFFFFF" fill-opacity="0.10" stroke="#FFFFFF" stroke-width="1.2" stroke-opacity="0.30" />
+  <!-- Inner Spout Droplet Nozzle -->
+  <circle cx="12" cy="12" r="3.5" fill="#FFFFFF" />
+</svg>

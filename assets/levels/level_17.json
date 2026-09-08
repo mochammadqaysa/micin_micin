@@ -1,0 +1,36 @@
+{
+  "id": 17,
+  "name": "Bipolar Orbit",
+  "totalSugar": 300,
+  "gravity": 0.14,
+  "hasGravityToggle": true,
+  "canvasHeight": 700.0,
+  "emitters": [
+    {
+      "x": 100.0,
+      "y": 350.0,
+      "rate": 3,
+      "color": "#FFFFFF",
+      "totalToEmit": 300
+    }
+  ],
+  "cups": [
+    {
+      "x": 280.0,
+      "y": 580.0,
+      "width": 40.0,
+      "height": 56.0,
+      "color": "#FFFFFF",
+      "targetAmount": 100
+    },
+    {
+      "x": 280.0,
+      "y": 105.0,
+      "width": 40.0,
+      "height": 56.0,
+      "color": "#FFFFFF",
+      "targetAmount": 100
+    }
+  ],
+  "filters": []
+}

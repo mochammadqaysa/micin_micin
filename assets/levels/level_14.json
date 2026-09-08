@@ -1,0 +1,59 @@
+{
+  "id": 14,
+  "name": "The Spectrum Trio",
+  "totalSugar": 450,
+  "gravity": 0.14,
+  "hasGravityToggle": false,
+  "canvasHeight": 700.0,
+  "emitters": [
+    {
+      "x": 200.0,
+      "y": 50.0,
+      "rate": 3,
+      "color": "#FFFFFF",
+      "totalToEmit": 450
+    }
+  ],
+  "cups": [
+    {
+      "x": 60.0,
+      "y": 580.0,
+      "width": 40.0,
+      "height": 56.0,
+      "color": "#F4A7B9",
+      "targetAmount": 100
+    },
+    {
+      "x": 130.0,
+      "y": 580.0,
+      "width": 40.0,
+      "height": 56.0,
+      "color": "#FFFFFF",
+      "targetAmount": 100
+    },
+    {
+      "x": 310.0,
+      "y": 580.0,
+      "width": 40.0,
+      "height": 56.0,
+      "color": "#70C1B3",
+      "targetAmount": 100
+    }
+  ],
+  "filters": [
+    {
+      "x": 60.0,
+      "y": 250.0,
+      "width": 80.0,
+      "height": 25.0,
+      "targetColor": "#F4A7B9"
+    },
+    {
+      "x": 260.0,
+      "y": 250.0,
+      "width": 80.0,
+      "height": 25.0,
+      "targetColor": "#70C1B3"
+    }
+  ]
+}

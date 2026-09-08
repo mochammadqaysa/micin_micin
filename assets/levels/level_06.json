@@ -1,0 +1,43 @@
+{
+  "id": 6,
+  "name": "Weaving Streams",
+  "totalSugar": 300,
+  "gravity": 0.14,
+  "hasGravityToggle": false,
+  "canvasHeight": 700.0,
+  "emitters": [
+    {
+      "x": 70.0,
+      "y": 60.0,
+      "rate": 3,
+      "color": "#FFFFFF",
+      "totalToEmit": 150
+    },
+    {
+      "x": 330.0,
+      "y": 60.0,
+      "rate": 3,
+      "color": "#FFFFFF",
+      "totalToEmit": 150
+    }
+  ],
+  "cups": [
+    {
+      "x": 130.0,
+      "y": 580.0,
+      "width": 40.0,
+      "height": 56.0,
+      "color": "#FFFFFF",
+      "targetAmount": 100
+    },
+    {
+      "x": 270.0,
+      "y": 580.0,
+      "width": 40.0,
+      "height": 56.0,
+      "color": "#FFFFFF",
+      "targetAmount": 100
+    }
+  ],
+  "filters": []
+}
