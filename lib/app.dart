@@ -18,15 +18,36 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/menu',
-      builder: (context, state) => const MenuScreen(),
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const MenuScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 700),
+      ),
     ),
     GoRoute(
       path: '/levels',
-      builder: (context, state) => const LevelSelectScreen(),
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const LevelSelectScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
     ),
     GoRoute(
       path: '/credits',
-      builder: (context, state) => const CreditsScreen(),
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const CreditsScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
     ),
     GoRoute(
       path: '/game/:id',
