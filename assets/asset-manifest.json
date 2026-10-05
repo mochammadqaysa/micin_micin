@@ -393,6 +393,212 @@
         "technical_checks_passed": true,
         "approved_by": "User Approved (2026-09-08)"
       }
+    },
+    {
+      "id": "bgm_zen_ambience",
+      "role": "Master background music loop providing calm, meditative acoustic soundscape",
+      "rendering_type": "audio_stream_loop",
+      "path": "micin_micin/assets/audio/bgm.mp3",
+      "original_source": "d:/kayzz/flutter/micin/bgm.wav",
+      "status": "production_ready",
+      "technical": {
+        "format": "mp3_stereo_256k",
+        "sample_rate": 48000,
+        "duration_seconds": 125.12,
+        "channels": 2,
+        "bus": "MusicBus",
+        "target_lufs": -16.0
+      },
+      "source": {
+        "kind": "user-provided-master",
+        "creator": "User Master Audio Track (DaVinci Resolve)",
+        "created_at": "2026-09-10",
+        "license": "User Owned / Project Exclusive"
+      },
+      "verification": {
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "User Provided (2026-09-10)"
+      }
+    },
+    {
+      "id": "sfx_button_click",
+      "role": "Tactile bamboo woodblock / stone pebble tap on all UI and stage button interactions",
+      "rendering_type": "audio_oneshot",
+      "path": "micin_micin/assets/audio/click.wav",
+      "status": "production_ready",
+      "technical": {
+        "format": "wav_pcm_16bit_mono",
+        "sample_rate": 44100,
+        "duration_seconds": 0.040,
+        "channels": 1,
+        "bus": "SfxBus"
+      },
+      "source": {
+        "kind": "procedural-synthesizer",
+        "creator": "tool/generate_zen_audio.dart",
+        "created_at": "2026-09-10",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "Antigravity Audio Engine (2026-09-10)"
+      }
+    },
+    {
+      "id": "sfx_particle_capture",
+      "role": "Crystalline kalimba tine pluck played with pentatonic scale pitch ascending as cup fills",
+      "rendering_type": "audio_multivoice_interaction",
+      "path": "micin_micin/assets/audio/particle_ping.wav",
+      "status": "production_ready",
+      "technical": {
+        "format": "wav_pcm_16bit_mono",
+        "sample_rate": 44100,
+        "duration_seconds": 0.260,
+        "channels": 1,
+        "bus": "InteractionBus",
+        "pitch_scaling": "pentatonic_C_D_E_G_A"
+      },
+      "source": {
+        "kind": "procedural-synthesizer",
+        "creator": "tool/generate_zen_audio.dart",
+        "created_at": "2026-09-10",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "Antigravity Audio Engine (2026-09-10)"
+      }
+    },
+    {
+      "id": "sfx_filter_pass",
+      "role": "Singing bowl prismatic shimmer when particle traverses a color filter gate",
+      "rendering_type": "audio_multivoice_interaction",
+      "path": "micin_micin/assets/audio/filter_pass.wav",
+      "status": "production_ready",
+      "technical": {
+        "format": "wav_pcm_16bit_mono",
+        "sample_rate": 44100,
+        "duration_seconds": 0.420,
+        "channels": 1,
+        "bus": "InteractionBus",
+        "pitch_scaling": "hue_correlated"
+      },
+      "source": {
+        "kind": "procedural-synthesizer",
+        "creator": "tool/generate_zen_audio.dart",
+        "created_at": "2026-09-10",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "Antigravity Audio Engine (2026-09-10)"
+      }
+    },
+    {
+      "id": "sfx_level_complete",
+      "role": "Celestial Zen resolution chime chord progression celebrating stage victory",
+      "rendering_type": "audio_oneshot_ducked",
+      "path": "micin_micin/assets/audio/ok.mp3",
+      "status": "production_ready",
+      "technical": {
+        "format": "mp3_mono_192k",
+        "sample_rate": 44100,
+        "duration_seconds": 2.20,
+        "channels": 1,
+        "bus": "SfxBus",
+        "sidechain_ducking": "-10dB for 1.4s"
+      },
+      "source": {
+        "kind": "procedural-synthesizer",
+        "creator": "tool/generate_zen_audio.dart",
+        "created_at": "2026-09-10",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "Antigravity Audio Engine (2026-09-10)"
+      }
+    },
+    {
+      "id": "sfx_gravity_invert",
+      "role": "Resonant singing bell harmonic swell when inverting gravitational orientation",
+      "rendering_type": "audio_oneshot",
+      "path": "micin_micin/assets/audio/gravity_invert.wav",
+      "status": "production_ready",
+      "technical": {
+        "format": "wav_pcm_16bit_mono",
+        "sample_rate": 44100,
+        "duration_seconds": 0.500,
+        "channels": 1,
+        "bus": "SfxBus"
+      },
+      "source": {
+        "kind": "procedural-synthesizer",
+        "creator": "tool/generate_zen_audio.dart",
+        "created_at": "2026-09-10",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "Antigravity Audio Engine (2026-09-10)"
+      }
+    },
+    {
+      "id": "sfx_level_reset",
+      "role": "Soft water ripple and sand rake sweep when rewinding or restarting a chamber",
+      "rendering_type": "audio_oneshot",
+      "path": "micin_micin/assets/audio/level_reset.wav",
+      "status": "production_ready",
+      "technical": {
+        "format": "wav_pcm_16bit_mono",
+        "sample_rate": 44100,
+        "duration_seconds": 0.280,
+        "channels": 1,
+        "bus": "SfxBus"
+      },
+      "source": {
+        "kind": "procedural-synthesizer",
+        "creator": "tool/generate_zen_audio.dart",
+        "created_at": "2026-09-10",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "Antigravity Audio Engine (2026-09-10)"
+      }
+    },
+    {
+      "id": "chimes_adaptive_stem",
+      "role": "Layer 2 ambient pentatonic chimes loop that fades in dynamically with target progress",
+      "rendering_type": "audio_stream_loop",
+      "path": "micin_micin/assets/audio/chimes_loop.wav",
+      "status": "production_ready",
+      "technical": {
+        "format": "wav_pcm_16bit_mono",
+        "sample_rate": 44100,
+        "duration_seconds": 4.00,
+        "channels": 1,
+        "bus": "AmbienceBus",
+        "dynamic_gain": "-40dB to 0dB based on progress"
+      },
+      "source": {
+        "kind": "procedural-synthesizer",
+        "creator": "tool/generate_zen_audio.dart",
+        "created_at": "2026-09-10",
+        "license": "Proprietary / MIT Project License"
+      },
+      "verification": {
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "approved_by": "Antigravity Audio Engine (2026-09-10)"
+      }
     }
   ]
 }

@@ -32,10 +32,49 @@ final GoRouter appRouter = GoRouter(
       pageBuilder: (context, state) => CustomTransitionPage(
         key: state.pageKey,
         child: const LevelSelectScreen(),
+        transitionDuration: const Duration(milliseconds: 550),
+        reverseTransitionDuration: const Duration(milliseconds: 500),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
+          final isReverse = animation.status == AnimationStatus.reverse;
+
+          if (isReverse) {
+            // Reverse (Select Level -> Menu): Preserved smoothly as user confirmed ("sudah sesuai")
+            final curvedReverse = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOutSine,
+            );
+            return FadeTransition(
+              opacity: curvedReverse,
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.95, end: 1.0).animate(curvedReverse),
+                child: child,
+              ),
+            );
+          } else {
+            // Forward (Menu -> Select Level): Stitch Interactive Transition Spec
+            // Holds LevelSelectScreen transparent during interval 0.0 -> 0.28 while
+            // MenuScreen performs its title aperture expansion, guide dematerialize, and CTA morph.
+            // Then smoothly scales from 0.92 to 1.0 and fades in (28% -> 100%).
+            final forwardFade = CurvedAnimation(
+              parent: animation,
+              curve: const Interval(0.28, 1.0, curve: Curves.easeOutCubic),
+            );
+            final forwardScale = Tween<double>(begin: 0.92, end: 1.0).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: const Interval(0.28, 1.0, curve: Curves.easeOutCubic),
+              ),
+            );
+
+            return FadeTransition(
+              opacity: forwardFade,
+              child: ScaleTransition(
+                scale: forwardScale,
+                child: child,
+              ),
+            );
+          }
         },
-        transitionDuration: const Duration(milliseconds: 400),
       ),
     ),
     GoRoute(

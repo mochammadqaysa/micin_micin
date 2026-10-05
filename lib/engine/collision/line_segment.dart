@@ -57,13 +57,26 @@ class LineSegment {
 
   /// Resolves physical collision with a [SugarParticle].
   ///
-  /// Applies positional projection to prevent penetration, normal velocity reflection
-  /// ([kLineRestitution]), and tangential surface friction ([kLineFriction]).
+  /// Features continuous collision detection (CCD):
+  /// - Evaluates current distance, predicted frame distance, and swept line intersection.
+  /// - Applies positional separation to prevent penetration.
+  /// - Reflects normal velocity with [kLineRestitution] and tangential friction [kLineFriction].
   /// Returns `true` if a collision occurred and was resolved.
   bool resolveCollision(SugarParticle p, {double radius = kParticleRadius}) {
     final dist = distanceToPoint(p.x, p.y);
     final threshold = radius + thickness / 2.0;
-    if (dist > threshold) {
+
+    bool hit = dist <= threshold;
+    if (!hit && (p.vx != 0.0 || p.vy != 0.0)) {
+      final nextDist = distanceToPoint(p.x + p.vx, p.y + p.vy);
+      if (nextDist <= threshold) {
+        hit = true;
+      } else {
+        hit = _sweptIntersects(p.x, p.y, p.x + p.vx, p.y + p.vy);
+      }
+    }
+
+    if (!hit) {
       return false;
     }
 
@@ -95,6 +108,23 @@ class LineSegment {
     p.vy = vtY * kLineFriction - vnY * kLineRestitution;
 
     return true;
+  }
+
+  /// Evaluates whether the swept path between (x1, y1) and (x2, y2)
+  /// intersects this line segment.
+  bool _sweptIntersects(double x1, double y1, double x2, double y2) {
+    final x3 = start.dx;
+    final y3 = start.dy;
+    final x4 = end.dx;
+    final y4 = end.dy;
+
+    final denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+    if (denom.abs() < 1e-6) return false;
+
+    final t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
+    final u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
+
+    return t >= 0.0 && t <= 1.0 && u >= 0.0 && u <= 1.0;
   }
 
   @override

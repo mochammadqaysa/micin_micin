@@ -11,6 +11,8 @@ enum SoundType {
   levelComplete,
   particlePing,
   filterPass,
+  gravityInvert,
+  levelReset,
 }
 
 /// Central audio manager coordinating background music loops, vertical stems,
@@ -197,6 +199,8 @@ class AudioManager {
         SoundType.levelComplete => 'audio/ok.mp3',
         SoundType.particlePing => 'audio/particle_ping.wav',
         SoundType.filterPass => 'audio/filter_pass.wav',
+        SoundType.gravityInvert => 'audio/gravity_invert.wav',
+        SoundType.levelReset => 'audio/level_reset.wav',
       };
 
       if (type == SoundType.levelComplete) {

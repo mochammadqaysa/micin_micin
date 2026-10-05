@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:micin_micin/screens/game/painters/background_painter.dart';
 import 'package:micin_micin/screens/splash/splash_screen.dart';
+import 'package:micin_micin/widgets/glass_container.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -43,8 +44,9 @@ void main() {
       expect(find.text('Teka-teki Garis & Butiran Gula'), findsOneWidget);
       expect(find.text('Sebuah Penghormatan untuk Sugar, Sugar'), findsOneWidget);
 
-      // Verify Zen vessel icon
+      // Verify Zen vessel icon and GlassContainer portal
       expect(find.byIcon(Icons.grain_rounded), findsOneWidget);
+      expect(find.byType(GlassContainer), findsWidgets);
 
       // Verify BackgroundPainter exists
       final hasBackgroundPainter = tester

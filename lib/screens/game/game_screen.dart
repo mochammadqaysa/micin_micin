@@ -260,25 +260,20 @@ class _GameScreenState extends ConsumerState<GameScreen>
                   },
                 ),
 
-                // 6. HUD Controls and statistics
+                // 6. HUD Controls and statistics (Pure Diegetic: Stage Numeral, Reset, Pause)
                 GameHud(
                   levelId: engine.levelConfig.id,
                   capturedCount: engine.particleController.capturedCount,
                   totalSugar: engine.levelConfig.totalSugar,
                   hasGravityToggle: engine.levelConfig.hasGravityToggle,
                   isMusicEnabled: ref.watch(audioManagerProvider).isMusicEnabled,
-                  onToggleMusic: () {
-                    ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
-                    ref.read(audioManagerProvider).toggleMusic();
-                    setState(() {});
-                  },
                   onPause: () {
                     ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
                     ref.read(audioManagerProvider).duckMusic(active: true, duckDb: -10.0);
                     engine.pause();
                   },
                   onReset: () {
-                    ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
+                    ref.read(audioManagerProvider).playSfx(SoundType.levelReset);
                     ref.read(audioManagerProvider).updateProgress(0.0);
                     ref.read(audioManagerProvider).duckMusic(active: false);
                     setState(() {
@@ -287,21 +282,28 @@ class _GameScreenState extends ConsumerState<GameScreen>
                     engine.reset();
                   },
                   onToggleGravity: () {
-                    ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
+                    ref.read(audioManagerProvider).playSfx(SoundType.gravityInvert);
                     engine.toggleGravity();
                   },
                 ),
 
-                // 7. Pause overlay modal
+                // 7. Pause overlay modal with whispered chamber info and audio soundscape control
                 if (engine.isPaused)
                   PauseOverlay(
+                    levelId: widget.levelId,
+                    isMusicEnabled: ref.watch(audioManagerProvider).isMusicEnabled,
+                    onToggleMusic: () {
+                      ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
+                      ref.read(audioManagerProvider).toggleMusic();
+                      setState(() {});
+                    },
                     onResume: () {
                       ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
                       ref.read(audioManagerProvider).duckMusic(active: false);
                       engine.resume();
                     },
                     onReplay: () {
-                      ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
+                      ref.read(audioManagerProvider).playSfx(SoundType.levelReset);
                       ref.read(audioManagerProvider).updateProgress(0.0);
                       ref.read(audioManagerProvider).duckMusic(active: false);
                       setState(() {
@@ -325,6 +327,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
                 if (engine.isComplete)
                   LevelCompleteDialog(
                     levelId: widget.levelId,
+                    levelConfig: widget.levelConfig,
                     onNextLevel: widget.levelId < kTotalLevels
                         ? () {
                             ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
@@ -332,7 +335,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
                           }
                         : null,
                     onReplay: () {
-                      ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
+                      ref.read(audioManagerProvider).playSfx(SoundType.levelReset);
                       setState(() {
                         _hasHandledCompletion = false;
                       });

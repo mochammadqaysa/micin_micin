@@ -1,12 +1,13 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../core/theme.dart';
 import '../../widgets/lock_badge.dart';
 
-/// Zen circular/beveled node representing a playable level on the stage matrix.
-/// - Unlocked: Translucent elevated basalt pebble (#191F26) with crisp Outfit numerals.
-/// - Next Playable: Continuous tranquil breathing pulse glow beckoning the player.
-/// - Completed: Delicate radiant gold completion pip and illuminated rim.
-/// - Locked: Deeply recessed slate (#12161A) with tactile micro-shake on tap.
+/// Modern Minimalist & Glassmorphism node representing a playable level on the stage matrix.
+/// - Unlocked: Frosted glass pebble with 1px specular border and crisp Outfit numerals.
+/// - Next Playable: 2.2s breathing cyan glow pulse beckoning the player.
+/// - Completed: Radiant gold completion pip and illuminated golden specular rim.
+/// - Locked: Recessed obsidian void node with lock badge and 300ms micro-shake on tap.
 class LevelButton extends StatefulWidget {
   final int levelId;
   final bool isUnlocked;
@@ -23,7 +24,7 @@ class LevelButton extends StatefulWidget {
     required this.isUnlocked,
     required this.isCompleted,
     required this.onTap,
-    this.accentColor = const Color(0xFFFFD54F),
+    this.accentColor = GlassTokens.radiantGold,
     this.isNextPlayable = false,
     this.isMilestone = false,
     this.milestoneLabel,
@@ -93,25 +94,17 @@ class _LevelButtonState extends State<LevelButton>
   Widget build(BuildContext context) {
     final backgroundColor = widget.isUnlocked
         ? (widget.isNextPlayable
-            ? const Color(0xFF1C242C)
-            : const Color(0xFF161C22))
-        : const Color(0xFF12161A);
-
-    final borderColor = widget.isCompleted
-        ? widget.accentColor.withValues(alpha: 0.80)
-        : (widget.isNextPlayable
-            ? widget.accentColor.withValues(alpha: 0.60)
-            : (widget.isUnlocked
-                ? const Color(0xFF28323D)
-                : const Color(0xFF192026)));
+            ? GlassTokens.surfaceElevated
+            : GlassTokens.surfaceLight)
+        : GlassTokens.obsidianVoid.withValues(alpha: 0.65);
 
     final textColor = widget.isUnlocked
         ? (widget.isCompleted
-            ? widget.accentColor
+            ? GlassTokens.radiantGold
             : (widget.isNextPlayable
-                ? const Color(0xFFFFFFFF)
-                : const Color(0xFFE2E8F0)))
-        : const Color(0xFF475569).withValues(alpha: 0.45);
+                ? GlassTokens.textSpecular
+                : GlassTokens.textSpecular.withValues(alpha: 0.90)))
+        : GlassTokens.textDim;
 
     return AnimatedBuilder(
       animation: Listenable.merge([
@@ -128,6 +121,17 @@ class _LevelButtonState extends State<LevelButton>
 
         final double pulseAlpha = _pulseAnimation?.value ?? 0.0;
 
+        final border = Border.all(
+          color: widget.isCompleted
+              ? GlassTokens.radiantGold.withValues(alpha: 0.80)
+              : (widget.isNextPlayable
+                  ? GlassTokens.neonCyan.withValues(alpha: 0.35 + pulseAlpha * 0.45)
+                  : (widget.isUnlocked
+                      ? GlassTokens.borderHighlight
+                      : GlassTokens.borderShadow)),
+          width: widget.isCompleted || widget.isNextPlayable ? 1.5 : 1.0,
+        );
+
         return Transform.translate(
           offset: Offset(wiggleDx, 0),
           child: Material(
@@ -135,29 +139,27 @@ class _LevelButtonState extends State<LevelButton>
             child: InkWell(
               onTap: _handleTap,
               borderRadius: BorderRadius.circular(18),
-              splashColor: widget.accentColor.withValues(alpha: 0.12),
+              splashColor: (widget.isNextPlayable
+                      ? GlassTokens.neonCyan
+                      : widget.accentColor)
+                  .withValues(alpha: 0.15),
               highlightColor: Colors.transparent,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
                   color: backgroundColor,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: widget.isNextPlayable
-                        ? widget.accentColor.withValues(alpha: 0.35 + pulseAlpha * 0.45)
-                        : borderColor,
-                    width: widget.isCompleted || widget.isNextPlayable ? 1.5 : 1.0,
-                  ),
+                  border: border,
                   boxShadow: [
                     if (widget.isCompleted)
                       BoxShadow(
-                        color: widget.accentColor.withValues(alpha: 0.15),
+                        color: GlassTokens.radiantGold.withValues(alpha: 0.15),
                         blurRadius: 10,
                         spreadRadius: 0,
                       ),
                     if (widget.isNextPlayable)
                       BoxShadow(
-                        color: widget.accentColor.withValues(alpha: 0.08 + pulseAlpha * 0.14),
+                        color: GlassTokens.neonCyan.withValues(alpha: 0.12 + pulseAlpha * 0.16),
                         blurRadius: 12 + pulseAlpha * 6,
                         spreadRadius: pulseAlpha * 1.5,
                       ),

@@ -8,6 +8,7 @@ import 'package:micin_micin/providers/player_progress_provider.dart';
 import 'package:micin_micin/screens/game/painters/background_painter.dart';
 import 'package:micin_micin/screens/level_select/level_button.dart';
 import 'package:micin_micin/screens/level_select/level_select_screen.dart';
+import 'package:micin_micin/widgets/glass_container.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -127,6 +128,49 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('MenuScreen'), findsOneWidget);
+    });
+
+    testWidgets('renders GlassContainer components across header, tabs, and act cards',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pump();
+
+      // Verify presence of GlassContainer widgets
+      expect(find.byType(GlassContainer), findsWidgets);
+    });
+
+    testWidgets('tapping unlocked level 1 navigates to game screen',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pump();
+
+      // Find and tap Level 1 button
+      final level1 = find.widgetWithText(LevelButton, '1');
+      expect(level1, findsOneWidget);
+
+      await tester.tap(level1);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('GameScreen 1'), findsOneWidget);
+    });
+
+    testWidgets('tapping locked level 2 stays on screen without SnackBar',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pump();
+
+      // Find and tap locked Level 2 button
+      final level2 = find.widgetWithText(LevelButton, '2');
+      expect(level2, findsOneWidget);
+
+      await tester.tap(level2);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.text('Pilih Level'), findsOneWidget);
+      expect(find.text('GameScreen 2'), findsNothing);
     });
   });
 }

@@ -136,5 +136,36 @@ void main() {
       // Verify GameScreen remains cleanly rendered without exceptions
       expect(find.byType(GameScreen), findsOneWidget);
     });
+
+    testWidgets('PauseOverlay renders chamber indicator and toggles audio soundscape',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: GameScreen(
+              levelId: 14,
+              levelConfig: testConfig,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Tap the pause icon in HUD
+      await tester.tap(find.byKey(const Key('hud_pause')));
+      await tester.pump();
+
+      // Verify chamber indicator and soundscape toggle
+      expect(find.text('CHAMBER 14'), findsOneWidget);
+      expect(find.text('PAUSED'), findsOneWidget);
+      expect(find.byKey(const Key('pause_audio')), findsOneWidget);
+      expect(find.text('CHIMES ON'), findsOneWidget);
+
+      // Tap audio toggle in PauseOverlay
+      await tester.tap(find.byKey(const Key('pause_audio')));
+      await tester.pump();
+
+      expect(find.text('CHIMES MUTED'), findsOneWidget);
+    });
   });
 }

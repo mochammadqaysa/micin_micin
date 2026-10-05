@@ -3,7 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/theme.dart';
 import '../../providers/audio_provider.dart';
+import '../../widgets/glass_container.dart';
 import '../game/painters/background_painter.dart';
 
 /// Zen animated splash screen featuring a tranquil living sugar stream,
@@ -84,8 +86,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           radius: 1.0 + _random.nextDouble() * 1.5,
           alpha: 0.25 + _random.nextDouble() * 0.65,
           color: _random.nextBool()
-              ? const Color(0xFFFFD54F)
-              : const Color(0xFFFFFFFF),
+              ? GlassTokens.radiantGold
+              : GlassTokens.textSpecular,
         ),
       );
     }
@@ -128,7 +130,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0E1217),
+      backgroundColor: GlassTokens.obsidianVoid,
       body: Stack(
         children: [
           // 1. Plane 1: Background Chalk Slate
@@ -159,31 +161,34 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       scale: _logoScale.value,
                       child: Opacity(
                         opacity: _logoFade.value,
-                        child: Container(
+                        child: GlassContainer(
                           width: 88,
                           height: 88,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF161C24),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color(0xFFFFD54F)
-                                  .withValues(alpha: 0.45 + pulse * 0.45),
-                              width: 2.0,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFFFFD54F)
-                                  .withValues(alpha: 0.12 * _haloFade.value + pulse * 0.18),
-                                blurRadius: 28 + pulse * 14,
-                                spreadRadius: 2 + pulse * 4,
-                              ),
+                          shape: BoxShape.circle,
+                          enableLiveBlur: false,
+                          backgroundColor: GlassTokens.surfaceLight,
+                          borderWidth: 1.8,
+                          borderGradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              GlassTokens.radiantGold.withValues(alpha: 0.65 + pulse * 0.35),
+                              GlassTokens.radiantGold.withValues(alpha: 0.20),
                             ],
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: GlassTokens.radiantGold
+                                  .withValues(alpha: 0.12 * _haloFade.value + pulse * 0.18),
+                              blurRadius: 28 + pulse * 14,
+                              spreadRadius: 2 + pulse * 4,
+                            ),
+                          ],
                           child: Center(
                             child: Icon(
                               Icons.grain_rounded,
                               size: 46,
-                              color: const Color(0xFFFFD54F)
+                              color: GlassTokens.radiantGold
                                   .withValues(alpha: 0.90 + pulse * 0.10),
                             ),
                           ),
@@ -198,35 +203,35 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       offset: Offset(0, _textSlide.value),
                       child: Opacity(
                         opacity: _textFade.value,
-                        child: Column(
+                        child: const Column(
                           children: [
-                            const Text(
+                            Text(
                               'Micin, Micin',
                               style: TextStyle(
                                 fontFamily: 'Outfit',
                                 fontSize: 38,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFFF1F5F9),
+                                color: GlassTokens.textSpecular,
                                 letterSpacing: 2.8,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             Text(
                               'Teka-teki Garis & Butiran Gula',
                               style: TextStyle(
                                 fontFamily: 'Outfit',
                                 fontSize: 14,
-                                color: const Color(0xFF94A3B8).withValues(alpha: 0.85),
+                                color: GlassTokens.textMuted,
                                 letterSpacing: 1.8,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            SizedBox(height: 6),
                             Text(
                               'Sebuah Penghormatan untuk Sugar, Sugar',
                               style: TextStyle(
                                 fontFamily: 'Outfit',
                                 fontSize: 11,
-                                color: const Color(0xFF64748B).withValues(alpha: 0.75),
+                                color: GlassTokens.textDim,
                                 letterSpacing: 1.2,
                               ),
                             ),

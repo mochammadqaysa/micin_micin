@@ -128,6 +128,30 @@ void main() {
       expect(particle.vx, equals(0.0));
       expect(particle.vy, equals(2.0));
     });
+
+    test('resolveCollision detects fast-moving particle using continuous collision detection (CCD)', () {
+      // Horizontal barrier at y = 50, thickness = 2.0 => threshold = 1.0 + 1.0 = 2.0
+      const segment = LineSegment(
+        start: Offset(0, 50),
+        end: Offset(100, 50),
+        thickness: 2.0,
+      );
+
+      // Particle starts at y = 46 (dist = 4.0, outside threshold 2.0)
+      // but vy = 4.8 (moves to 50.8, sweeping across the barrier in 1 frame)
+      final particle = SugarParticle(
+        x: 50.0,
+        y: 46.0,
+        vx: 0.0,
+        vy: 4.8,
+      );
+
+      final didCollide = segment.resolveCollision(particle, radius: 1.0);
+
+      expect(didCollide, isTrue);
+      // Particle should have its downward velocity reflected upward
+      expect(particle.vy, isNegative);
+    });
   });
 
   group('DrawnLine', () {

@@ -109,7 +109,10 @@ class CupHitbox {
   bool resolveBarrierCollision(SugarParticle p) {
     if (leftWall.resolveCollision(p)) return true;
     if (rightWall.resolveCollision(p)) return true;
-    if (floor.resolveCollision(p)) return true;
+    // Floor barrier only deflects particles hitting the underside of the cup from outside
+    if (p.vy < 0 || p.y >= bounds.bottom) {
+      if (floor.resolveCollision(p)) return true;
+    }
     return false;
   }
 

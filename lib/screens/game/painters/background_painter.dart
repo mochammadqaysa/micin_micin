@@ -1,7 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../../../core/theme.dart';
 
-/// Renders a minimalist dark chalkboard/sand-textured background.
+/// Renders a minimalist dark obsidian void background with multi-plane starlight sand dust.
 class BackgroundPainter extends CustomPainter {
   final Offset parallaxOffset;
 
@@ -9,7 +10,7 @@ class BackgroundPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Fill base deep matte Zen Slate background (#13171C) with subtle radial vignette
+    // Fill base deep obsidian void (#0A0D14) with subtle radial vignette
     final rect = Offset.zero & size;
     final centerAlignment = Alignment(
       (parallaxOffset.dx / size.width).clamp(-0.3, 0.3),
@@ -21,9 +22,9 @@ class BackgroundPainter extends CustomPainter {
         center: centerAlignment,
         radius: 0.9,
         colors: const [
-          Color(0xFF181E24), // Center ambient elevation
-          Color(0xFF13171C), // Base Zen slate floor
-          Color(0xFF101418), // Subtle edge vignette
+          Color(0xFF141A29), // Center ambient glass elevation
+          GlassTokens.obsidianVoid, // Base obsidian void floor (#0A0D14)
+          Color(0xFF06080D), // Edge dark void
         ],
         stops: const [0.0, 0.6, 1.0],
       ).createShader(rect);

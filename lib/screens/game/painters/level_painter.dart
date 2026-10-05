@@ -41,11 +41,19 @@ class LevelPainter extends CustomPainter {
         fillPaint,
       );
 
-      // Luminescent border outline (opacity 0.75)
+      // Specular gradient luminescent border outline (alpha: 0.85 -> 0.25)
       final borderPaint = Paint()
-        ..color = filter.targetColor.withValues(alpha: 0.75)
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            filter.targetColor.withValues(alpha: 0.85),
+            Colors.white.withValues(alpha: 0.40),
+            filter.targetColor.withValues(alpha: 0.25),
+          ],
+        ).createShader(rect)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5;
+        ..strokeWidth = 1.2;
       canvas.drawRRect(
         RRect.fromRectAndRadius(rect, const Radius.circular(6.0)),
         borderPaint,
@@ -79,12 +87,15 @@ class LevelPainter extends CustomPainter {
         cup.height,
       );
 
-      // Cup body background: deep basalt slate (#191F26)
+      // Option A Pure Vector Glass Body: Translucent obsidian-mineral wash
       final fillPaint = Paint()
-        ..shader = const LinearGradient(
+        ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF161B21), Color(0xFF1D232B)],
+          colors: [
+            cup.color.withValues(alpha: 0.16),
+            const Color(0xFF0A0D14).withValues(alpha: 0.72),
+          ],
         ).createShader(rect)
         ..style = PaintingStyle.fill;
 
@@ -97,11 +108,19 @@ class LevelPainter extends CustomPainter {
         fillPaint,
       );
 
-      // Cup rim & outer contour
+      // Specular gradient rim & outer contour (1.6px crisp line)
       final rimPaint = Paint()
-        ..color = cup.color
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.65),
+            cup.color.withValues(alpha: 0.90),
+            cup.color.withValues(alpha: 0.35),
+          ],
+        ).createShader(rect)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.5
+        ..strokeWidth = 1.6
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round;
 
@@ -115,11 +134,21 @@ class LevelPainter extends CustomPainter {
 
       canvas.drawPath(path, rimPaint);
 
-      // Top aperture selective membrane glow
-      final membranePaint = Paint()
-        ..color = cup.color.withValues(alpha: 0.35)
+      // Top aperture selective membrane halo & core line
+      final haloPaint = Paint()
+        ..color = cup.color.withValues(alpha: 0.25)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5;
+        ..strokeWidth = 4.0;
+      canvas.drawLine(
+        Offset(rect.left + 4.0, rect.top),
+        Offset(rect.right - 4.0, rect.top),
+        haloPaint,
+      );
+
+      final membranePaint = Paint()
+        ..color = cup.color.withValues(alpha: 0.80)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.8;
       canvas.drawLine(
         Offset(rect.left + 2.0, rect.top),
         Offset(rect.right - 2.0, rect.top),
@@ -135,9 +164,10 @@ class LevelPainter extends CustomPainter {
           text: '$remaining',
           style: TextStyle(
             color: remaining == 0 ? const Color(0xFFFFD54F) : cup.color,
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: FontWeight.w600,
             fontFamily: 'Outfit',
+            letterSpacing: 0.6,
           ),
         );
         textPainter = TextPainter(

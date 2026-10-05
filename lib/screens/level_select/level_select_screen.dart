@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants.dart';
+import '../../core/theme.dart';
 import '../../models/player_progress.dart';
 import '../../audio/audio_manager.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/player_progress_provider.dart';
+import '../../widgets/glass_container.dart';
 import '../game/painters/background_painter.dart';
 import 'level_button.dart';
 
@@ -48,8 +50,10 @@ class LevelSelectScreen extends ConsumerStatefulWidget {
   ConsumerState<LevelSelectScreen> createState() => _LevelSelectScreenState();
 }
 
-class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
+class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
+    with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
+  late final AnimationController _entranceController;
   double _scrollOffset = 0.0;
   int _selectedActIndex = 0;
 
@@ -66,7 +70,7 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
       title: 'Aliran Lembut & Curam',
       subtitle: 'Level 1 – 7',
       mechanicsDescription: 'Gravitasi Alami & Sudut Luncuran Murni',
-      accentColor: Color(0xFFF1F5F9), // Pure White
+      accentColor: GlassTokens.textSpecular,
       startLevel: 1,
       endLevel: 7,
       milestoneLevel: 5,
@@ -78,7 +82,7 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
       title: 'Prisma Kromatik',
       subtitle: 'Level 8 – 15',
       mechanicsDescription: 'Filter Warna & Persilangan Jalur',
-      accentColor: Color(0xFFF4A7B9), // Pastel Rose
+      accentColor: GlassTokens.neonRose,
       startLevel: 8,
       endLevel: 15,
       milestoneLevel: 10,
@@ -90,7 +94,7 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
       title: 'Inversi Gravitasi',
       subtitle: 'Level 16 – 22',
       mechanicsDescription: 'Pembalikan Arah & Cawan Langit',
-      accentColor: Color(0xFF70C1B3), // Soft Aqua
+      accentColor: GlassTokens.mintFlora,
       startLevel: 16,
       endLevel: 22,
       milestoneLevel: 18,
@@ -102,7 +106,7 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
       title: 'Taman Zen Agung',
       subtitle: 'Level 23 – 30',
       mechanicsDescription: 'Harmoni Puncak & Aliran Multi-Cawan',
-      accentColor: Color(0xFFE8C547), // Muted Gold
+      accentColor: GlassTokens.radiantGold,
       startLevel: 23,
       endLevel: 30,
       milestoneLevel: 30,
@@ -115,6 +119,17 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
     super.initState();
     _scrollController.addListener(_onScroll);
 
+    // Rule δ: Harmonic Cascade Ripple entrance animation (550ms easeOutCubic)
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 550),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _entranceController.forward();
+      }
+    });
+
     // Initialize 24 deterministic floating foreground motes
     final rng = math.Random(42);
     _foregroundMotes = List.generate(24, (_) {
@@ -125,8 +140,8 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
         alpha: 0.12 + rng.nextDouble() * 0.28,
         phase: rng.nextDouble() * math.pi * 2,
         color: rng.nextBool()
-            ? const Color(0xFFFFD54F)
-            : const Color(0xFFE2E8F0),
+            ? GlassTokens.radiantGold
+            : GlassTokens.neonCyan,
       );
     });
   }
@@ -158,6 +173,7 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _entranceController.dispose();
     super.dispose();
   }
 
@@ -177,7 +193,7 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF11151A),
+      backgroundColor: GlassTokens.obsidianVoid,
       body: Stack(
         children: [
           // 1. Plane 1 (Far Depth): Background Chalk Slate with scroll parallax drift
@@ -249,137 +265,174 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
 
   /// Quiet top bar with back navigation, 'Pilih Level' title, and total progress pill.
   Widget _buildHeader(BuildContext context, PlayerProgress progress) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(
-              Icons.arrow_back_rounded,
-              color: Color(0xFF94A3B8),
-              size: 22,
-            ),
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            onPressed: () {
-              ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.go('/menu');
-              }
-            },
+    return AnimatedBuilder(
+      animation: _entranceController,
+      builder: (context, child) {
+        final val = CurvedAnimation(
+          parent: _entranceController,
+          curve: const Interval(0.0, 0.45, curve: Curves.easeOutCubic),
+        ).value;
+        return Opacity(
+          opacity: val.clamp(0.0, 1.0),
+          child: Transform.translate(
+            offset: Offset(0, -10.0 * (1.0 - val)),
+            child: child,
           ),
-          const Spacer(),
-
-          // Centered Title matching strict test finders
-          const Text(
-            'Pilih Level',
-            style: TextStyle(
-              fontFamily: 'Outfit',
-              fontSize: 18,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFFE2E8F0),
-              letterSpacing: 2.2,
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(
+                Icons.arrow_back_rounded,
+                color: GlassTokens.textMuted,
+                size: 22,
+              ),
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              onPressed: () {
+                ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/menu');
+                }
+              },
             ),
-          ),
-          const Spacer(),
+            const Spacer(),
 
-          // Progress Counter Pill
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF192028),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: const Color(0xFF28323E),
-                width: 1.0,
+            // Centered Title matching strict test finders
+            const Text(
+              'Pilih Level',
+              style: TextStyle(
+                fontFamily: 'Outfit',
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: GlassTokens.textSpecular,
+                letterSpacing: 2.2,
               ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 5,
-                  height: 5,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFFFFD54F),
+            const Spacer(),
+
+            // Progress Counter Pill in Frosted Glass Capsule
+            GlassContainer(
+              borderRadius: GlassTokens.radiusMedium,
+              enableLiveBlur: false,
+              backgroundColor: GlassTokens.surfaceLight,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 5,
+                    height: 5,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: GlassTokens.radiantGold,
+                      boxShadow: [
+                        BoxShadow(
+                          color: GlassTokens.radiantGoldGlow,
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '${progress.completedCount}/$kTotalLevels',
-                  style: const TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF94A3B8),
-                    letterSpacing: 0.8,
+                  const SizedBox(width: 6),
+                  Text(
+                    '${progress.completedCount}/$kTotalLevels',
+                    style: const TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: GlassTokens.textMuted,
+                      letterSpacing: 0.8,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   /// Floating horizontal pill bar allowing rapid jump to any of The 4 Acts.
   Widget _buildActNavigator() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 6.0),
-      padding: const EdgeInsets.all(4.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF141920).withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFF222C38),
-          width: 1.0,
-        ),
-      ),
-      child: Row(
-        children: [
-          for (int i = 0; i < _acts.length; i++)
-            Expanded(
-              child: GestureDetector(
-                onTap: () => _scrollToAct(i),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  padding: const EdgeInsets.symmetric(vertical: 7.0),
-                  decoration: BoxDecoration(
-                    color: _selectedActIndex == i
-                        ? _acts[i].accentColor.withValues(alpha: 0.14)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
+    return AnimatedBuilder(
+      animation: _entranceController,
+      builder: (context, child) {
+        final val = CurvedAnimation(
+          parent: _entranceController,
+          curve: const Interval(0.06, 0.50, curve: Curves.easeOutCubic),
+        ).value;
+        return Opacity(
+          opacity: val.clamp(0.0, 1.0),
+          child: Transform.scale(
+            scale: 0.96 + 0.04 * val,
+            child: child,
+          ),
+        );
+      },
+      child: GlassContainer(
+        margin: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 6.0),
+        padding: const EdgeInsets.all(4.0),
+        borderRadius: 20,
+        enableLiveBlur: false,
+        backgroundColor: GlassTokens.surfaceLight,
+        child: Row(
+          children: [
+            for (int i = 0; i < _acts.length; i++)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _scrollToAct(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.symmetric(vertical: 7.0),
+                    decoration: BoxDecoration(
                       color: _selectedActIndex == i
-                          ? _acts[i].accentColor.withValues(alpha: 0.40)
+                          ? _acts[i].accentColor.withValues(alpha: 0.16)
                           : Colors.transparent,
-                      width: 1.0,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Babak ${_acts[i].romanNumeral}',
-                      style: TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 12,
-                        fontWeight: _selectedActIndex == i
-                            ? FontWeight.w600
-                            : FontWeight.w400,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
                         color: _selectedActIndex == i
-                            ? _acts[i].accentColor
-                            : const Color(0xFF64748B),
-                        letterSpacing: 0.6,
+                            ? _acts[i].accentColor.withValues(alpha: 0.50)
+                            : Colors.transparent,
+                        width: 1.0,
+                      ),
+                      boxShadow: [
+                        if (_selectedActIndex == i)
+                          BoxShadow(
+                            color: _acts[i].accentColor.withValues(alpha: 0.20),
+                            blurRadius: 10,
+                            spreadRadius: 0,
+                          ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Babak ${_acts[i].romanNumeral}',
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 12,
+                          fontWeight: _selectedActIndex == i
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          color: _selectedActIndex == i
+                              ? _acts[i].accentColor
+                              : GlassTokens.textDim,
+                          letterSpacing: 0.6,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -406,27 +459,49 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
     final double colWidth = (parentWidth - (spacing * 3)) / 4.0;
     final double milestoneWidth = (colWidth * 2) + spacing;
 
-    return Padding(
-      key: actKey,
-      padding: const EdgeInsets.only(top: 24.0, bottom: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 1. Act Bento Hero Card with parallax watermark
-          _buildActHeroCard(act, completedInAct, completionRatio),
+    final int actIdx = act.actNumber - 1;
+    final double start = (actIdx * 0.12).clamp(0.0, 0.6);
+    final double end = (start + 0.45).clamp(0.0, 1.0);
+    final anim = CurvedAnimation(
+      parent: _entranceController,
+      curve: Interval(start, end, curve: Curves.easeOutCubic),
+    );
 
-          const SizedBox(height: 14),
-
-          // 2. Asymmetric Bento Grid of Stage Nodes
-          _buildActBentoGrid(
-            act: act,
-            playerProgress: playerProgress,
-            nextPlayableId: nextPlayableId,
-            colWidth: colWidth,
-            milestoneWidth: milestoneWidth,
-            spacing: spacing,
+    return AnimatedBuilder(
+      animation: anim,
+      builder: (context, child) {
+        final val = anim.value;
+        return Opacity(
+          opacity: val.clamp(0.0, 1.0),
+          child: Transform.scale(
+            scale: 0.94 + 0.06 * val,
+            alignment: Alignment.topCenter,
+            child: child,
           ),
-        ],
+        );
+      },
+      child: Padding(
+        key: actKey,
+        padding: const EdgeInsets.only(top: 24.0, bottom: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Act Bento Hero Card with parallax watermark
+            _buildActHeroCard(act, completedInAct, completionRatio),
+
+            const SizedBox(height: 14),
+
+            // 2. Asymmetric Bento Grid of Stage Nodes
+            _buildActBentoGrid(
+              act: act,
+              playerProgress: playerProgress,
+              nextPlayableId: nextPlayableId,
+              colWidth: colWidth,
+              milestoneWidth: milestoneWidth,
+              spacing: spacing,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -437,156 +512,181 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
     int completedCount,
     double completionRatio,
   ) {
-    return Container(
+    return GlassContainer(
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: const Color(0xFF151B22),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: act.accentColor.withValues(alpha: 0.20),
-          width: 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: act.accentColor.withValues(alpha: 0.04),
-            blurRadius: 16,
-            spreadRadius: 0,
-          ),
+      borderRadius: 20,
+      enableLiveBlur: false,
+      backgroundColor: GlassTokens.surfaceSubtle,
+      borderGradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          act.accentColor.withValues(alpha: 0.35),
+          GlassTokens.borderShadow,
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Stack(
-          children: [
-            // Plane 2: Watermark Roman numeral with subtle differential scroll parallax
-            Positioned(
-              right: -10,
-              bottom: -22,
-              child: Transform.translate(
-                offset: Offset(0, -(_scrollOffset * 0.04) % 15),
-                child: Text(
-                  act.romanNumeral,
-                  style: TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 90,
-                    fontWeight: FontWeight.w800,
-                    color: act.accentColor.withValues(alpha: 0.04),
-                    letterSpacing: -4,
-                  ),
+      boxShadow: [
+        BoxShadow(
+          color: act.accentColor.withValues(alpha: 0.05),
+          blurRadius: 20,
+          spreadRadius: 0,
+        ),
+      ],
+      child: Stack(
+        children: [
+          // Plane 2: Watermark Roman numeral with subtle differential scroll parallax
+          Positioned(
+            right: -10,
+            bottom: -22,
+            child: Transform.translate(
+              offset: Offset(0, -(_scrollOffset * 0.04) % 15),
+              child: Text(
+                act.romanNumeral,
+                style: TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 90,
+                  fontWeight: FontWeight.w800,
+                  color: act.accentColor.withValues(alpha: 0.04),
+                  letterSpacing: -4,
                 ),
               ),
             ),
+          ),
 
-            // Card content
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'BABAK ${act.romanNumeral}',
+          // Inner subtle radial highlight
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: RadialGradient(
+                  center: const Alignment(-0.8, -0.6),
+                  radius: 1.2,
+                  colors: [
+                    act.accentColor.withValues(alpha: 0.06),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Card content
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'BABAK ${act.romanNumeral}',
+                      style: TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: act.accentColor.withValues(alpha: 0.90),
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '•  ${act.subtitle}',
+                      style: const TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 11,
+                        fontWeight: FontWeight.w400,
+                        color: GlassTokens.textDim,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const Spacer(),
+
+                    // Act Progress Pill in subtle glass
+                    GlassContainer(
+                      borderRadius: 10,
+                      enableLiveBlur: false,
+                      backgroundColor: act.accentColor.withValues(alpha: 0.10),
+                      borderWidth: 0.8,
+                      borderGradient: LinearGradient(
+                        colors: [
+                          act.accentColor.withValues(alpha: 0.40),
+                          act.accentColor.withValues(alpha: 0.15),
+                        ],
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      child: Text(
+                        '$completedCount/${act.totalLevels} Selesai',
                         style: TextStyle(
                           fontFamily: 'Outfit',
                           fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: act.accentColor.withValues(alpha: 0.85),
-                          letterSpacing: 2.0,
+                          fontWeight: FontWeight.w500,
+                          color: act.accentColor,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '•  ${act.subtitle}',
-                        style: const TextStyle(
-                          fontFamily: 'Outfit',
-                          fontSize: 11,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF64748B),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const Spacer(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
 
-                      // Act Progress Pill
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
+                Text(
+                  act.title,
+                  style: const TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: GlassTokens.textSpecular,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 3),
+
+                Text(
+                  act.mechanicsDescription,
+                  style: const TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: GlassTokens.textMuted,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Minimalist Frosted Progress Track
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: Container(
+                    height: 3.5,
+                    width: double.infinity,
+                    color: GlassTokens.obsidianVoid.withValues(alpha: 0.70),
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: completionRatio.clamp(0.0, 1.0),
+                      child: Container(
                         decoration: BoxDecoration(
-                          color: act.accentColor.withValues(alpha: 0.10),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: act.accentColor.withValues(alpha: 0.25),
-                            width: 0.8,
+                          gradient: LinearGradient(
+                            colors: [
+                              act.accentColor.withValues(alpha: 0.6),
+                              act.accentColor,
+                            ],
                           ),
-                        ),
-                        child: Text(
-                          '$completedCount/${act.totalLevels} Selesai',
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: act.accentColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-
-                  Text(
-                    act.title,
-                    style: const TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFFF1F5F9),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-
-                  Text(
-                    act.mechanicsDescription,
-                    style: const TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF8092A7),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Minimalist Progress Track
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(3),
-                    child: Container(
-                      height: 3.5,
-                      width: double.infinity,
-                      color: const Color(0xFF202732),
-                      child: FractionallySizedBox(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: completionRatio.clamp(0.0, 1.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                act.accentColor.withValues(alpha: 0.6),
-                                act.accentColor,
-                              ],
+                          boxShadow: [
+                            BoxShadow(
+                              color: act.accentColor.withValues(alpha: 0.35),
+                              blurRadius: 4,
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -838,17 +938,12 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
     required Color accentColor,
     required double height,
   }) {
-    return Container(
+    return GlassContainer(
       height: height,
+      borderRadius: 18,
+      enableLiveBlur: false,
+      backgroundColor: GlassTokens.surfaceSubtle,
       padding: const EdgeInsets.symmetric(horizontal: 14.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF141920),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFF222C38),
-          width: 1.0,
-        ),
-      ),
       child: Center(
         child: Text(
           label,
@@ -857,7 +952,7 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
             fontFamily: 'Outfit',
             fontSize: 11,
             fontWeight: FontWeight.w400,
-            color: accentColor.withValues(alpha: 0.55),
+            color: accentColor.withValues(alpha: 0.60),
             letterSpacing: 0.6,
           ),
         ),
