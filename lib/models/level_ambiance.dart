@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'level_config.dart';
 
-/// Defines the unique contemplative visual atmosphere, color wash, and poetic reflection
-/// for a level's Victory State (Diegetic HUD - Ambient Victory State).
+/// Clean minimalist atmospheric profile for each of the 30 stages.
+/// Preserves color harmonies while stripping all poetic AI slop.
 class LevelAmbiance {
   final int levelId;
   final String name;
-  final int actIndex; // 0..3
-  final String actNumeral; // "I", "II", "III", "IV"
+  final int actIndex;
+  final String actNumeral;
   final String actTitle;
   final Color accentColor;
   final Color glowColor;
@@ -26,357 +26,352 @@ class LevelAmbiance {
     required this.zenReflection,
   });
 
-  /// 30 bespoke atmospheric themes curated across the 4 Zen Movements.
+  /// 30 bespoke atmospheric color profiles across the 4 stages.
   static const List<LevelAmbiance> _ambiances = [
-    // Act I: Aliran Lembut & Curam (Levels 1–7) — Pure Crystalline Silver & Moonlit White
+    // Stages 1–7 (Silver & White)
     LevelAmbiance(
       levelId: 1,
-      name: 'Kabut Fajar',
+      name: 'Level 1',
       actIndex: 0,
       actNumeral: 'I',
-      actTitle: 'Aliran Lembut & Curam',
-      accentColor: Color(0xFFF1F5F9), // Crystalline White
+      actTitle: 'Level 1',
+      accentColor: Color(0xFFF1F5F9),
       glowColor: Color(0xFF94A3B8),
       moteColor: Color(0xFFE2E8F0),
-      zenReflection: 'Titik awal perjalanan. Butiran mineral mengalir tenang dalam keheningan fajar.',
+      zenReflection: 'Level 1',
     ),
     LevelAmbiance(
       levelId: 2,
-      name: 'Embun Kristal',
+      name: 'Level 2',
       actIndex: 0,
       actNumeral: 'I',
-      actTitle: 'Aliran Lembut & Curam',
-      accentColor: Color(0xFFE0F2FE), // Soft Ice
+      actTitle: 'Level 2',
+      accentColor: Color(0xFFE0F2FE),
       glowColor: Color(0xFF7DD3FC),
       moteColor: Color(0xFFBAE6FD),
-      zenReflection: 'Aliran menemukan ritmenya, laksana tetesan embun membasahi dedaunan pagi.',
+      zenReflection: 'Level 2',
     ),
     LevelAmbiance(
       levelId: 3,
-      name: 'Batu Sungai',
+      name: 'Level 3',
       actIndex: 0,
       actNumeral: 'I',
-      actTitle: 'Aliran Lembut & Curam',
-      accentColor: Color(0xFFCBD5E1), // River Stone
+      actTitle: 'Level 3',
+      accentColor: Color(0xFFCBD5E1),
       glowColor: Color(0xFF64748B),
       moteColor: Color(0xFF94A3B8),
-      zenReflection: 'Garis yang Anda goreskan membimbing butiran melewati rintangan dengan anggun.',
+      zenReflection: 'Level 3',
     ),
     LevelAmbiance(
       levelId: 4,
-      name: 'Hutan Bambu',
+      name: 'Level 4',
       actIndex: 0,
       actNumeral: 'I',
-      actTitle: 'Aliran Lembut & Curam',
-      accentColor: Color(0xFFD1FAE5), // Pale Jade
+      actTitle: 'Level 4',
+      accentColor: Color(0xFFD1FAE5),
       glowColor: Color(0xFF6EE7B7),
       moteColor: Color(0xFFA7F3D0),
-      zenReflection: 'Keseimbangan lentur tercipta, seperti rumpun bambu yang meliuk mengikuti angin.',
+      zenReflection: 'Level 4',
     ),
     LevelAmbiance(
       levelId: 5,
-      name: 'Taman Bebas I',
+      name: 'Level 5',
       actIndex: 0,
       actNumeral: 'I',
-      actTitle: 'Aliran Lembut & Curam',
-      accentColor: Color(0xFFE2E8F0), // Pure Alabaster
+      actTitle: 'Level 5',
+      accentColor: Color(0xFFE2E8F0),
       glowColor: Color(0xFFA8B2D1),
       moteColor: Color(0xFFF8FAFC),
-      zenReflection: 'Ruang terbuka menyambut aliran bebas. Ketenangan pikiran terpancar sempurna.',
+      zenReflection: 'Level 5',
     ),
     LevelAmbiance(
       levelId: 6,
-      name: 'Arus Sejuk',
+      name: 'Level 6',
       actIndex: 0,
       actNumeral: 'I',
-      actTitle: 'Aliran Lembut & Curam',
-      accentColor: Color(0xFFCFFAFE), // Cyan Dew
+      actTitle: 'Level 6',
+      accentColor: Color(0xFFCFFAFE),
       glowColor: Color(0xFF67E8F9),
       moteColor: Color(0xFFA5F3FC),
-      zenReflection: 'Kecepatan dan kelokan bersatu tanpa hambatan, mengisi bejana hingga penuh.',
+      zenReflection: 'Level 6',
     ),
     LevelAmbiance(
       levelId: 7,
-      name: 'Gerbang Babak Pertama',
+      name: 'Level 7',
       actIndex: 0,
       actNumeral: 'I',
-      actTitle: 'Aliran Lembut & Curam',
-      accentColor: Color(0xFFFFFFFF), // Pristine Diamond
+      actTitle: 'Level 7',
+      accentColor: Color(0xFFFFFFFF),
       glowColor: Color(0xFFCBD5E1),
       moteColor: Color(0xFFF1F5F9),
-      zenReflection: 'Babak pertama terselesaikan. Pondasi ketenangan gravitasi telah Anda kuasai.',
+      zenReflection: 'Level 7',
     ),
 
-    // Act II: Prisma Kromatik (Levels 8–15) — Pastel Rose, Lotus, & Coral Blush
+    // Stages 8–15 (Pastel Rose, Lotus, Coral)
     LevelAmbiance(
       levelId: 8,
-      name: 'Kelopak Sakura',
+      name: 'Level 8',
       actIndex: 1,
       actNumeral: 'II',
-      actTitle: 'Prisma Kromatik',
-      accentColor: Color(0xFFF4A7B9), // Sakura Rose
+      actTitle: 'Level 8',
+      accentColor: Color(0xFFF4A7B9),
       glowColor: Color(0xFFF472B6),
       moteColor: Color(0xFFFBCFE8),
-      zenReflection: 'Butiran melintasi filter warna, bermutasi menjadi rona merah muda yang anggun.',
+      zenReflection: 'Level 8',
     ),
     LevelAmbiance(
       levelId: 9,
-      name: 'Bunga Teratai',
+      name: 'Level 9',
       actIndex: 1,
       actNumeral: 'II',
-      actTitle: 'Prisma Kromatik',
-      accentColor: Color(0xFFFDA4AF), // Lotus Pink
+      actTitle: 'Level 9',
+      accentColor: Color(0xFFFDA4AF),
       glowColor: Color(0xFFFB7185),
       moteColor: Color(0xFFFECDD3),
-      zenReflection: 'Mekar di atas ketenangan air, warna terpisah dan berlabuh pada cawan yang tepat.',
+      zenReflection: 'Level 9',
     ),
     LevelAmbiance(
       levelId: 10,
-      name: 'Prisma Harmoni',
+      name: 'Level 10',
       actIndex: 1,
       actNumeral: 'II',
-      actTitle: 'Prisma Kromatik',
-      accentColor: Color(0xFFF0ABFC), // Dawn Mauve
+      actTitle: 'Level 10',
+      accentColor: Color(0xFFF0ABFC),
       glowColor: Color(0xFFE879F9),
       moteColor: Color(0xFFF5D0FE),
-      zenReflection: 'Dua spektrum bersilangan harmonis tanpa saling mengganggu aliran satu sama lain.',
+      zenReflection: 'Level 10',
     ),
     LevelAmbiance(
       levelId: 11,
-      name: 'Lembayung Sutra',
+      name: 'Level 11',
       actIndex: 1,
       actNumeral: 'II',
-      actTitle: 'Prisma Kromatik',
-      accentColor: Color(0xFFE879F9), // Soft Magenta
+      actTitle: 'Level 11',
+      accentColor: Color(0xFFE879F9),
       glowColor: Color(0xFFC084FC),
       moteColor: Color(0xFFF0ABFC),
-      zenReflection: 'Kelembutan sutra memandu warna ungu pastel mengalir memenuhi wadah takdirnya.',
+      zenReflection: 'Level 11',
     ),
     LevelAmbiance(
       levelId: 12,
-      name: 'Senja Koral',
+      name: 'Level 12',
       actIndex: 1,
       actNumeral: 'II',
-      actTitle: 'Prisma Kromatik',
-      accentColor: Color(0xFFFB7185), // Coral Blossom
+      actTitle: 'Level 12',
+      accentColor: Color(0xFFFB7185),
       glowColor: Color(0xFFF43F5E),
       moteColor: Color(0xFFFECDD3),
-      zenReflection: 'Rona senja merambat pada butiran gula, memancarkan kehangatan di atas batu basal.',
+      zenReflection: 'Level 12',
     ),
     LevelAmbiance(
       levelId: 13,
-      name: 'Bara Merah Delima',
+      name: 'Level 13',
       actIndex: 1,
       actNumeral: 'II',
-      actTitle: 'Prisma Kromatik',
-      accentColor: Color(0xFFF87171), // Ruby Warmth
+      actTitle: 'Level 13',
+      accentColor: Color(0xFFF87171),
       glowColor: Color(0xFFEF4444),
       moteColor: Color(0xFFFCA5A5),
-      zenReflection: 'Daya tarik warna semakin mendalam, menyalakan semangat presisi dalam ketenangan.',
+      zenReflection: 'Level 13',
     ),
     LevelAmbiance(
       levelId: 14,
-      name: 'Air Tenang Basal',
+      name: 'Level 14',
       actIndex: 1,
       actNumeral: 'II',
-      actTitle: 'Prisma Kromatik',
-      accentColor: Color(0xFF84D5C7), // Still Water Basalt (Stitch Act II Canon)
+      actTitle: 'Level 14',
+      accentColor: Color(0xFF84D5C7),
       glowColor: Color(0xFF00685D),
       moteColor: Color(0xFFA0F2E3),
-      zenReflection: 'Granular equilibrium attained. The vessels resonate in quiet alignment.',
+      zenReflection: 'Level 14',
     ),
     LevelAmbiance(
       levelId: 15,
-      name: 'Klimaks Spektrum',
+      name: 'Level 15',
       actIndex: 1,
       actNumeral: 'II',
-      actTitle: 'Prisma Kromatik',
-      accentColor: Color(0xFFF472B6), // Deep Radiant Rose
+      actTitle: 'Level 15',
+      accentColor: Color(0xFFF472B6),
       glowColor: Color(0xFFDB2777),
       moteColor: Color(0xFFFBCFE8),
-      zenReflection: 'Seluruh spektrum warna telah bersatu dalam kepatuhan pada hukum harmoni.',
+      zenReflection: 'Level 15',
     ),
 
-    // Act III: Inversi Gravitasi (Levels 16–22) — Soft Aqua, Celadon Teal, Sky Inversion
+    // Stages 16–22 (Soft Aqua, Celadon Teal)
     LevelAmbiance(
       levelId: 16,
-      name: 'Mata Air Langit',
+      name: 'Level 16',
       actIndex: 2,
       actNumeral: 'III',
-      actTitle: 'Inversi Gravitasi',
-      accentColor: Color(0xFF70C1B3), // Soft Emerald Aqua
+      actTitle: 'Level 16',
+      accentColor: Color(0xFF70C1B3),
       glowColor: Color(0xFF0D9488),
       moteColor: Color(0xFF99F6E4),
-      zenReflection: 'Arah gravitasi berbalik menuju cakrawala. Butiran naik melawan kelaziman alam.',
+      zenReflection: 'Level 16',
     ),
     LevelAmbiance(
       levelId: 17,
-      name: 'Danau Giok',
+      name: 'Level 17',
       actIndex: 2,
       actNumeral: 'III',
-      actTitle: 'Inversi Gravitasi',
-      accentColor: Color(0xFF34D399), // Jade Spring
+      actTitle: 'Level 17',
+      accentColor: Color(0xFF34D399),
       glowColor: Color(0xFF059669),
       moteColor: Color(0xFFA7F3D0),
-      zenReflection: 'Kejernihan giok memayungi cawan langit yang terbalik menerima tumpahan mineral.',
+      zenReflection: 'Level 17',
     ),
     LevelAmbiance(
       levelId: 18,
-      name: 'Air Mancur Zen',
+      name: 'Level 18',
       actIndex: 2,
       actNumeral: 'III',
-      actTitle: 'Inversi Gravitasi',
-      accentColor: Color(0xFF2DD4BF), // Celestial Turquoise
+      actTitle: 'Level 18',
+      accentColor: Color(0xFF2DD4BF),
       glowColor: Color(0xFF0F766E),
       moteColor: Color(0xFF5EEAD4),
-      zenReflection: 'Lompatan gravitasi melahirkan pancuran butiran yang menari di angkasa.',
+      zenReflection: 'Level 18',
     ),
     LevelAmbiance(
       levelId: 19,
-      name: 'Seladon Samudera',
+      name: 'Level 19',
       actIndex: 2,
       actNumeral: 'III',
-      actTitle: 'Inversi Gravitasi',
-      accentColor: Color(0xFF38BDF8), // Ocean Sky
+      actTitle: 'Level 19',
+      accentColor: Color(0xFF38BDF8),
       glowColor: Color(0xFF0284C7),
       moteColor: Color(0xFF7DD3FC),
-      zenReflection: 'Kedalaman dan ketinggian bertukar peran. Pikiran tetap teguh di poros keseimbangan.',
+      zenReflection: 'Level 19',
     ),
     LevelAmbiance(
       levelId: 20,
-      name: 'Cakrawala Terbalik',
+      name: 'Level 20',
       actIndex: 2,
       actNumeral: 'III',
-      actTitle: 'Inversi Gravitasi',
-      accentColor: Color(0xFF06B6D4), // Cyan Horizon
+      actTitle: 'Level 20',
+      accentColor: Color(0xFF06B6D4),
       glowColor: Color(0xFF0891B2),
       moteColor: Color(0xFF67E8F9),
-      zenReflection: 'Pembalikan arah menjadi keindahan saat garis pemandu Anda mengarahkan takdir.',
+      zenReflection: 'Level 20',
     ),
     LevelAmbiance(
       levelId: 21,
-      name: 'Aurora Pesisir',
+      name: 'Level 21',
       actIndex: 2,
       actNumeral: 'III',
-      actTitle: 'Inversi Gravitasi',
-      accentColor: Color(0xFF22D3EE), // Luminous Aurora
+      actTitle: 'Level 21',
+      accentColor: Color(0xFF22D3EE),
       glowColor: Color(0xFF0E7490),
       moteColor: Color(0xFFA5F3FC),
-      zenReflection: 'Pendaran cahaya aqua menyinari partikel yang melayang bebas dalam ruang hening.',
+      zenReflection: 'Level 21',
     ),
     LevelAmbiance(
       levelId: 22,
-      name: 'Pusaran Langit Biru',
+      name: 'Level 22',
       actIndex: 2,
       actNumeral: 'III',
-      actTitle: 'Inversi Gravitasi',
-      accentColor: Color(0xFF0EA5E9), // Deep Celestial
+      actTitle: 'Level 22',
+      accentColor: Color(0xFF0EA5E9),
       glowColor: Color(0xFF0369A1),
       moteColor: Color(0xFF38BDF8),
-      zenReflection: 'Ujian gravitasi ganda telah tuntas. Cawan di langit dan bumi kini bersatu.',
+      zenReflection: 'Level 22',
     ),
 
-    // Act IV: Taman Zen Agung (Levels 23–30) — Warm Imperial Gold, Honey Amber & Saffron
+    // Stages 23–30 (Gold, Amber & Saffron)
     LevelAmbiance(
       levelId: 23,
-      name: 'Matahari Pagi Emas',
+      name: 'Level 23',
       actIndex: 3,
       actNumeral: 'IV',
-      actTitle: 'Taman Zen Agung',
-      accentColor: Color(0xFFFFD54F), // Imperial Amber
+      actTitle: 'Level 23',
+      accentColor: Color(0xFFFFD54F),
       glowColor: Color(0xFFD97706),
       moteColor: Color(0xFFFDE68A),
-      zenReflection: 'Pancaran emas kehangatan menyambut Anda di gerbang Taman Zen Agung.',
+      zenReflection: 'Level 23',
     ),
     LevelAmbiance(
       levelId: 24,
-      name: 'Kunyit Kencana',
+      name: 'Level 24',
       actIndex: 3,
       actNumeral: 'IV',
-      actTitle: 'Taman Zen Agung',
-      accentColor: Color(0xFFFBBF24), // Saffron Ochre
+      actTitle: 'Level 24',
+      accentColor: Color(0xFFFBBF24),
       glowColor: Color(0xFFB45309),
       moteColor: Color(0xFFFEF08A),
-      zenReflection: 'Kemewahan harmoni terpancar dari butiran yang mengisi cawan emas tanpa tumpah.',
+      zenReflection: 'Level 24',
     ),
     LevelAmbiance(
       levelId: 25,
-      name: 'Kayu Cendana',
+      name: 'Level 25',
       actIndex: 3,
       actNumeral: 'IV',
-      actTitle: 'Taman Zen Agung',
-      accentColor: Color(0xFFF59E0B), // Sandalwood Gold
+      actTitle: 'Level 25',
+      accentColor: Color(0xFFF59E0B),
       glowColor: Color(0xFF92400E),
       moteColor: Color(0xFFFDE68A),
-      zenReflection: 'Aroma ketenangan terwujud dalam aliran multi-cawan yang presisi dan anggun.',
+      zenReflection: 'Level 25',
     ),
     LevelAmbiance(
       levelId: 26,
-      name: 'Topaz Keabadian',
+      name: 'Level 26',
       actIndex: 3,
       actNumeral: 'IV',
-      actTitle: 'Taman Zen Agung',
-      accentColor: Color(0xFFE8C547), // Muted Gold (Canon)
+      actTitle: 'Level 26',
+      accentColor: Color(0xFFE8C547),
       glowColor: Color(0xFF78350F),
       moteColor: Color(0xFFFEF3C7),
-      zenReflection: 'Setiap butiran laksana permata topaz yang menemukan tempat peristirahatan abadinya.',
+      zenReflection: 'Level 26',
     ),
     LevelAmbiance(
       levelId: 27,
-      name: 'Fatamorgana Senja',
+      name: 'Level 27',
       actIndex: 3,
       actNumeral: 'IV',
-      actTitle: 'Taman Zen Agung',
-      accentColor: Color(0xFFF97316), // Warm Amber Dusk
+      actTitle: 'Level 27',
+      accentColor: Color(0xFFF97316),
       glowColor: Color(0xFFC2410C),
       moteColor: Color(0xFFFED7AA),
-      zenReflection: 'Cahaya jingga keemasan memancarkan keagungan konsentrasi dan ketelitian Anda.',
+      zenReflection: 'Level 27',
     ),
     LevelAmbiance(
       levelId: 28,
-      name: 'Batu Kuarsa Emas',
+      name: 'Level 28',
       actIndex: 3,
       actNumeral: 'IV',
-      actTitle: 'Taman Zen Agung',
-      accentColor: Color(0xFFFBBF24), // Golden Quartz
+      actTitle: 'Level 28',
+      accentColor: Color(0xFFFBBF24),
       glowColor: Color(0xFFB45309),
       moteColor: Color(0xFFFFFBEB),
-      zenReflection: 'Menjelang garis akhir, ketenangan batin Anda terbukti kokoh bagai kuarsa.',
+      zenReflection: 'Level 28',
     ),
     LevelAmbiance(
       levelId: 29,
-      name: 'Zenith Surya',
+      name: 'Level 29',
       actIndex: 3,
       actNumeral: 'IV',
-      actTitle: 'Taman Zen Agung',
-      accentColor: Color(0xFFFFD54F), // Molten Gold
+      actTitle: 'Level 29',
+      accentColor: Color(0xFFFFD54F),
       glowColor: Color(0xFFEA580C),
       moteColor: Color(0xFFFEF08A),
-      zenReflection: 'Satu langkah menuju kesempurnaan. Seluruh elemen fisika berpadu secara mutlak.',
+      zenReflection: 'Level 29',
     ),
     LevelAmbiance(
       levelId: 30,
-      name: 'Klimaks Nirwana',
+      name: 'Level 30',
       actIndex: 3,
       actNumeral: 'IV',
-      actTitle: 'Taman Zen Agung',
-      accentColor: Color(0xFFFFE082), // Grand Radiant Gold
+      actTitle: 'Level 30',
+      accentColor: Color(0xFFFFE082),
       glowColor: Color(0xFFB45309),
       moteColor: Color(0xFFFFFFFF),
-      zenReflection: 'Equilibrium mutlak tercapai. Seluruh 30 taman beresonansi dalam harmoni abadi.',
+      zenReflection: 'Level 30',
     ),
   ];
 
   /// Resolves the atmospheric ambiance for a given [levelId] (1..30).
-  ///
-  /// If a [config] is provided and contains colored target cups, the accent color
-  /// dynamically harmonizes with the dominant cup's chromatic identity while
-  /// preserving the level's distinct act mood and poetic reflection.
   static LevelAmbiance forLevel(int levelId, [LevelConfig? config]) {
     final int index = (levelId - 1).clamp(0, _ambiances.length - 1);
     final base = _ambiances[index];
 
-    // If level has non-white cups, adapt accent color to reflect cup requirement
     if (config != null && config.cups.isNotEmpty) {
       final coloredCups = config.cups.where((c) => c.color.toARGB32() != const Color(0xFFFFFFFF).toARGB32()).toList();
       if (coloredCups.isNotEmpty) {

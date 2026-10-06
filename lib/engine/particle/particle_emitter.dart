@@ -48,10 +48,10 @@ class ParticleEmitter {
       if (particle != null) {
         // Organic position jitter: x ± 1.2 virtual px
         final xJitter = (_random.nextDouble() * 2.4) - 1.2;
-        // Organic horizontal velocity jitter: vx in [-0.25, 0.25] virtual px/frame
-        final vxJitter = (_random.nextDouble() * 0.5) - 0.25;
-        // Crystalline opacity variation: alpha in [0.85, 1.0]
-        final opacity = 0.85 + (_random.nextDouble() * 0.15);
+        // Bounded stream horizontal velocity jitter: vx in [-0.35, 0.35] virtual px/frame (REQ-002)
+        final vxJitter = (_random.nextDouble() * 0.70) - 0.35;
+        // Crystalline opacity variation: alpha in [0.88, 1.0] (REQ-001)
+        final opacity = 0.88 + (_random.nextDouble() * 0.12);
 
         particle.x = x + xJitter;
         particle.y = y;

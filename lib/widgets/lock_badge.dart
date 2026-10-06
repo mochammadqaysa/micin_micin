@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../core/theme.dart';
+import 'neu_container.dart';
 
-/// Small visual lock badge overlaid on locked level tiles.
+/// Pure Neumorphism debossed lock badge for locked game nodes.
 class LockBadge extends StatelessWidget {
   final double size;
 
@@ -11,20 +13,19 @@ class LockBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.65),
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: const Color(0xFF616161),
-          width: 1.0,
+    return NeuContainer(
+      width: size + 10.0,
+      height: size + 10.0,
+      shape: BoxShape.circle,
+      style: NeuStyle.inset,
+      depth: 3.0,
+      blur: 5.0,
+      child: Center(
+        child: Icon(
+          Icons.lock_rounded,
+          size: size,
+          color: NeuTokens.textMuted,
         ),
-      ),
-      child: Icon(
-        Icons.lock_rounded,
-        size: size,
-        color: const Color(0xFFBDBDBD),
       ),
     );
   }

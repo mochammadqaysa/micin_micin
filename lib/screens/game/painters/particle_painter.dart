@@ -23,7 +23,7 @@ class ParticlePainter extends CustomPainter {
 
     final paint = Paint()
       ..strokeWidth = kParticleRadius * 2.0
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap = StrokeCap.square;
 
     // 1. Batch group active particle offsets by color and crystalline opacity (PRN-001)
     if (hasParticles) {

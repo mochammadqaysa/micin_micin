@@ -7,6 +7,7 @@ import 'package:micin_micin/models/emitter_config.dart';
 import 'package:micin_micin/models/level_config.dart';
 import 'package:micin_micin/screens/game/game_hud.dart';
 import 'package:micin_micin/screens/game/game_screen.dart';
+import 'package:micin_micin/screens/game/painters/background_painter.dart';
 import 'package:micin_micin/widgets/pause_overlay.dart';
 
 void main() {
@@ -167,5 +168,31 @@ void main() {
 
       expect(find.text('CHIMES MUTED'), findsOneWidget);
     });
+
+    testWidgets(
+        'GameScreen mounts with LevelVisualTheme and passes chromatic palette and label to BackgroundPainter (AC-003, AC-004)',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: GameScreen(
+              levelId: 8,
+              levelConfig: testConfig,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final customPaints = tester.widgetList<CustomPaint>(find.byType(CustomPaint));
+      final bgCustomPaint = customPaints.firstWhere((cp) => cp.painter is BackgroundPainter);
+      final painter = bgCustomPaint.painter as BackgroundPainter;
+
+      expect(painter.backgroundColor.toARGB32(), equals(const Color(0xFF0F511D).toARGB32())); // Classic Kelly Green
+      expect(painter.canvasLabel, equals('level 8'));
+      expect(painter.canvasLabelColor.toARGB32(), equals(const Color(0xFF4ADE80).toARGB32()));
+      expect(painter.canvasLabelOpacity, closeTo(0.22, 0.05));
+    });
   });
 }
+

@@ -15,6 +15,7 @@ class CupHitbox {
   final Color color;
   final int targetAmount;
   int capturedCount;
+  int lastCaptureMs;
 
   // Rigid barrier segments for outer collisions
   final LineSegment leftWall;
@@ -31,6 +32,7 @@ class CupHitbox {
     required this.color,
     this.targetAmount = 100,
     this.capturedCount = 0,
+    this.lastCaptureMs = 0,
   })  : leftWall = LineSegment(
           start: Offset(bounds.left, bounds.top),
           end: Offset(bounds.left, bounds.bottom),
@@ -203,6 +205,7 @@ class CupHitbox {
       settledParticleOffsets.add(Offset(settledX, settledY));
 
       capturedCount++;
+      lastCaptureMs = DateTime.now().millisecondsSinceEpoch;
       p.isCaptured = true;
       return true;
     }
@@ -213,6 +216,7 @@ class CupHitbox {
   /// Resets captured count and clears heightmap state.
   void reset() {
     capturedCount = 0;
+    lastCaptureMs = 0;
     columnHeights.fillRange(0, columnHeights.length, 0.0);
     settledParticleOffsets.clear();
   }

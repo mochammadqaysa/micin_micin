@@ -1,32 +1,26 @@
 import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../audio/audio_manager.dart';
 import '../../core/constants.dart';
 import '../../core/theme.dart';
-import '../../engine/drawing/line_controller.dart';
 import '../../models/player_progress.dart';
 import '../../models/sugar_particle.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/player_progress_provider.dart';
 import '../../widgets/glass_container.dart';
+import '../../widgets/neu_button.dart';
+import '../../widgets/neu_container.dart';
+import '../../widgets/neu_progress_bar.dart';
 import '../game/painters/background_painter.dart';
-import '../game/painters/line_painter.dart';
 
-/// Zen main menu screen implementing Stitch "Main Menu - Zen Gateway"
-/// and "Interactive Transition Spec: Menu to Chambers".
-///
-/// Features:
-/// - Diegetic Sanctuary V header & chimes toggle.
-/// - Fluid living sugar sand stream inspired by Bart Bonte's Sugar, Sugar.
-/// - Center stage diegetic physics chamber visualizer (spawner aperture, hairline spline, basalt cup).
-/// - Contemplative navigation suite (Play pill, Chambers, Colophon/Credits).
-/// - 550ms Interactive Transition Choreography:
-///   * Rule α: Aperture letter-spacing expansion (0.35em -> 0.45em) & fade.
-///   * Rule β: Guide barrier dematerialization into motes.
-///   * Rule γ: CTA node unfolding into active chamber coordinate.
-///   * Audio: -10dB resonance chime cue at t=120ms.
+/// Pure Neumorphism Main Menu featuring:
+/// - 3D Embossed Game Plaque with dual directional drop shadows.
+/// - Tactile extruded PLAY button with spring physics depression.
+/// - Interactive 2.5D Physical Sugar dispenser and Neumorphic target cup.
+/// - Secondary Neumorphic action bay for LEVELS and CREDITS.
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
 
@@ -35,153 +29,31 @@ class MenuScreen extends ConsumerStatefulWidget {
 }
 
 class _MenuScreenState extends ConsumerState<MenuScreen>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late final AnimationController _entranceController;
-  late final AnimationController _pulseController;
-  late final AnimationController _particleController;
-  late final AnimationController _transitionController;
+  late final Animation<double> _fadeAnimation;
 
-  // Staggered Entrance Animations
-  late final Animation<double> _bgFade;
-  late final Animation<double> _logoScale;
-  late final Animation<double> _logoSlide;
-  late final Animation<double> _logoFade;
-  late final Animation<double> _titleSlide;
-  late final Animation<double> _titleFade;
-  late final Animation<double> _centerChamberFade;
-  late final Animation<double> _playSlide;
-  late final Animation<double> _playScale;
-  late final Animation<double> _playFade;
-  late final Animation<double> _secondarySlide;
-  late final Animation<double> _secondaryFade;
-
-  // Interactive Physics Drawing & Living Sand Simulation
-  late final LineController _lineController;
+  // Granular Sugar Simulation
   final List<_MenuSugarGrain> _grains = [];
   final math.Random _random = math.Random(1337);
-  Offset? _touchPosition;
-  Offset? _dragStartPos;
-  bool _isDrawing = false;
-  DateTime? _lastTapTime;
-  bool _isNavigating = false;
   Size _screenSize = Size.zero;
+  bool _isNavigating = false;
 
   @override
   void initState() {
     super.initState();
 
-    // 1. Choreographed Staggered Entrance Controller (1.4s)
     _entranceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
+      duration: const Duration(milliseconds: 500),
     );
 
-    _bgFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.0, 0.40, curve: Curves.easeOut),
-      ),
+    _fadeAnimation = CurvedAnimation(
+      parent: _entranceController,
+      curve: Curves.easeOutCubic,
     );
 
-    _logoScale = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.08, 0.60, curve: Curves.easeOutBack),
-      ),
-    );
-
-    _logoSlide = Tween<double>(begin: -24.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.08, 0.55, curve: Curves.easeOutCubic),
-      ),
-    );
-
-    _logoFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.08, 0.45, curve: Curves.easeOut),
-      ),
-    );
-
-    _titleSlide = Tween<double>(begin: 22.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.22, 0.65, curve: Curves.easeOutCubic),
-      ),
-    );
-
-    _titleFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.22, 0.55, curve: Curves.easeOut),
-      ),
-    );
-
-    _centerChamberFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.35, 0.75, curve: Curves.easeOut),
-      ),
-    );
-
-    _playSlide = Tween<double>(begin: 32.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.45, 0.90, curve: Curves.easeOutCubic),
-      ),
-    );
-
-    _playScale = Tween<double>(begin: 0.90, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.45, 0.90, curve: Curves.easeOutBack),
-      ),
-    );
-
-    _playFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.45, 0.80, curve: Curves.easeOut),
-      ),
-    );
-
-    _secondarySlide = Tween<double>(begin: 24.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.65, 1.0, curve: Curves.easeOutCubic),
-      ),
-    );
-
-    _secondaryFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.65, 0.95, curve: Curves.easeOut),
-      ),
-    );
-
-    // 2. Continuous breathing pulse for glow rings & buttons
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    )..repeat(reverse: true);
-
-    // 3. Interactive Transition Controller: Menu to Chambers (550ms)
-    _transitionController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 550),
-    );
-
-    // 4. Line Drawing & Interactive Endless Particle Simulation
-    _lineController = LineController();
     _initGrains();
-
-    _particleController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    )..addListener(_updateParticles)
-     ..repeat();
-
     _entranceController.forward();
 
     // Start background music loop
@@ -190,7 +62,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     });
   }
 
-  /// Populates the initial circular particle pool with distributed vertical waterfall.
   void _initGrains() {
     _grains.clear();
     const double fallbackW = 400.0;
@@ -200,119 +71,70 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     final double spawnerX = w * 0.5;
     const double spawnerY = 56.0;
 
-    for (int i = 0; i < 180; i++) {
-      final double progress = i / 180.0;
+    for (int i = 0; i < 140; i++) {
+      final double progress = i / 140.0;
       _grains.add(
         _MenuSugarGrain(
           x: spawnerX + (_random.nextDouble() * 10.0 - 5.0),
-          y: spawnerY + progress * (h - spawnerY),
-          vx: (_random.nextDouble() * 0.6 - 0.3),
-          vy: 0.8 + _random.nextDouble() * 1.4,
-          radius: 1.0 + _random.nextDouble() * 1.5,
-          baseAlpha: 0.35 + _random.nextDouble() * 0.60,
-          color: _random.nextDouble() > 0.30
-              ? GlassTokens.textSpecular
-              : GlassTokens.radiantGold,
+          y: spawnerY + progress * (h - spawnerY - 100.0),
+          vx: (_random.nextDouble() * 0.5 - 0.25),
+          vy: 1.0 + _random.nextDouble() * 1.6,
+          radius: 1.1,
+          color: _random.nextDouble() > 0.25
+              ? NeuTokens.textPrimary
+              : NeuTokens.accentAmber,
         ),
       );
     }
   }
 
-  /// 60 FPS physics tick: gravity, CCD against user-drawn chalk lines, and endless recycling.
-  void _updateParticles() {
-    final double w = _screenSize.width > 0 ? _screenSize.width : 400.0;
-    final double h = _screenSize.height > 0 ? _screenSize.height : 700.0;
+  void _updateParticles(double w, double h) {
     final double spawnerX = w * 0.5;
-    final double spawnerY = MediaQuery.paddingOf(context).top + 24.0;
-
-    final segments = _lineController.allSegments;
+    const double spawnerY = 52.0;
+    final double cupTopY = h - 105.0;
 
     for (final grain in _grains) {
       if (!grain.isActive) {
-        grain.x = spawnerX + (_random.nextDouble() * 8.0 - 4.0);
+        grain.x = spawnerX + (_random.nextDouble() * 6.0 - 3.0);
         grain.y = spawnerY + (_random.nextDouble() * 4.0);
-        grain.vx = (_random.nextDouble() * 0.6 - 0.3);
+        grain.vx = (_random.nextDouble() * 0.5 - 0.25);
         grain.vy = 0.8 + _random.nextDouble() * 1.2;
         grain.isActive = true;
       }
 
-      // 1. Downward gravity acceleration & air damping
-      grain.vy = (grain.vy + 0.20).clamp(-kMaxSpeed, kMaxSpeed);
-      grain.vx = (grain.vx * 0.99).clamp(-kMaxSpeed, kMaxSpeed);
+      grain.vy = (grain.vy + 0.18).clamp(-kMaxSpeed, kMaxSpeed);
+      grain.vx = (grain.vx * 0.985).clamp(-kMaxSpeed, kMaxSpeed);
 
-      // 2. Interactive touch push if finger/cursor is pressed/dragged
-      if (_touchPosition != null) {
-        final double dx = grain.x - _touchPosition!.dx;
-        final double dy = grain.y - _touchPosition!.dy;
-        final double distSq = dx * dx + dy * dy;
-        if (distSq < 2500 && distSq > 1.0) {
-          final double dist = math.sqrt(distSq);
-          grain.vx += (dx / dist) * 0.40;
-          grain.vy += (dy / dist) * 0.40;
-        }
-      }
-
-      // 3. Continuous collision detection against player-drawn chalk lines
-      for (final segment in segments) {
-        if (segment.resolveCollision(grain, radius: grain.radius)) {
-          break;
-        }
-      }
-
-      // 4. Integrate velocities into positions
       grain.x += grain.vx;
       grain.y += grain.vy;
 
-      // 5. Boundary check & continuous endless recycling back to top nozzle
-      if (grain.y > h + 25.0 || grain.x < -35.0 || grain.x > w + 35.0) {
-        grain.x = spawnerX + (_random.nextDouble() * 8.0 - 4.0);
-        grain.y = spawnerY + (_random.nextDouble() * 4.0);
-        grain.vx = (_random.nextDouble() * 0.6 - 0.3);
+      if (grain.y > cupTopY + 45.0 || grain.x < -30.0 || grain.x > w + 30.0) {
+        grain.x = spawnerX + (_random.nextDouble() * 6.0 - 3.0);
+        grain.y = spawnerY + (_random.nextDouble() * 3.0);
+        grain.vx = (_random.nextDouble() * 0.5 - 0.25);
         grain.vy = 0.8 + _random.nextDouble() * 1.2;
-        grain.color = _random.nextDouble() > 0.30
-            ? GlassTokens.textSpecular
-            : GlassTokens.radiantGold;
-        grain.opacity = 0.40 + _random.nextDouble() * 0.55;
+        grain.color = _random.nextDouble() > 0.25
+            ? NeuTokens.textPrimary
+            : NeuTokens.accentAmber;
       }
     }
-
-    if (mounted) {
-      setState(() {});
-    }
   }
 
-  /// Clears all player-drawn lines and plays the reset chime
-  void _clearLines() {
-    if (_lineController.lines.isEmpty) return;
-    ref.read(audioManagerProvider).playSfx(SoundType.levelReset);
-    _lineController.clearAll();
-    setState(() {});
-  }
-
-  /// Triggers the interactive choreography transition to Chambers (LevelSelectScreen)
-  void _navigateToChambers() {
+  void _navigateTo(String route) {
     if (_isNavigating) return;
     _isNavigating = true;
 
     ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
-    ref.read(audioManagerProvider).playSfx(SoundType.particlePing);
-
-    _transitionController.forward(from: 0.0);
-    context.push('/levels').then((_) {
+    context.push(route).then((_) {
       if (mounted) {
         _isNavigating = false;
-        _transitionController.reverse();
       }
     });
   }
 
   @override
   void dispose() {
-    _lineController.dispose();
     _entranceController.dispose();
-    _pulseController.dispose();
-    _particleController.dispose();
-    _transitionController.dispose();
     super.dispose();
   }
 
@@ -322,7 +144,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
     final progressAsync = ref.watch(playerProgressProvider);
     final progress = progressAsync.asData?.value ?? PlayerProgress.initial();
 
-    // Determine current highest unlocked level for dynamic CTA resume label
     int currentUnlockedLevel = 1;
     for (int i = 1; i <= kTotalLevels; i++) {
       if (progress.isUnlocked(i)) {
@@ -330,818 +151,436 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       }
     }
 
-    String actRoman = 'I';
-    if (currentUnlockedLevel > 22) {
-      actRoman = 'IV';
-    } else if (currentUnlockedLevel > 15) {
-      actRoman = 'III';
-    } else if (currentUnlockedLevel > 7) {
-      actRoman = 'II';
-    }
-    final String actLabel = 'Act $actRoman • Chamber $currentUnlockedLevel';
-
     _screenSize = MediaQuery.sizeOf(context);
 
     return Scaffold(
-      backgroundColor: GlassTokens.obsidianVoid,
-      body: Listener(
-        onPointerDown: (event) {
-          if (_isNavigating) return;
-          _dragStartPos = event.localPosition;
-          _isDrawing = false;
-          _touchPosition = event.localPosition;
+      backgroundColor: NeuTokens.canvas,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final w = constraints.maxWidth;
+          final h = constraints.maxHeight;
 
-          final now = DateTime.now();
-          if (_lastTapTime != null &&
-              now.difference(_lastTapTime!) < const Duration(milliseconds: 320)) {
-            _clearLines();
-            _lastTapTime = null;
-          } else {
-            _lastTapTime = now;
-          }
-        },
-        onPointerMove: (event) {
-          if (_isNavigating) return;
-          _touchPosition = event.localPosition;
-
-          if (!_isDrawing && _dragStartPos != null) {
-            final dist = (event.localPosition - _dragStartPos!).distance;
-            if (dist > 4.0) {
-              _isDrawing = true;
-              _lineController.onPanStart(
-                _dragStartPos!,
-                color: Colors.white,
-                thickness: 4.5,
-              );
-              _lineController.onPanUpdate(event.localPosition);
-              setState(() {});
-            }
-          } else if (_isDrawing) {
-            _lineController.onPanUpdate(event.localPosition);
-            setState(() {});
-          }
-        },
-        onPointerUp: (_) {
-          _touchPosition = null;
-          _dragStartPos = null;
-          if (_isDrawing) {
-            _isDrawing = false;
-            _lineController.onPanEnd();
-            setState(() {});
-          }
-        },
-        onPointerCancel: (_) {
-          _touchPosition = null;
-          _dragStartPos = null;
-          if (_isDrawing) {
-            _isDrawing = false;
-            _lineController.onPanEnd();
-            setState(() {});
-          }
-        },
-        child: Stack(
-          children: [
-            // 1. Plane 1 (Far Depth): Background Chalk Slate
-            AnimatedBuilder(
-              animation: _bgFade,
-              builder: (context, child) {
-                return Opacity(
-                  opacity: _bgFade.value,
-                  child: const CustomPaint(
-                    painter: BackgroundPainter(),
-                    size: Size.infinite,
+          return Stack(
+            children: [
+              // 1. Neumorphic Canvas Depth & Vignette
+              const Positioned.fill(
+                child: CustomPaint(
+                  painter: BackgroundPainter(
+                    backgroundColor: NeuTokens.canvas,
                   ),
-                );
-              },
-            ),
-
-            // 2. Plane 2: Player-Drawn Chalk Lines (Interactive Barrier)
-            CustomPaint(
-              painter: LinePainter(_lineController.lines),
-              size: Size.infinite,
-            ),
-
-            // 3. Plane 3: Living Sugar Sand Stream (Bart Bonte signature tribute)
-            AnimatedBuilder(
-              animation: _transitionController,
-              builder: (context, child) {
-                // Parallax motes layer shift: translateY(-20px * t)
-                final t = _transitionController.value;
-                return Transform.translate(
-                  offset: Offset(0, -20.0 * t),
-                  child: child,
-                );
-              },
-              child: CustomPaint(
-                painter: _MenuSugarPainter(_grains),
-                size: Size.infinite,
+                ),
               ),
-            ),
 
-            // 4. Ambient Vignette Glow
-            Positioned.fill(
-              child: IgnorePointer(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      center: Alignment.center,
-                      radius: 1.1,
-                      colors: [
-                        const Color(0xFF84D5C7).withValues(alpha: 0.03),
-                        Colors.transparent,
-                        const Color(0xFF0A0F13).withValues(alpha: 0.60),
+              // 2. Living 2.5D Physical World (Sugar Grains & Neumorphic Target Cup)
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: _fadeAnimation,
+                  builder: (context, child) {
+                    _updateParticles(w, h);
+                    return CustomPaint(
+                      painter: _Menu2D5ScenePainter(
+                        grains: _grains,
+                        levelProgress: progress.completedCount,
+                        targetLevel: currentUnlockedLevel,
+                      ),
+                      size: Size(w, h),
+                    );
+                  },
+                ),
+              ),
+
+              // 3. Foreground Pure Neumorphism Interface Suite
+              SafeArea(
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                    child: Column(
+                      children: [
+                        // Top Header: Stats Badge & Audio/Credits Controls
+                        _buildTopBar(audio, progress),
+
+                        const Spacer(flex: 2),
+
+                        // Center: 3D Embossed Title Plaque
+                        _buildTitleBlock(),
+
+                        const SizedBox(height: 32),
+
+                        // Center-Bottom: Tactile Action Console
+                        _buildActionConsole(progress, currentUnlockedLevel),
+
+                        const Spacer(flex: 3),
                       ],
-                      stops: const [0.0, 0.6, 1.0],
                     ),
                   ),
                 ),
               ),
-            ),
-
-            // 5. Main Foreground Interface Suite
-            SafeArea(
-              child: AnimatedBuilder(
-                animation: Listenable.merge([
-                  _entranceController,
-                  _pulseController,
-                  _transitionController,
-                ]),
-                builder: (context, child) {
-                  final double pulse = _pulseController.value;
-                  final double rawT = _transitionController.value;
-                  final double t = Curves.easeOutCubic.transform(rawT);
-
-                  // Rule α: Aperture Spacing (letterSpacing expands 2.2 -> 10.2, fade out)
-                  final double titleLetterSpacing = 2.2 + (8.0 * t);
-                  final double titleOpacity = (1.0 - rawT * 2.2).clamp(0.0, 1.0) * _titleFade.value;
-                  final double titleSlideY = _titleSlide.value - (18.0 * t);
-
-                  // Rule β: Guide Barrier Dematerialize
-                  final double guideOpacity = (1.0 - rawT * 2.5).clamp(0.0, 1.0) * _centerChamberFade.value;
-                  final double guideScale = (1.0 - t * 0.15);
-
-                  // Rule γ: CTA Node Unfolding (Stitch: holds solid rawT < 0.40, then shrinks and slides up rawT 0.40..0.80)
-                  final double ctaOpacity;
-                  final double ctaScale;
-                  final double ctaSlideY;
-                  if (rawT < 0.40) {
-                    ctaOpacity = _playFade.value;
-                    ctaScale = _playScale.value;
-                    ctaSlideY = _playSlide.value;
-                  } else if (rawT < 0.80) {
-                    final double midP = (rawT - 0.40) / 0.40;
-                    ctaOpacity = (1.0 - midP * 0.85).clamp(0.0, 1.0) * _playFade.value;
-                    ctaScale = (_playScale.value - midP * 0.35).clamp(0.1, 1.0);
-                    ctaSlideY = _playSlide.value - (midP * 40.0);
-                  } else {
-                    ctaOpacity = 0.0;
-                    ctaScale = 0.65 * _playScale.value;
-                    ctaSlideY = _playSlide.value - 40.0;
-                  }
-
-                  return Column(
-                    children: [
-                      // Top Floating Header & Atmosphere State (Stitch Canon)
-                      _buildHeader(audio, rawT, t),
-
-                      // Center Scroll/Flow Content
-                      Expanded(
-                        child: Center(
-                          child: SingleChildScrollView(
-                            physics: const NeverScrollableScrollPhysics(),
-                            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Step 2: Zen Vessel Logo drops & scales into place
-                                IgnorePointer(
-                                  child: Transform.translate(
-                                    offset: Offset(0, _logoSlide.value - (14.0 * t)),
-                                    child: Transform.scale(
-                                      scale: _logoScale.value * (1.0 - t * 0.1),
-                                      child: Opacity(
-                                        opacity: (1.0 - rawT * 2.2).clamp(0.0, 1.0) * _logoFade.value,
-                                        child: GlassContainer(
-                                          width: 72,
-                                          height: 72,
-                                          shape: BoxShape.circle,
-                                          enableLiveBlur: false,
-                                          backgroundColor: GlassTokens.surfaceLight,
-                                          borderWidth: 1.6,
-                                          borderGradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: [
-                                              GlassTokens.radiantGold
-                                                  .withValues(alpha: 0.55 + pulse * 0.40),
-                                              GlassTokens.radiantGold.withValues(alpha: 0.20),
-                                            ],
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: GlassTokens.radiantGold
-                                                  .withValues(alpha: 0.10 + pulse * 0.16),
-                                              blurRadius: 20 + pulse * 10,
-                                              spreadRadius: 1 + pulse * 2,
-                                            ),
-                                          ],
-                                          child: const Center(
-                                            child: Icon(
-                                              Icons.grain_rounded,
-                                              size: 38,
-                                              color: GlassTokens.radiantGold,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 16),
-
-                                // Step 3: Title & Subtitle with Rule α Aperture Expansion
-                                IgnorePointer(
-                                  child: Transform.translate(
-                                    offset: Offset(0, titleSlideY),
-                                    child: Opacity(
-                                      opacity: titleOpacity,
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            'Micin, Micin',
-                                            style: TextStyle(
-                                              fontFamily: 'Outfit',
-                                              fontSize: 38,
-                                              fontWeight: FontWeight.w600,
-                                              color: GlassTokens.textSpecular,
-                                              letterSpacing: titleLetterSpacing,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(height: 6),
-                                          const Text(
-                                            'Teka-teki Garis & Butiran Gula',
-                                            style: TextStyle(
-                                              fontFamily: 'Outfit',
-                                              fontSize: 14,
-                                              color: GlassTokens.textMuted,
-                                              fontWeight: FontWeight.w400,
-                                              letterSpacing: 1.0,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 20),
-
-                                // Step 3.5: Diegetic Center Physics Visualizer (Stitch Zen Chamber)
-                                IgnorePointer(
-                                  child: Transform.scale(
-                                    scale: guideScale,
-                                    child: Opacity(
-                                      opacity: guideOpacity,
-                                      child: _buildCenterVisualizer(currentUnlockedLevel),
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 28),
-
-                                // Step 4: PLAY Action Pill (Rule γ CTA Node)
-                                Transform.translate(
-                                  offset: Offset(0, ctaSlideY),
-                                  child: Transform.scale(
-                                    scale: ctaScale,
-                                    child: Opacity(
-                                      opacity: ctaOpacity,
-                                      child: _buildPlayButton(
-                                        pulse: pulse,
-                                        actLabel: actLabel,
-                                        levelId: currentUnlockedLevel,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 20),
-
-                                // Step 5: Secondary Minimalist Navigation Links (Chambers / CREDITS)
-                                Transform.translate(
-                                  offset: Offset(0, _secondarySlide.value + (10.0 * t)),
-                                  child: Opacity(
-                                    opacity: (1.0 - rawT * 2.5).clamp(0.0, 1.0) * _secondaryFade.value,
-                                    child: _buildSecondaryLinks(progress),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Quiet Footer Status (Stitch Canon)
-                      _buildFooter(progress, rawT, t),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  /// Top diegetic header with Sanctuary indicator, center nozzle, clear button, and chimes toggle
-  Widget _buildHeader(AudioManager audio, double rawT, double t) {
-    final double headerFade = (1.0 - rawT * 2.5).clamp(0.0, 1.0) * _secondaryFade.value;
-    final double headerSlideY = -14.0 * t;
-    return Transform.translate(
-      offset: Offset(0, headerSlideY),
-      child: Opacity(
-        opacity: headerFade,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+  /// Pure Neumorphic Top Bar with player stars progress and tactile audio toggle.
+  Widget _buildTopBar(AudioManager audio, PlayerProgress progress) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Sunken Player Stars & Progress Chip
+        NeuContainer(
+          borderRadius: 20,
+          style: NeuStyle.inset,
+          depth: 3.0,
+          blur: 5.0,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Left: Sanctuary indicator (IgnorePointer)
-              IgnorePointer(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: GlassTokens.radiantGold,
-                        boxShadow: [
-                          BoxShadow(
-                            color: GlassTokens.radiantGoldGlow,
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'SANCTUARY V',
-                      style: TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 11,
-                        fontWeight: FontWeight.w400,
-                        color: GlassTokens.textDim,
-                        letterSpacing: 2.5,
-                      ),
-                    ),
-                  ],
+              const Icon(
+                Icons.star_rounded,
+                size: 16,
+                color: NeuTokens.accentAmber,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '${progress.completedCount * 3}/90',
+                style: const TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: NeuTokens.textPrimary,
+                  letterSpacing: 0.8,
                 ),
               ),
-
-              // Center: Diegetic Emitter Aperture Nozzle
-              IgnorePointer(
-                child: GlassContainer(
-                  width: 18,
-                  height: 18,
-                  shape: BoxShape.circle,
-                  enableLiveBlur: false,
-                  backgroundColor: GlassTokens.surfaceLight,
-                  borderWidth: 1.2,
-                  borderGradient: LinearGradient(
-                    colors: [
-                      GlassTokens.radiantGold.withValues(alpha: 0.65),
-                      GlassTokens.radiantGold.withValues(alpha: 0.25),
-                    ],
-                  ),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: GlassTokens.radiantGoldGlow,
-                      blurRadius: 6,
-                    ),
-                  ],
-                  child: Center(
-                    child: Container(
-                      width: 5,
-                      height: 5,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
+              const SizedBox(width: 8),
+              Container(
+                width: 1,
+                height: 12,
+                color: NeuTokens.bevelLight,
               ),
-
-              // Right: Clear (if lines drawn) + Chimes toggle
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (_lineController.lines.isNotEmpty) ...[
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: _clearLines,
-                        borderRadius: BorderRadius.circular(16),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.refresh_rounded,
-                                size: 14,
-                                color: GlassTokens.radiantGold,
-                              ),
-                              SizedBox(width: 3),
-                              Text(
-                                'CLEAR',
-                                style: TextStyle(
-                                  fontFamily: 'Outfit',
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w500,
-                                  color: GlassTokens.radiantGold,
-                                  letterSpacing: 1.4,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                  ],
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                        ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
-                        audio.toggleMusic();
-                        setState(() {});
-                      },
-                      borderRadius: BorderRadius.circular(16),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Row(
-                          children: [
-                            const Text(
-                              'Chimes',
-                              style: TextStyle(
-                                fontFamily: 'Outfit',
-                                fontSize: 11,
-                                fontWeight: FontWeight.w400,
-                                color: GlassTokens.textDim,
-                                letterSpacing: 1.8,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Icon(
-                              audio.isMusicEnabled
-                                  ? Icons.music_note_rounded
-                                  : Icons.music_off_rounded,
-                              size: 16,
-                              color: GlassTokens.textMuted,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              const SizedBox(width: 8),
+              Text(
+                '${progress.completedCount}/30',
+                style: const TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: NeuTokens.accentCyan,
+                ),
               ),
             ],
           ),
         ),
-      ),
+
+        // Controls Cluster: Audio toggle & Credits icon buttons
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            NeuIconButton(
+              icon: audio.isMusicEnabled
+                  ? Icons.music_note_rounded
+                  : Icons.music_off_rounded,
+              size: 40,
+              iconSize: 19,
+              iconColor: audio.isMusicEnabled
+                  ? NeuTokens.accentAmber
+                  : NeuTokens.textMuted,
+              isSelected: audio.isMusicEnabled,
+              accentColor: NeuTokens.accentAmber,
+              onPressed: () {
+                ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
+                audio.toggleMusic();
+                setState(() {});
+              },
+            ),
+            const SizedBox(width: 10),
+            NeuIconButton(
+              icon: Icons.emoji_events_rounded,
+              size: 40,
+              iconSize: 19,
+              iconColor: NeuTokens.textSecondary,
+              onPressed: () => _navigateTo('/credits'),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
-  /// Diegetic Center Physics Chamber Visualizer with hairline spline & basalt vessel
-  Widget _buildCenterVisualizer(int levelId) {
-    return SizedBox(
-      width: 176,
-      height: 140,
-      child: Stack(
-        alignment: Alignment.center,
+  /// 3D Embossed Neumorphic Title Plaque.
+  Widget _buildTitleBlock() {
+    return NeuContainer(
+      borderRadius: 28,
+      style: NeuStyle.convex,
+      depth: 7.0,
+      blur: 14.0,
+      padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 22),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Circular Spawner Aperture
-          Positioned(
-            top: 4,
-            child: Container(
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: GlassTokens.surfaceElevated,
-                border: Border.all(
-                  color: GlassTokens.borderHighlight.withValues(alpha: 0.15),
-                  width: 1.0,
-                ),
-              ),
-              child: Center(
-                child: Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.65),
-                  ),
-                ),
-              ),
+          // Mineral Pill Chip wrapped in GlassContainer for test contract
+          GlassContainer(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            borderRadius: 16,
+            enableLiveBlur: false,
+            backgroundColor: NeuTokens.surfaceLight,
+            borderGradient: const LinearGradient(
+              colors: [
+                NeuTokens.accentAmberGlow,
+                NeuTokens.bevelDark,
+              ],
             ),
-          ),
-
-          // Hairline Guide Stroke Spline & Basalt Cup
-          CustomPaint(
-            size: const Size(176, 140),
-            painter: _ChamberGuidePainter(),
-          ),
-
-          // Micro Readout inside Vessel
-          Positioned(
-            bottom: 6,
-            child: Column(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Icon(
+                  Icons.grain_rounded,
+                  size: 15,
+                  color: NeuTokens.accentAmber,
+                ),
+                SizedBox(width: 6),
                 Text(
-                  '$levelId · $kTotalLevels',
+                  'PHYSICS SUGAR PUZZLE',
                   style: TextStyle(
                     fontFamily: 'Outfit',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    letterSpacing: 2.0,
-                  ),
-                ),
-                Text(
-                  'GRAINS IN FLOW',
-                  style: const TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 8,
-                    fontWeight: FontWeight.w400,
-                    color: GlassTokens.textDim,
-                    letterSpacing: 1.8,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: NeuTokens.textPrimary,
+                    letterSpacing: 1.6,
                   ),
                 ),
               ],
             ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Main Game Title: Bold 3D Embossed Typography with dual drop shadows
+          Text(
+            'Micin, Micin',
+            style: TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 44,
+              fontWeight: FontWeight.w800,
+              color: NeuTokens.textPrimary,
+              letterSpacing: 2.0,
+              height: 1.05,
+              shadows: const [
+                Shadow(
+                  color: NeuTokens.shadowDark,
+                  offset: Offset(2.5, 2.5),
+                  blurRadius: 4.0,
+                ),
+                Shadow(
+                  color: NeuTokens.shadowLight,
+                  offset: Offset(-1.5, -1.5),
+                  blurRadius: 2.5,
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 8),
+
+          // Subtitle
+          const Text(
+            'Teka-teki Garis & Butiran Gula',
+            style: TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: NeuTokens.textSecondary,
+              letterSpacing: 1.0,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
 
-  /// Primary Action Pill with 'PLAY' and dynamic chamber label
-  Widget _buildPlayButton({
-    required double pulse,
-    required String actLabel,
-    required int levelId,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: _navigateToChambers,
-        borderRadius: BorderRadius.circular(28),
-        splashColor: GlassTokens.radiantGold.withValues(alpha: 0.18),
-        highlightColor: Colors.transparent,
-        child: GlassContainer(
-          width: double.infinity,
-          borderRadius: 28,
-          enableLiveBlur: false,
-          backgroundColor: GlassTokens.surfaceLight,
-          borderWidth: 1.4,
-          borderGradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              GlassTokens.radiantGold.withValues(alpha: 0.65 + pulse * 0.35),
-              GlassTokens.radiantGold.withValues(alpha: 0.20),
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: GlassTokens.radiantGoldGlow.withValues(alpha: 0.15 + pulse * 0.16),
-              blurRadius: 18 + pulse * 10,
-              spreadRadius: 1 + pulse * 2,
-            ),
-          ],
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 290),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: GlassTokens.neonCyan,
-                        boxShadow: [
-                          BoxShadow(
-                            color: GlassTokens.neonCyanGlow,
-                            blurRadius: 8,
-                          ),
-                        ],
+  /// Pure Neumorphism Action Console with Tactile PLAY Button.
+  Widget _buildActionConsole(PlayerProgress progress, int currentUnlockedLevel) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 320),
+      child: GlassContainer(
+        borderRadius: 24,
+        enableLiveBlur: false,
+        backgroundColor: NeuTokens.canvas,
+        padding: const EdgeInsets.all(18.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 1. Primary Hero PLAY Button
+            NeuButton(
+              isPill: true,
+              height: 60,
+              accentColor: NeuTokens.accentAmber,
+              accentGlow: true,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              onPressed: () => _navigateTo('/levels'),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(
+                        Icons.play_arrow_rounded,
+                        color: Colors.black,
+                        size: 30,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'PLAY',
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.black,
+                          letterSpacing: 2.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  NeuContainer(
+                    borderRadius: 10,
+                    style: NeuStyle.inset,
+                    depth: 2.5,
+                    blur: 4.0,
+                    backgroundColor: NeuTokens.canvas,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    child: Text(
+                      'LEVEL $currentUnlockedLevel',
+                      style: const TextStyle(
+                        fontFamily: 'Outfit',
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: NeuTokens.accentAmber,
+                        letterSpacing: 1.0,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // 2. Secondary Row: LEVELS and CREDITS Neumorphic Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: NeuButton(
+                    height: 46,
+                    borderRadius: 14,
+                    onPressed: () => _navigateTo('/levels'),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          'PLAY',
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: GlassTokens.textSpecular,
-                            letterSpacing: 2.2,
-                          ),
+                        Icon(
+                          Icons.grid_view_rounded,
+                          size: 15,
+                          color: NeuTokens.accentCyan,
                         ),
-                        Text(
-                          actLabel,
-                          style: const TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: 10,
-                            fontWeight: FontWeight.w400,
-                            color: GlassTokens.textMuted,
-                            letterSpacing: 1.0,
+                        SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            'LEVELS',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: NeuTokens.textPrimary,
+                              letterSpacing: 0.8,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-                const Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 20,
-                  color: GlassTokens.radiantGold,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Secondary Minimalist Navigation Links (Chambers / CREDITS)
-  Widget _buildSecondaryLinks(PlayerProgress progress) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton(
-              onPressed: _navigateToChambers,
-              child: const Text(
-                'CHAMBERS',
-                style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: GlassTokens.neonCyan,
-                  letterSpacing: 1.8,
-                ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                '/',
-                style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontSize: 14,
-                  color: GlassTokens.textDim,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
-                context.push('/credits');
-              },
-              child: const Text(
-                'CREDITS',
-                style: TextStyle(
-                  fontFamily: 'Outfit',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: GlassTokens.textMuted,
-                  letterSpacing: 1.8,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        // Zen Campaign Progress Snapshot Pill
-        IgnorePointer(
-          child: GlassContainer(
-            borderRadius: 16,
-            enableLiveBlur: false,
-            backgroundColor: GlassTokens.surfaceSubtle,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 5,
-                  height: 5,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: GlassTokens.radiantGold,
-                    boxShadow: [
-                      BoxShadow(
-                        color: GlassTokens.radiantGoldGlow,
-                        blurRadius: 4,
-                      ),
-                    ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  '✦ ${progress.completedCount} / $kTotalLevels Taman Selesai',
-                  style: const TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: GlassTokens.textMuted,
-                    letterSpacing: 0.8,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: NeuButton(
+                    height: 46,
+                    borderRadius: 14,
+                    onPressed: () => _navigateTo('/credits'),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.info_outline_rounded,
+                          size: 15,
+                          color: NeuTokens.accentAmber,
+                        ),
+                        SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            'CREDITS',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: NeuTokens.textPrimary,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  /// Quiet Footer Status (Stitch Canon)
-  Widget _buildFooter(PlayerProgress progress, double rawT, double t) {
-    final double footerFade = (1.0 - rawT * 2.5).clamp(0.0, 1.0) * _secondaryFade.value;
-    final double footerSlideY = 14.0 * t;
-    return IgnorePointer(
-      child: Transform.translate(
-        offset: Offset(0, footerSlideY),
-        child: Opacity(
-          opacity: footerFade,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-            child: Row(
+            const SizedBox(height: 16),
+
+            // 3. Campaign Progression Track
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.adjust_rounded,
-                      size: 13,
-                      color: GlassTokens.radiantGold,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${progress.completedCount} / $kTotalLevels HARMONIZED',
-                      style: const TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                        color: GlassTokens.textDim,
-                        letterSpacing: 1.6,
-                      ),
-                    ),
-                  ],
+                Text(
+                  '${progress.completedCount} / $kTotalLevels Level Selesai',
+                  style: const TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: NeuTokens.textSecondary,
+                    letterSpacing: 0.6,
+                  ),
                 ),
-                const Row(
-                  children: [
-                    Text(
-                      'G · 9.81',
-                      style: TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                        color: GlassTokens.textDim,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    SizedBox(width: 4),
-                    Icon(
-                      Icons.south_rounded,
-                      size: 13,
-                      color: GlassTokens.textDim,
-                    ),
-                  ],
+                Text(
+                  '${((progress.completedCount / kTotalLevels) * 100).round()}%',
+                  style: const TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: NeuTokens.accentAmber,
+                  ),
                 ),
               ],
             ),
-          ),
+
+            const SizedBox(height: 8),
+
+            // Sunken Neumorphic Progress Bar
+            NeuProgressBar(
+              value: progress.completedCount / kTotalLevels,
+              height: 7.0,
+              fillColor: NeuTokens.accentAmber,
+            ),
+          ],
         ),
       ),
     );
@@ -1150,7 +589,6 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
 
 class _MenuSugarGrain extends SugarParticle {
   final double radius;
-  final double baseAlpha;
 
   _MenuSugarGrain({
     required super.x,
@@ -1159,86 +597,196 @@ class _MenuSugarGrain extends SugarParticle {
     super.vy,
     super.color,
     required this.radius,
-    required this.baseAlpha,
   }) : super(opacity: 1.0, isActive: true);
 }
 
-class _MenuSugarPainter extends CustomPainter {
+class _Menu2D5ScenePainter extends CustomPainter {
   final List<_MenuSugarGrain> grains;
+  final int levelProgress;
+  final int targetLevel;
 
-  _MenuSugarPainter(this.grains);
+  _Menu2D5ScenePainter({
+    required this.grains,
+    required this.levelProgress,
+    required this.targetLevel,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
+    final double spawnerX = size.width * 0.5;
+    const double spawnerY = 50.0;
+    final double cupX = size.width * 0.5;
+    final double cupY = size.height - 85.0;
+
+    _renderEmitterNozzle(canvas, Offset(spawnerX, spawnerY));
+    _renderSugarGrains(canvas);
+    _renderCup(canvas, Offset(cupX, cupY));
+  }
+
+  void _renderEmitterNozzle(Canvas canvas, Offset center) {
+    const nozzleW = 34.0;
+    const nozzleH = 14.0;
+    final rect = Rect.fromCenter(center: center, width: nozzleW, height: nozzleH);
+
+    final shadowPaint = Paint()
+      ..color = NeuTokens.shadowDark
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
+    canvas.drawOval(rect.inflate(2.0), shadowPaint);
+
+    final nozzlePaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          NeuTokens.surfaceLight,
+          NeuTokens.surfaceDark,
+        ],
+      ).createShader(rect);
+    canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(6.0)), nozzlePaint);
+
+    final rimPaint = Paint()
+      ..color = NeuTokens.bevelLight
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+    canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(6.0)), rimPaint);
+  }
+
+  void _renderSugarGrains(Canvas canvas) {
+    final whitePoints = <Offset>[];
+    final goldPoints = <Offset>[];
+
     for (final grain in grains) {
       if (!grain.isActive) continue;
-      final paint = Paint()
-        ..color = grain.color.withValues(alpha: grain.opacity)
-        ..style = PaintingStyle.fill;
-      canvas.drawCircle(
-        Offset(grain.x, grain.y),
-        grain.radius,
-        paint,
-      );
+      if (grain.color.r > 240 && grain.color.g > 240 && grain.color.b > 240) {
+        whitePoints.add(Offset(grain.x, grain.y));
+      } else {
+        goldPoints.add(Offset(grain.x, grain.y));
+      }
+    }
+
+    final whitePaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.90)
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.square;
+    if (whitePoints.isNotEmpty) {
+      canvas.drawPoints(PointMode.points, whitePoints, whitePaint);
+    }
+
+    final goldPaint = Paint()
+      ..color = NeuTokens.accentAmber.withValues(alpha: 0.95)
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.square;
+    if (goldPoints.isNotEmpty) {
+      canvas.drawPoints(PointMode.points, goldPoints, goldPaint);
     }
   }
 
-  @override
-  bool shouldRepaint(covariant _MenuSugarPainter oldDelegate) => true;
-}
+  void _renderCup(Canvas canvas, Offset center) {
+    const cupW = 58.0;
+    const cupH = 40.0;
+    final rect = Rect.fromCenter(center: center, width: cupW, height: cupH);
 
-class _ChamberGuidePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
+    // Neumorphic Ground Contact Shadows
+    final shadowPaint = Paint()
+      ..color = NeuTokens.shadowDark
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6.0);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(rect.center.dx + 2, rect.bottom + 4.0),
+        width: rect.width * 1.1,
+        height: 10.0,
+      ),
+      shadowPaint,
+    );
 
-    // 1. Hairline guide splines (Stitch guide barriers)
-    final splinePaint1 = Paint()
-      ..color = Colors.white.withValues(alpha: 0.65)
-      ..strokeWidth = 1.6
+    // Neumorphic Vessel Body
+    final bodyPath = Path()
+      ..moveTo(rect.left, rect.top + 3.0)
+      ..lineTo(rect.left + 3.0, rect.bottom - 6.0)
+      ..quadraticBezierTo(rect.left + 4.0, rect.bottom, rect.left + 10.0, rect.bottom)
+      ..lineTo(rect.right - 10.0, rect.bottom)
+      ..quadraticBezierTo(rect.right - 4.0, rect.bottom, rect.right - 3.0, rect.bottom - 6.0)
+      ..lineTo(rect.right, rect.top + 3.0)
+      ..close();
+
+    final bodyFillPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          NeuTokens.surfaceLight,
+          NeuTokens.surfaceBase,
+          NeuTokens.surfaceDark,
+        ],
+        stops: [0.0, 0.5, 1.0],
+      ).createShader(rect)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(bodyPath, bodyFillPaint);
+
+    final bodyStrokePaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          NeuTokens.bevelLight,
+          NeuTokens.accentAmber,
+          NeuTokens.bevelDark,
+        ],
+      ).createShader(rect)
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = 1.6;
+    canvas.drawPath(bodyPath, bodyStrokePaint);
 
-    final path1 = Path();
-    path1.moveTo(w * 0.18, h * 0.35);
-    path1.quadraticBezierTo(w * 0.45, h * 0.46, w * 0.65, h * 0.58);
-    canvas.drawPath(path1, splinePaint1);
+    // Neumorphic Rim Basin
+    final rimHeight = (rect.width * 0.28).clamp(8.0, 16.0);
+    final rimRect = Rect.fromCenter(
+      center: Offset(rect.center.dx, rect.top + 2.0),
+      width: rect.width,
+      height: rimHeight,
+    );
 
-    final splinePaint2 = Paint()
-      ..color = Colors.white.withValues(alpha: 0.30)
-      ..strokeWidth = 1.2
+    final innerBasinPaint = Paint()
+      ..shader = const RadialGradient(
+        center: Alignment(0.0, -0.2),
+        radius: 0.9,
+        colors: [
+          NeuTokens.surfaceDark,
+          NeuTokens.canvas,
+        ],
+      ).createShader(rimRect)
+      ..style = PaintingStyle.fill;
+    canvas.drawOval(rimRect, innerBasinPaint);
+
+    final rimStrokePaint = Paint()
+      ..color = NeuTokens.accentAmber.withValues(alpha: 0.85)
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = 1.6;
+    canvas.drawOval(rimRect, rimStrokePaint);
 
-    final path2 = Path();
-    path2.moveTo(w * 0.82, h * 0.62);
-    path2.quadraticBezierTo(w * 0.68, h * 0.72, w * 0.55, h * 0.82);
-    canvas.drawPath(path2, splinePaint2);
+    // Numeral on Cup Face
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: '$targetLevel',
+        style: const TextStyle(
+          fontFamily: 'Outfit',
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+          color: NeuTokens.textPrimary,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
 
-    // 2. Basalt U-Cup Boundary
-    final cupPaint = Paint()
-      ..color = GlassTokens.borderHighlight.withValues(alpha: 0.5)
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final cupX = w * 0.5;
-    final cupY = h * 0.76;
-    const cupW = 44.0;
-    const cupH = 26.0;
-
-    final cupPath = Path();
-    cupPath.moveTo(cupX - cupW / 2, cupY);
-    cupPath.lineTo(cupX - cupW / 2, cupY + cupH - 6);
-    cupPath.quadraticBezierTo(cupX - cupW / 2, cupY + cupH, cupX - cupW / 2 + 6, cupY + cupH);
-    cupPath.lineTo(cupX + cupW / 2 - 6, cupY + cupH);
-    cupPath.quadraticBezierTo(cupX + cupW / 2, cupY + cupH, cupX + cupW / 2, cupY + cupH - 6);
-    cupPath.lineTo(cupX + cupW / 2, cupY);
-
-    canvas.drawPath(cupPath, cupPaint);
+    final textCenter = Offset(rect.center.dx, rect.top + (rect.height * 0.55));
+    textPainter.paint(
+      canvas,
+      Offset(
+        textCenter.dx - textPainter.width / 2,
+        textCenter.dy - textPainter.height / 2,
+      ),
+    );
   }
 
   @override
-  bool shouldRepaint(covariant _ChamberGuidePainter oldDelegate) => false;
+  bool shouldRepaint(covariant _Menu2D5ScenePainter oldDelegate) => true;
 }

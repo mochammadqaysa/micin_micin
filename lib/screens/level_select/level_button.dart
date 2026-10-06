@@ -1,13 +1,15 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/theme.dart';
 import '../../widgets/lock_badge.dart';
+import '../../widgets/neu_container.dart';
 
-/// Modern Minimalist & Glassmorphism node representing a playable level on the stage matrix.
-/// - Unlocked: Frosted glass pebble with 1px specular border and crisp Outfit numerals.
-/// - Next Playable: 2.2s breathing cyan glow pulse beckoning the player.
-/// - Completed: Radiant gold completion pip and illuminated golden specular rim.
-/// - Locked: Recessed obsidian void node with lock badge and 300ms micro-shake on tap.
+/// Pure Neumorphism node representing a playable level on the stage matrix.
+/// - Unlocked: Tactile extruded convex cylinder with dual directional shadows and 3-star rating row.
+/// - Next Playable: Raised high-elevation node with breathing pulse aura beckoning the player.
+/// - Completed: Radiant golden illuminated rim with 3 glowing gold stars.
+/// - Locked: Deeply sunken debossed socket with engraved lock badge and micro-shake on tap.
 class LevelButton extends StatefulWidget {
   final int levelId;
   final bool isUnlocked;
@@ -24,7 +26,7 @@ class LevelButton extends StatefulWidget {
     required this.isUnlocked,
     required this.isCompleted,
     required this.onTap,
-    this.accentColor = GlassTokens.radiantGold,
+    this.accentColor = NeuTokens.accentAmber,
     this.isNextPlayable = false,
     this.isMilestone = false,
     this.milestoneLabel,
@@ -37,8 +39,11 @@ class LevelButton extends StatefulWidget {
 class _LevelButtonState extends State<LevelButton>
     with TickerProviderStateMixin {
   late final AnimationController _shakeController;
+  late final AnimationController _pressController;
+  late final Animation<double> _pressScale;
   AnimationController? _pulseController;
   Animation<double>? _pulseAnimation;
+  bool _isDown = false;
 
   @override
   void initState() {
@@ -46,6 +51,15 @@ class _LevelButtonState extends State<LevelButton>
     _shakeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
+    );
+
+    _pressController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+
+    _pressScale = Tween<double>(begin: 1.0, end: 0.94).animate(
+      CurvedAnimation(parent: _pressController, curve: Curves.easeOutCubic),
     );
 
     if (widget.isNextPlayable) {
@@ -56,10 +70,10 @@ class _LevelButtonState extends State<LevelButton>
   void _initPulse() {
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
+      duration: const Duration(milliseconds: 1800),
     )..repeat(reverse: true);
 
-    _pulseAnimation = Tween<double>(begin: 0.25, end: 0.85).animate(
+    _pulseAnimation = Tween<double>(begin: 0.35, end: 0.95).animate(
       CurvedAnimation(parent: _pulseController!, curve: Curves.easeInOut),
     );
   }
@@ -79,115 +93,112 @@ class _LevelButtonState extends State<LevelButton>
   @override
   void dispose() {
     _shakeController.dispose();
+    _pressController.dispose();
     _pulseController?.dispose();
     super.dispose();
   }
 
-  void _handleTap() {
+  void _handleTapDown(TapDownDetails _) {
     if (!widget.isUnlocked) {
+      HapticFeedback.heavyImpact();
       _shakeController.forward(from: 0.0);
+      return;
     }
+    setState(() => _isDown = true);
+    _pressController.forward();
+    HapticFeedback.lightImpact();
+  }
+
+  void _handleTapUp(TapUpDetails _) {
+    if (!widget.isUnlocked) {
+      widget.onTap();
+      return;
+    }
+    setState(() => _isDown = false);
+    _pressController.reverse();
     widget.onTap();
+  }
+
+  void _handleTapCancel() {
+    if (!widget.isUnlocked) return;
+    setState(() => _isDown = false);
+    _pressController.reverse();
   }
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = widget.isUnlocked
-        ? (widget.isNextPlayable
-            ? GlassTokens.surfaceElevated
-            : GlassTokens.surfaceLight)
-        : GlassTokens.obsidianVoid.withValues(alpha: 0.65);
-
-    final textColor = widget.isUnlocked
-        ? (widget.isCompleted
-            ? GlassTokens.radiantGold
-            : (widget.isNextPlayable
-                ? GlassTokens.textSpecular
-                : GlassTokens.textSpecular.withValues(alpha: 0.90)))
-        : GlassTokens.textDim;
-
     return AnimatedBuilder(
       animation: Listenable.merge([
         _shakeController,
+        _pressController,
         if (_pulseController != null) _pulseController!,
       ]),
       builder: (context, child) {
-        // Micro-wiggle horizontal displacement: 4px dampening sine
+        // Micro-wiggle horizontal displacement on locked tap
         final double wiggleDx = _shakeController.isAnimating
             ? math.sin(_shakeController.value * math.pi * 4) *
                 (1.0 - _shakeController.value) *
-                4.0
+                5.0
             : 0.0;
 
-        final double pulseAlpha = _pulseAnimation?.value ?? 0.0;
+        final double pulseVal = _pulseAnimation?.value ?? 0.0;
+
+        // Visual styling parameters
+        final isDepressed = _isDown;
+        final neuStyle = !widget.isUnlocked
+            ? NeuStyle.inset
+            : (isDepressed ? NeuStyle.inset : NeuStyle.convex);
+
+        final depth = !widget.isUnlocked
+            ? 3.5
+            : (widget.isNextPlayable ? 6.5 : (isDepressed ? 2.5 : 5.0));
+
+        final blur = !widget.isUnlocked
+            ? 6.0
+            : (widget.isNextPlayable ? 12.0 : (isDepressed ? 4.0 : 10.0));
+
+        final textColor = widget.isUnlocked
+            ? (widget.isCompleted
+                ? NeuTokens.accentAmber
+                : (widget.isNextPlayable
+                    ? NeuTokens.textPrimary
+                    : NeuTokens.textPrimary.withValues(alpha: 0.90)))
+            : NeuTokens.textMuted;
 
         final border = Border.all(
           color: widget.isCompleted
-              ? GlassTokens.radiantGold.withValues(alpha: 0.80)
+              ? NeuTokens.accentAmber.withValues(alpha: 0.85)
               : (widget.isNextPlayable
-                  ? GlassTokens.neonCyan.withValues(alpha: 0.35 + pulseAlpha * 0.45)
+                  ? NeuTokens.accentCyan.withValues(alpha: 0.45 + pulseVal * 0.45)
                   : (widget.isUnlocked
-                      ? GlassTokens.borderHighlight
-                      : GlassTokens.borderShadow)),
-          width: widget.isCompleted || widget.isNextPlayable ? 1.5 : 1.0,
+                      ? NeuTokens.bevelLight
+                      : NeuTokens.bevelDark)),
+          width: widget.isCompleted || widget.isNextPlayable ? 1.6 : 1.0,
         );
 
         return Transform.translate(
           offset: Offset(wiggleDx, 0),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: _handleTap,
-              borderRadius: BorderRadius.circular(18),
-              splashColor: (widget.isNextPlayable
-                      ? GlassTokens.neonCyan
-                      : widget.accentColor)
-                  .withValues(alpha: 0.15),
-              highlightColor: Colors.transparent,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: BorderRadius.circular(18),
-                  border: border,
-                  boxShadow: [
-                    if (widget.isCompleted)
-                      BoxShadow(
-                        color: GlassTokens.radiantGold.withValues(alpha: 0.15),
-                        blurRadius: 10,
-                        spreadRadius: 0,
-                      ),
-                    if (widget.isNextPlayable)
-                      BoxShadow(
-                        color: GlassTokens.neonCyan.withValues(alpha: 0.12 + pulseAlpha * 0.16),
-                        blurRadius: 12 + pulseAlpha * 6,
-                        spreadRadius: pulseAlpha * 1.5,
-                      ),
-                  ],
-                ),
+          child: ScaleTransition(
+            scale: _pressScale,
+            child: GestureDetector(
+              onTapDown: _handleTapDown,
+              onTapUp: _handleTapUp,
+              onTapCancel: _handleTapCancel,
+              behavior: HitTestBehavior.opaque,
+              child: NeuContainer(
+                borderRadius: 18.0,
+                style: neuStyle,
+                depth: depth,
+                blur: blur,
+                accentColor: widget.isNextPlayable
+                    ? NeuTokens.accentCyan
+                    : (widget.isCompleted ? NeuTokens.accentAmber : null),
+                accentGlow: widget.isNextPlayable || widget.isCompleted,
+                border: border,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Faint radial mineral glow inside unlocked node
-                    if (widget.isUnlocked)
-                      Positioned.fill(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(18),
-                            gradient: RadialGradient(
-                              center: const Alignment(0, -0.4),
-                              radius: 0.85,
-                              colors: [
-                                (widget.isCompleted ? widget.accentColor : Colors.white)
-                                    .withValues(alpha: widget.isCompleted ? 0.06 : 0.03),
-                                Colors.transparent,
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-
-                    // Center Stage Numeral and optional milestone tag
+                    // Center Stage Numeral and Milestone tag
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
@@ -196,14 +207,43 @@ class _LevelButtonState extends State<LevelButton>
                           '${widget.levelId}',
                           style: TextStyle(
                             fontFamily: 'Outfit',
-                            fontSize: widget.isMilestone ? 19 : 17,
-                            fontWeight: widget.isCompleted || widget.isNextPlayable
-                                ? FontWeight.w600
-                                : FontWeight.w400,
+                            fontSize: widget.isMilestone ? 20 : 18,
+                            fontWeight: FontWeight.w800,
                             color: textColor,
-                            letterSpacing: 0.5,
+                            letterSpacing: 0.6,
+                            shadows: widget.isCompleted
+                                ? [
+                                    Shadow(
+                                      color: NeuTokens.accentAmberGlow,
+                                      blurRadius: 8,
+                                    ),
+                                  ]
+                                : null,
                           ),
                         ),
+
+                        // Stars row for mobile game look & feel
+                        if (widget.isUnlocked)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 3.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(3, (starIndex) {
+                                final isEarned = widget.isCompleted;
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                                  child: Icon(
+                                    Icons.star_rounded,
+                                    size: 11,
+                                    color: isEarned
+                                        ? NeuTokens.accentAmber
+                                        : NeuTokens.textMuted.withValues(alpha: 0.35),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
+
                         if (widget.isMilestone && widget.milestoneLabel != null)
                           Padding(
                             padding: const EdgeInsets.only(top: 2.0),
@@ -214,9 +254,9 @@ class _LevelButtonState extends State<LevelButton>
                               style: TextStyle(
                                 fontFamily: 'Outfit',
                                 fontSize: 9,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w700,
                                 color: widget.accentColor.withValues(
-                                  alpha: widget.isUnlocked ? 0.75 : 0.35,
+                                  alpha: widget.isUnlocked ? 0.90 : 0.40,
                                 ),
                                 letterSpacing: 0.8,
                               ),
@@ -225,32 +265,11 @@ class _LevelButtonState extends State<LevelButton>
                       ],
                     ),
 
-                    // Delicate Completion Pip (bottom center mineral pip)
-                    if (widget.isCompleted && !widget.isMilestone)
-                      Positioned(
-                        bottom: 6,
-                        child: Container(
-                          width: 4.5,
-                          height: 4.5,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: widget.accentColor,
-                            boxShadow: [
-                              BoxShadow(
-                                color: widget.accentColor.withValues(alpha: 0.60),
-                                blurRadius: 4,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                    // Subtle Lock Badge for locked nodes
+                    // Locked State: Sunken Debossed Lock Socket
                     if (!widget.isUnlocked)
-                      const Positioned(
-                        child: Opacity(
-                          opacity: 0.35,
-                          child: LockBadge(size: 14),
+                      const Positioned.fill(
+                        child: Center(
+                          child: LockBadge(size: 16),
                         ),
                       ),
                   ],
@@ -263,4 +282,3 @@ class _LevelButtonState extends State<LevelButton>
     );
   }
 }
-

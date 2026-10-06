@@ -25,6 +25,7 @@ class ParticleController {
   /// Updates physics simulation for one frame step.
   void update({
     required List<LineSegment> lines,
+    List<LineSegment> obstacles = const [],
     required List<CupHitbox> cups,
     required List<ColorFilterZone> filters,
     required double canvasHeight,
@@ -53,9 +54,9 @@ class ParticleController {
       p.vy = p.vy.clamp(-kMaxSpeed, kMaxSpeed);
 
       // (c) Apply color filter mutations with swept continuous test
-      final nextX = p.x + p.vx;
-      final nextY = p.y + p.vy;
       for (final filter in filters) {
+        final nextX = p.x + p.vx;
+        final nextY = p.y + p.vy;
         if (filter.intersectsSegment(Offset(p.x, p.y), Offset(nextX, nextY))) {
           if (p.color != filter.targetColor) {
             p.color = filter.targetColor;
@@ -64,7 +65,14 @@ class ParticleController {
         }
       }
 
-      // (d) Resolve collisions against player-drawn line segments
+      // (d1) Resolve collisions against rigid static obstacles (REQ-005, AC-005)
+      for (final obstacle in obstacles) {
+        if (obstacle.resolveCollision(p)) {
+          break;
+        }
+      }
+
+      // (d2) Resolve collisions against player-drawn line segments
       for (final segment in lines) {
         if (segment.resolveCollision(p)) {
           break;

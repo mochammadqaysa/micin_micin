@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/theme.dart';
 import '../screens/game/game_hud.dart';
 import 'glass_container.dart';
+import 'neu_container.dart';
 
 /// Full-bleed Modern Minimalist & Glassmorphism Pause Overlay:
 /// - Gaussian blur (sigma=24.0) with obsidian void radial vignette.
@@ -130,167 +131,185 @@ class _PauseOverlayState extends State<PauseOverlay>
                     ),
 
                     // 2. Centerpiece: State title, floating glyph cluster, and subtitle
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Ambient Wide-Spaced State Typography
-                        Text(
-                          'PAUSED',
-                          style: GoogleFonts.outfit(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w300,
-                            letterSpacing: 8.0,
-                            color: GlassTokens.textSpecular.withValues(alpha: 0.40),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          width: 24,
-                          height: 1,
-                          color: GlassTokens.borderHighlight,
-                        ),
-                        const SizedBox(height: 36),
-
-                        // Action Nodes Cluster with Trigonometric Floating Micro-Parallax
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // Secondary Action Left: Ulangi Chamber ('↺')
-                            Transform.translate(
-                              offset: Offset(0, replayDy),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ZenGlyphButton(
-                                    key: const Key('pause_replay'),
-                                    tooltip: 'Ulangi Level',
-                                    size: 56,
-                                    isCircularBasalt: true,
-                                    icon: Icons.refresh_rounded,
-                                    iconSize: 26,
-                                    iconColor: GlassTokens.textSpecular,
-                                    onPressed: widget.onReplay ?? widget.onResume,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'ULANGI',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w400,
-                                      letterSpacing: 1.8,
-                                      color: GlassTokens.textMuted,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                    NeuContainer(
+                      borderRadius: 28,
+                      style: NeuStyle.convex,
+                      depth: 12.0,
+                      blur: 24.0,
+                      backgroundColor: NeuTokens.canvas,
+                      padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 32.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 3D Embossed State Typography
+                          Text(
+                            'PAUSED',
+                            style: GoogleFonts.outfit(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 6.0,
+                              color: NeuTokens.textPrimary,
+                              shadows: const [
+                                Shadow(
+                                  color: NeuTokens.shadowDark,
+                                  offset: Offset(2, 2),
+                                  blurRadius: 4,
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 28),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            width: 32,
+                            height: 2,
+                            decoration: BoxDecoration(
+                              color: NeuTokens.accentAmber,
+                              borderRadius: BorderRadius.circular(1),
+                            ),
+                          ),
+                          const SizedBox(height: 28),
 
-                            // Primary Action Center (Hero): Lanjutkan ('▶') with Neon Cyan Aura
-                            Transform.translate(
-                              offset: Offset(0, resumeDy),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      // Soft pulsing halo aura
-                                      Container(
-                                        width: 86,
-                                        height: 86,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: GlassTokens.neonCyan.withValues(
-                                            alpha: 0.10 + 0.08 * math.sin(t).abs(),
+                          // Action Nodes Cluster with Trigonometric Floating Micro-Parallax
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Secondary Action Left: Ulangi Chamber ('↺')
+                              Transform.translate(
+                                offset: Offset(0, replayDy),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    ZenGlyphButton(
+                                      key: const Key('pause_replay'),
+                                      tooltip: 'Ulangi Level',
+                                      size: 56,
+                                      isCircularBasalt: true,
+                                      icon: Icons.refresh_rounded,
+                                      iconSize: 26,
+                                      iconColor: NeuTokens.textPrimary,
+                                      onPressed: widget.onReplay ?? widget.onResume,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'ULANGI',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 1.4,
+                                        color: NeuTokens.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 24),
+
+                              // Primary Action Center (Hero): Lanjutkan ('▶') with Amber Aura
+                              Transform.translate(
+                                offset: Offset(0, resumeDy),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        // Soft pulsing halo aura
+                                        Container(
+                                          width: 86,
+                                          height: 86,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: NeuTokens.accentAmber.withValues(
+                                              alpha: 0.12 + 0.08 * math.sin(t).abs(),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      ZenGlyphButton(
-                                        key: const Key('pause_resume'),
-                                        tooltip: 'Lanjutkan',
-                                        size: 70,
-                                        isCircularBasalt: true,
-                                        backgroundColor: GlassTokens.surfaceElevated,
-                                        activeColor: GlassTokens.neonCyan,
-                                        border: Border.all(
-                                          color: GlassTokens.neonCyan.withValues(alpha: 0.70),
-                                          width: 1.4,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: GlassTokens.neonCyan.withValues(alpha: 0.35),
-                                            blurRadius: 20,
-                                            spreadRadius: 2,
+                                        ZenGlyphButton(
+                                          key: const Key('pause_resume'),
+                                          tooltip: 'Lanjutkan',
+                                          size: 70,
+                                          isCircularBasalt: true,
+                                          backgroundColor: NeuTokens.surfaceLight,
+                                          activeColor: NeuTokens.accentAmber,
+                                          border: Border.all(
+                                            color: NeuTokens.accentAmber.withValues(alpha: 0.85),
+                                            width: 1.6,
                                           ),
-                                        ],
-                                        icon: Icons.play_arrow_rounded,
-                                        iconSize: 40,
-                                        iconColor: GlassTokens.neonCyan,
-                                        onPressed: widget.onResume,
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color: NeuTokens.accentAmberGlow,
+                                              blurRadius: 18,
+                                              spreadRadius: 2,
+                                            ),
+                                          ],
+                                          icon: Icons.play_arrow_rounded,
+                                          iconSize: 42,
+                                          iconColor: NeuTokens.accentAmber,
+                                          onPressed: widget.onResume,
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'LANJUT',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 1.4,
+                                        color: NeuTokens.accentAmber,
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'LANJUT',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w500,
-                                      letterSpacing: 1.8,
-                                      color: GlassTokens.neonCyan.withValues(alpha: 0.85),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 28),
+                              const SizedBox(width: 24),
 
-                            // Secondary Action Right: Kembali ke Level ('←')
-                            Transform.translate(
-                              offset: Offset(0, stagesDy),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ZenGlyphButton(
-                                    key: const Key('pause_stages'),
-                                    tooltip: 'Kembali ke Level',
-                                    size: 56,
-                                    isCircularBasalt: true,
-                                    icon: Icons.arrow_back_rounded,
-                                    iconSize: 24,
-                                    iconColor: GlassTokens.textSpecular,
-                                    onPressed: widget.onMenu,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'KEMBALI',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w400,
-                                      letterSpacing: 1.8,
-                                      color: GlassTokens.textMuted,
+                              // Secondary Action Right: Kembali ke Level ('←')
+                              Transform.translate(
+                                offset: Offset(0, stagesDy),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    ZenGlyphButton(
+                                      key: const Key('pause_stages'),
+                                      tooltip: 'Kembali ke Level',
+                                      size: 56,
+                                      isCircularBasalt: true,
+                                      icon: Icons.arrow_back_rounded,
+                                      iconSize: 24,
+                                      iconColor: NeuTokens.textPrimary,
+                                      onPressed: widget.onMenu,
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'KEMBALI',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 1.4,
+                                        color: NeuTokens.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 28),
-
-                        // Subtle instruction hint
-                        Text(
-                          'SENTUH DI MANA SAJA UNTUK LANJUT',
-                          style: GoogleFonts.outfit(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: 2.2,
-                            color: GlassTokens.textDim,
+                            ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 24),
+
+                          // Instruction hint
+                          Text(
+                            'SENTUH DI MANA SAJA UNTUK LANJUT',
+                            style: GoogleFonts.outfit(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.8,
+                              color: NeuTokens.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
 
                     // 3. Bottom Footer: Ambient Soundscape Toggle

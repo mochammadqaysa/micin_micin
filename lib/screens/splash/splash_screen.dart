@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../providers/audio_provider.dart';
 import '../../widgets/glass_container.dart';
+import '../../widgets/neu_container.dart';
 import '../game/painters/background_painter.dart';
 
 /// Zen animated splash screen featuring a tranquil living sugar stream,
@@ -203,9 +204,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       offset: Offset(0, _textSlide.value),
                       child: Opacity(
                         opacity: _textFade.value,
-                        child: const Column(
+                        child: Column(
                           children: [
-                            Text(
+                            const Text(
                               'Micin, Micin',
                               style: TextStyle(
                                 fontFamily: 'Outfit',
@@ -215,8 +216,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                 letterSpacing: 2.8,
                               ),
                             ),
-                            SizedBox(height: 8),
-                            Text(
+                            const SizedBox(height: 8),
+                            const Text(
                               'Teka-teki Garis & Butiran Gula',
                               style: TextStyle(
                                 fontFamily: 'Outfit',
@@ -225,14 +226,41 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                 letterSpacing: 1.8,
                               ),
                             ),
-                            SizedBox(height: 6),
-                            Text(
+                            const SizedBox(height: 6),
+                            const Text(
                               'Sebuah Penghormatan untuk Sugar, Sugar',
                               style: TextStyle(
                                 fontFamily: 'Outfit',
                                 fontSize: 11,
                                 color: GlassTokens.textDim,
                                 letterSpacing: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            NeuContainer(
+                              width: 140,
+                              height: 6,
+                              borderRadius: 3,
+                              style: NeuStyle.inset,
+                              depth: 2.5,
+                              blur: 4.0,
+                              padding: const EdgeInsets.all(1.5),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: FractionallySizedBox(
+                                  widthFactor: _entranceController.value.clamp(0.05, 1.0),
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(2),
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          NeuTokens.accentAmber,
+                                          NeuTokens.accentCyan,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ],

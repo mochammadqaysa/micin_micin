@@ -27,7 +27,7 @@ void main() {
       }
     });
 
-    test('spawns particles with horizontal velocity jitter vx in [-0.25, 0.25] (REQ-003)', () {
+    test('spawns particles with horizontal velocity jitter vx in [-0.35, 0.35] (REQ-003, AC-001)', () {
       final pool = ParticlePool(capacity: 50);
       final emitter = ParticleEmitter(
         x: 100.0,
@@ -41,13 +41,13 @@ void main() {
       }
 
       for (final p in pool.activeParticles) {
-        expect(p.vx, greaterThanOrEqualTo(-0.25));
-        expect(p.vx, lessThanOrEqualTo(0.25));
+        expect(p.vx, greaterThanOrEqualTo(-0.35));
+        expect(p.vx, lessThanOrEqualTo(0.35));
         expect(p.vy, equals(0.0));
       }
     });
 
-    test('spawns particles with crystalline opacity alpha in [0.85, 1.0] (REQ-001, AC-001)', () {
+    test('spawns particles with crystalline opacity alpha in [0.88, 1.0] (REQ-001, AC-001)', () {
       final pool = ParticlePool(capacity: 50);
       final emitter = ParticleEmitter(
         x: 150.0,
@@ -61,7 +61,7 @@ void main() {
       }
 
       for (final p in pool.activeParticles) {
-        expect(p.opacity, greaterThanOrEqualTo(0.85));
+        expect(p.opacity, greaterThanOrEqualTo(0.88));
         expect(p.opacity, lessThanOrEqualTo(1.0));
       }
     });

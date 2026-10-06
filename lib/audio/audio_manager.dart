@@ -233,11 +233,16 @@ class AudioManager {
     _lastParticleSoundTime = now;
 
     try {
-      final noteIndex = ((fillPercentage.clamp(0.0, 1.0)) * (_pentatonicIntervals.length - 1)).round();
-      final baseInterval = _pentatonicIntervals[noteIndex];
+      final position = (fillPercentage.clamp(0.0, 1.0)) * (_pentatonicIntervals.length - 1);
+      final index = position.floor();
+      final fraction = position - index;
+      final baseInterval = index >= _pentatonicIntervals.length - 1
+          ? _pentatonicIntervals.last
+          : _pentatonicIntervals[index] * (1.0 - fraction) +
+              _pentatonicIntervals[index + 1] * fraction;
 
-      // Pitch micro-jitter (+/- 4% randomization)
-      final jitter = 1.0 + (math.Random().nextDouble() - 0.5) * 0.08;
+      // Pitch micro-jitter (+/- 3% randomization for organic analog feel)
+      final jitter = 1.0 + (math.Random().nextDouble() - 0.5) * 0.06;
       final targetPitch = (baseInterval * jitter).clamp(0.5, 2.5);
 
       final player = _interactionPlayers[_nextInteractionIndex];

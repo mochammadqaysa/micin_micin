@@ -2,35 +2,82 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
 
-/// Renders a minimalist dark obsidian void background with multi-plane starlight sand dust.
+/// Renders a chromatic chalkboard background with multi-plane starlight sand dust
+/// and diegetic canvas typography (REQ-003, REQ-004, AC-003, AC-004).
 class BackgroundPainter extends CustomPainter {
   final Offset parallaxOffset;
+  final Color backgroundColor;
+  final String? canvasLabel;
+  final Color canvasLabelColor;
+  final double canvasLabelOpacity;
+  final Offset canvasLabelPosition;
+  final Offset virtualOffset;
+  final double virtualScale;
 
-  const BackgroundPainter({this.parallaxOffset = Offset.zero});
+  const BackgroundPainter({
+    this.parallaxOffset = Offset.zero,
+    this.backgroundColor = GlassTokens.obsidianVoid,
+    this.canvasLabel,
+    this.canvasLabelColor = const Color(0xFFFFFFFF),
+    this.canvasLabelOpacity = 0.22,
+    this.canvasLabelPosition = const Offset(280.0, 640.0),
+    this.virtualOffset = Offset.zero,
+    this.virtualScale = 1.0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Fill base deep obsidian void (#0A0D14) with subtle radial vignette
     final rect = Offset.zero & size;
     final centerAlignment = Alignment(
       (parallaxOffset.dx / size.width).clamp(-0.3, 0.3),
       (parallaxOffset.dy / size.height).clamp(-0.3, 0.3),
     );
 
+    // 1. Chromatic chalkboard base fill with subtle radial vignette
+    final hsl = HSLColor.fromColor(backgroundColor);
+    final centerColor = hsl.withLightness((hsl.lightness + 0.04).clamp(0.0, 1.0)).toColor();
+    final edgeColor = hsl.withLightness((hsl.lightness * 0.65).clamp(0.0, 1.0)).toColor();
+
     final bgPaint = Paint()
       ..shader = RadialGradient(
         center: centerAlignment,
         radius: 0.9,
-        colors: const [
-          Color(0xFF141A29), // Center ambient glass elevation
-          GlassTokens.obsidianVoid, // Base obsidian void floor (#0A0D14)
-          Color(0xFF06080D), // Edge dark void
+        colors: [
+          centerColor,
+          backgroundColor,
+          edgeColor,
         ],
         stops: const [0.0, 0.6, 1.0],
       ).createShader(rect);
     canvas.drawRect(rect, bgPaint);
 
-    // Multi-plane parallax grain & ambient dust particles
+    // 2. Diegetic Canvas Typography embedded directly onto the canvas floor (REQ-004, AC-004)
+    if (canvasLabel != null && canvasLabel!.isNotEmpty) {
+      final effectiveScale = virtualScale > 0 ? virtualScale : 1.0;
+      final renderPos = virtualOffset + (canvasLabelPosition * effectiveScale);
+
+      final textSpan = TextSpan(
+        text: canvasLabel,
+        style: TextStyle(
+          fontFamily: 'Outfit',
+          fontSize: 32.0 * effectiveScale,
+          fontWeight: FontWeight.bold,
+          color: canvasLabelColor.withValues(
+            alpha: canvasLabelOpacity.clamp(0.0, 1.0),
+          ),
+          letterSpacing: 1.5,
+        ),
+      );
+
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      textPainter.paint(canvas, renderPos);
+    }
+
+    // 3. Multi-plane parallax grain & ambient dust particles
     final random = Random(42); // Deterministic seed
     final int baseCount = ((size.width * size.height) / 1200).toInt().clamp(60, 300);
 
@@ -70,5 +117,12 @@ class BackgroundPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant BackgroundPainter oldDelegate) =>
-      oldDelegate.parallaxOffset != parallaxOffset;
+      oldDelegate.parallaxOffset != parallaxOffset ||
+      oldDelegate.backgroundColor != backgroundColor ||
+      oldDelegate.canvasLabel != canvasLabel ||
+      oldDelegate.canvasLabelColor != canvasLabelColor ||
+      oldDelegate.canvasLabelOpacity != canvasLabelOpacity ||
+      oldDelegate.canvasLabelPosition != canvasLabelPosition ||
+      oldDelegate.virtualOffset != virtualOffset ||
+      oldDelegate.virtualScale != virtualScale;
 }

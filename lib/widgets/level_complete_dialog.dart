@@ -8,12 +8,11 @@ import '../models/level_ambiance.dart';
 import '../models/level_config.dart';
 import 'glass_container.dart';
 import 'glass_pill_button.dart';
+import 'neu_container.dart';
 
 /// Full-bleed Modern Minimalist & Glassmorphism victory overlay:
 /// - Radiant gold bloom wash and floating ambient victory motes.
-/// - Diegetic stage header: Chamber number and Act identifier.
-/// - Harmonized equilibrium state focal glass chip.
-/// - Tactile GlassPillButton for progression and secondary controls.
+/// - Level status badge and tactile progression buttons.
 /// - Modern typography in Google Fonts Outfit.
 class LevelCompleteDialog extends StatefulWidget {
   final int levelId;
@@ -194,184 +193,227 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog>
                   SafeArea(
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // 1. Equilibrium glass chip
-                            GlassContainer(
-                              enableLiveBlur: false,
-                              borderRadius: GlassTokens.radiusPill,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                              backgroundColor: GlassTokens.surfaceLight.withValues(alpha: 0.70),
-                              borderGradient: LinearGradient(
-                                colors: [
-                                  _ambiance.accentColor.withValues(alpha: 0.40 + pulse * 0.30),
-                                  GlassTokens.borderHighlight,
-                                  _ambiance.accentColor.withValues(alpha: 0.15),
-                                ],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: _ambiance.accentColor.withValues(alpha: 0.15 + pulse * 0.15),
-                                  blurRadius: 14,
-                                ),
-                              ],
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: NeuContainer(
+                          borderRadius: 28,
+                          style: NeuStyle.convex,
+                          depth: 12.0,
+                          blur: 24.0,
+                          backgroundColor: NeuTokens.canvas,
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 26.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // 1. Three Neumorphic Star Podiums
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: _ambiance.accentColor,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: _ambiance.accentColor.withValues(alpha: 0.8),
-                                          blurRadius: 6,
-                                        ),
-                                      ],
+                                  NeuContainer(
+                                    width: 44,
+                                    height: 44,
+                                    shape: BoxShape.circle,
+                                    style: NeuStyle.convex,
+                                    depth: 4.0,
+                                    blur: 8.0,
+                                    accentColor: NeuTokens.accentAmber,
+                                    accentGlow: true,
+                                    child: const Center(
+                                      child: Icon(Icons.star_rounded, size: 26, color: NeuTokens.accentAmber),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'EQUILIBRIUM • ${_ambiance.name.toUpperCase()}',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      color: _ambiance.accentColor,
-                                      letterSpacing: 2.0,
+                                  const SizedBox(width: 14),
+                                  NeuContainer(
+                                    width: 58,
+                                    height: 58,
+                                    shape: BoxShape.circle,
+                                    style: NeuStyle.convex,
+                                    depth: 6.0,
+                                    blur: 12.0,
+                                    accentColor: NeuTokens.accentAmber,
+                                    accentGlow: true,
+                                    child: const Center(
+                                      child: Icon(Icons.star_rounded, size: 36, color: NeuTokens.accentAmber),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  NeuContainer(
+                                    width: 44,
+                                    height: 44,
+                                    shape: BoxShape.circle,
+                                    style: NeuStyle.convex,
+                                    depth: 4.0,
+                                    blur: 8.0,
+                                    accentColor: NeuTokens.accentAmber,
+                                    accentGlow: true,
+                                    child: const Center(
+                                      child: Icon(Icons.star_rounded, size: 26, color: NeuTokens.accentAmber),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(height: 20),
-
-                            // 2. Tranquil Title
-                            Text(
-                              isFinalLevel ? 'Selamat!' : 'Level ${widget.levelId} Selesai!',
-                              style: GoogleFonts.outfit(
-                                fontSize: 26,
-                                fontWeight: FontWeight.w400,
-                                color: GlassTokens.textSpecular,
-                                letterSpacing: 2.0,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 10),
-
-                            // 3. Whisper Subtitle
-                            Text(
-                              isFinalLevel
-                                  ? 'Semua 30 level telah berhasil Anda selesaikan!'
-                                  : _ambiance.zenReflection,
-                              style: GoogleFonts.outfit(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w300,
-                                color: GlassTokens.textMuted,
-                                letterSpacing: 0.6,
-                                height: 1.4,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-
-                            const SizedBox(height: 40),
-
-                            // 4. Primary Glass Action (Proceed / Return to Menu)
-                            if (!isFinalLevel && widget.onNextLevel != null) ...[
-                              GlassPillButton(
-                                key: const Key('dialog_next_level'),
-                                label: 'Level Berikutnya',
-                                icon: Icon(
-                                  Icons.arrow_forward_rounded,
-                                  size: 18,
-                                  color: _ambiance.accentColor,
-                                ),
-                                isPrimary: true,
-                                accentGlow: _ambiance.accentColor,
-                                textStyle: GoogleFonts.outfit(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: _ambiance.accentColor,
-                                  letterSpacing: 1.0,
-                                ),
-                                onTap: widget.onNextLevel!,
-                              ),
                               const SizedBox(height: 18),
-                            ],
 
-                            if (isFinalLevel) ...[
-                              GlassPillButton(
-                                key: const Key('dialog_menu'),
-                                label: 'Kembali ke Menu',
-                                icon: Icon(
-                                  Icons.check_circle_outline_rounded,
-                                  size: 18,
-                                  color: _ambiance.accentColor,
+                              // 2. Victory Title with 3D Embossed Shadows
+                              Text(
+                                isFinalLevel ? 'Selamat!' : 'Level ${widget.levelId} Selesai!',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w800,
+                                  color: NeuTokens.textPrimary,
+                                  letterSpacing: 1.5,
+                                  shadows: const [
+                                    Shadow(
+                                      color: NeuTokens.shadowDark,
+                                      offset: Offset(2, 2),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
                                 ),
-                                isPrimary: true,
-                                accentGlow: _ambiance.accentColor,
-                                textStyle: GoogleFonts.outfit(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: _ambiance.accentColor,
-                                  letterSpacing: 1.0,
-                                ),
-                                onTap: widget.onMenu,
+                                textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 18),
-                            ],
+                              const SizedBox(height: 8),
 
-                            // 5. Secondary Glass Controls: Replay (↺) & Stages (←)
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                GlassPillButton(
-                                  key: const Key('dialog_replay'),
-                                  label: 'Ulangi',
-                                  icon: const Icon(
-                                    Icons.refresh_rounded,
-                                    size: 16,
-                                    color: GlassTokens.textMuted,
-                                  ),
-                                  height: 40,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                  textStyle: GoogleFonts.outfit(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w400,
-                                    color: GlassTokens.textMuted,
-                                    letterSpacing: 0.8,
-                                  ),
-                                  onTap: widget.onReplay,
+                              // 3. Subtitle
+                              Text(
+                                isFinalLevel
+                                    ? 'Semua 30 level telah berhasil Anda selesaikan!'
+                                    : 'Target butiran berhasil dipenuhi.',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: NeuTokens.textSecondary,
+                                  letterSpacing: 0.6,
+                                  height: 1.4,
                                 ),
-                                if (!isFinalLevel) ...[
-                                  const SizedBox(width: 14),
-                                  GlassPillButton(
-                                    key: const Key('dialog_menu_level'),
-                                    label: 'Level',
-                                    icon: const Icon(
-                                      Icons.arrow_back_rounded,
+                                textAlign: TextAlign.center,
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // 4. Sunken Accuracy & Rating Chip
+                              NeuContainer(
+                                borderRadius: 14,
+                                style: NeuStyle.inset,
+                                depth: 3.0,
+                                blur: 5.0,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.check_circle_rounded,
                                       size: 16,
-                                      color: GlassTokens.textMuted,
+                                      color: NeuTokens.accentEmerald,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Akurasi 100% • Sempurna',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: NeuTokens.accentEmerald,
+                                        letterSpacing: 0.8,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              const SizedBox(height: 24),
+
+                              // 5. Primary Glass Action (Proceed / Return to Menu)
+                              if (!isFinalLevel && widget.onNextLevel != null) ...[
+                                GlassPillButton(
+                                  key: const Key('dialog_next_level'),
+                                  label: 'Level Berikutnya',
+                                  icon: const Icon(
+                                    Icons.arrow_forward_rounded,
+                                    size: 18,
+                                    color: Colors.black,
+                                  ),
+                                  isPrimary: true,
+                                  accentGlow: NeuTokens.accentAmber,
+                                  textStyle: GoogleFonts.outfit(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.black,
+                                    letterSpacing: 1.2,
+                                  ),
+                                  onTap: widget.onNextLevel!,
+                                ),
+                                const SizedBox(height: 14),
+                              ],
+
+                              if (isFinalLevel) ...[
+                                GlassPillButton(
+                                  key: const Key('dialog_menu'),
+                                  label: 'Kembali ke Menu',
+                                  icon: const Icon(
+                                    Icons.check_circle_outline_rounded,
+                                    size: 18,
+                                    color: Colors.black,
+                                  ),
+                                  isPrimary: true,
+                                  accentGlow: NeuTokens.accentAmber,
+                                  textStyle: GoogleFonts.outfit(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.black,
+                                    letterSpacing: 1.2,
+                                  ),
+                                  onTap: widget.onMenu,
+                                ),
+                                const SizedBox(height: 14),
+                              ],
+
+                              // 6. Secondary Controls: Replay (↺) & Stages (←)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GlassPillButton(
+                                    key: const Key('dialog_replay'),
+                                    label: 'Ulangi',
+                                    icon: const Icon(
+                                      Icons.refresh_rounded,
+                                      size: 16,
+                                      color: NeuTokens.textPrimary,
                                     ),
                                     height: 40,
                                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                     textStyle: GoogleFonts.outfit(
                                       fontSize: 13,
-                                      fontWeight: FontWeight.w400,
-                                      color: GlassTokens.textMuted,
+                                      fontWeight: FontWeight.w600,
+                                      color: NeuTokens.textPrimary,
                                       letterSpacing: 0.8,
                                     ),
-                                    onTap: widget.onMenu,
+                                    onTap: widget.onReplay,
                                   ),
+                                  if (!isFinalLevel) ...[
+                                    const SizedBox(width: 14),
+                                    GlassPillButton(
+                                      key: const Key('dialog_menu_level'),
+                                      label: 'Level',
+                                      icon: const Icon(
+                                        Icons.arrow_back_rounded,
+                                        size: 16,
+                                        color: NeuTokens.textPrimary,
+                                      ),
+                                      height: 40,
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      textStyle: GoogleFonts.outfit(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: NeuTokens.textPrimary,
+                                        letterSpacing: 0.8,
+                                      ),
+                                      onTap: widget.onMenu,
+                                    ),
+                                  ],
                                 ],
-                              ],
-                            ),
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

@@ -9,40 +9,37 @@ import '../../audio/audio_manager.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/player_progress_provider.dart';
 import '../../widgets/glass_container.dart';
+import '../../widgets/neu_button.dart';
+import '../../widgets/neu_container.dart';
+import '../../widgets/neu_progress_bar.dart';
 import '../game/painters/background_painter.dart';
 import 'level_button.dart';
 
-/// Metadata for each of The 4 Zen Movements in the stage curriculum.
+/// Metadata for each chapter in the stage progression.
 class _ActInfo {
   final int actNumber;
   final String romanNumeral;
   final String title;
   final String subtitle;
-  final String mechanicsDescription;
   final Color accentColor;
   final int startLevel;
   final int endLevel;
-  final int milestoneLevel;
-  final String milestoneLabel;
 
   const _ActInfo({
     required this.actNumber,
     required this.romanNumeral,
     required this.title,
     required this.subtitle,
-    required this.mechanicsDescription,
     required this.accentColor,
     required this.startLevel,
     required this.endLevel,
-    required this.milestoneLevel,
-    required this.milestoneLabel,
   });
 
   int get totalLevels => (endLevel - startLevel) + 1;
 }
 
-/// Zen stage selection screen with Bento Grid architecture, Act progression,
-/// floating quick-jump navigator, and multi-plane optical parallax drift.
+/// Pure Neumorphism stage selection screen with tactile Bento layout,
+/// debossed chapter navigation, and extruded level buttons.
 class LevelSelectScreen extends ConsumerStatefulWidget {
   const LevelSelectScreen({super.key});
 
@@ -60,57 +57,42 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
   // GlobalKeys to enable precise smooth-scrolling to each Act
   final List<GlobalKey> _actKeys = List.generate(4, (_) => GlobalKey());
 
-  // Deterministic floating foreground motes for near-plane optical parallax
-  late final List<_ZenMote> _foregroundMotes;
-
   static const List<_ActInfo> _acts = [
     _ActInfo(
       actNumber: 1,
       romanNumeral: 'I',
-      title: 'Aliran Lembut & Curam',
+      title: 'Dasar',
       subtitle: 'Level 1 – 7',
-      mechanicsDescription: 'Gravitasi Alami & Sudut Luncuran Murni',
-      accentColor: GlassTokens.textSpecular,
+      accentColor: NeuTokens.textPrimary,
       startLevel: 1,
       endLevel: 7,
-      milestoneLevel: 5,
-      milestoneLabel: 'Taman Bebas I',
     ),
     _ActInfo(
       actNumber: 2,
       romanNumeral: 'II',
-      title: 'Prisma Kromatik',
+      title: 'Filter Warna',
       subtitle: 'Level 8 – 15',
-      mechanicsDescription: 'Filter Warna & Persilangan Jalur',
-      accentColor: GlassTokens.neonRose,
+      accentColor: NeuTokens.accentCoral,
       startLevel: 8,
       endLevel: 15,
-      milestoneLevel: 10,
-      milestoneLabel: 'Prisma Harmoni',
     ),
     _ActInfo(
       actNumber: 3,
       romanNumeral: 'III',
       title: 'Inversi Gravitasi',
       subtitle: 'Level 16 – 22',
-      mechanicsDescription: 'Pembalikan Arah & Cawan Langit',
-      accentColor: GlassTokens.mintFlora,
+      accentColor: NeuTokens.accentCyan,
       startLevel: 16,
       endLevel: 22,
-      milestoneLevel: 18,
-      milestoneLabel: 'Air Mancur Zen',
     ),
     _ActInfo(
       actNumber: 4,
       romanNumeral: 'IV',
-      title: 'Taman Zen Agung',
+      title: 'Tantangan Akhir',
       subtitle: 'Level 23 – 30',
-      mechanicsDescription: 'Harmoni Puncak & Aliran Multi-Cawan',
-      accentColor: GlassTokens.radiantGold,
+      accentColor: NeuTokens.accentAmber,
       startLevel: 23,
       endLevel: 30,
-      milestoneLevel: 30,
-      milestoneLabel: 'Klimaks Agung',
     ),
   ];
 
@@ -119,7 +101,6 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
     super.initState();
     _scrollController.addListener(_onScroll);
 
-    // Rule δ: Harmonic Cascade Ripple entrance animation (550ms easeOutCubic)
     _entranceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 550),
@@ -128,21 +109,6 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
       if (mounted) {
         _entranceController.forward();
       }
-    });
-
-    // Initialize 24 deterministic floating foreground motes
-    final rng = math.Random(42);
-    _foregroundMotes = List.generate(24, (_) {
-      return _ZenMote(
-        baseX: rng.nextDouble(),
-        baseY: rng.nextDouble(),
-        radius: 0.8 + rng.nextDouble() * 1.6,
-        alpha: 0.12 + rng.nextDouble() * 0.28,
-        phase: rng.nextDouble() * math.pi * 2,
-        color: rng.nextBool()
-            ? GlassTokens.radiantGold
-            : GlassTokens.neonCyan,
-      );
     });
   }
 
@@ -193,30 +159,32 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
     }
 
     return Scaffold(
-      backgroundColor: GlassTokens.obsidianVoid,
+      backgroundColor: NeuTokens.canvas,
       body: Stack(
         children: [
-          // 1. Plane 1 (Far Depth): Background Chalk Slate with scroll parallax drift
-          CustomPaint(
-            painter: BackgroundPainter(
-              parallaxOffset: Offset(0, -_scrollOffset * 0.14),
+          // 1. Neumorphic Canvas Depth with scroll parallax drift
+          Positioned.fill(
+            child: CustomPaint(
+              painter: BackgroundPainter(
+                backgroundColor: NeuTokens.canvas,
+                parallaxOffset: Offset(0, -_scrollOffset * 0.14),
+              ),
             ),
-            size: Size.infinite,
           ),
 
           // 2. Main Bento Content
           SafeArea(
             child: Column(
               children: [
-                // Quiet Borderless Zen Header (Pinned)
+                // Top Neumorphic Header
                 _buildHeader(context, playerProgress),
 
-                // Floating Act Quick-Jump Capsule Navigator
+                // Debossed Act Quick-Jump Navigator
                 _buildActNavigator(),
 
                 const SizedBox(height: 8),
 
-                // Scrollable Bento Sections for The 4 Zen Movements
+                // Scrollable Sections
                 Expanded(
                   child: SingleChildScrollView(
                     controller: _scrollController,
@@ -231,7 +199,7 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
                         return Column(
                           children: [
                             for (int i = 0; i < _acts.length; i++)
-                              _buildActBentoSection(
+                              _buildActSection(
                                 act: _acts[i],
                                 actKey: _actKeys[i],
                                 playerProgress: playerProgress,
@@ -247,23 +215,12 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
               ],
             ),
           ),
-
-          // 3. Plane 4 (Near Depth): Translucent Specular Sugar Motes drifting in foreground
-          IgnorePointer(
-            child: CustomPaint(
-              painter: _ForegroundMotesPainter(
-                scrollOffset: _scrollOffset,
-                motes: _foregroundMotes,
-              ),
-              size: Size.infinite,
-            ),
-          ),
         ],
       ),
     );
   }
 
-  /// Quiet top bar with back navigation, 'Pilih Level' title, and total progress pill.
+  /// Neumorphic Header with tactile circular back button, title, and progress badge.
   Widget _buildHeader(BuildContext context, PlayerProgress progress) {
     return AnimatedBuilder(
       animation: _entranceController,
@@ -284,14 +241,11 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Row(
           children: [
-            IconButton(
-              icon: const Icon(
-                Icons.arrow_back_rounded,
-                color: GlassTokens.textMuted,
-                size: 22,
-              ),
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
+            NeuIconButton(
+              icon: Icons.arrow_back_rounded,
+              size: 42,
+              iconSize: 20,
+              iconColor: NeuTokens.textSecondary,
               onPressed: () {
                 ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
                 if (context.canPop()) {
@@ -308,45 +262,36 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
               'Pilih Level',
               style: TextStyle(
                 fontFamily: 'Outfit',
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: GlassTokens.textSpecular,
-                letterSpacing: 2.2,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: NeuTokens.textPrimary,
+                letterSpacing: 2.0,
               ),
             ),
             const Spacer(),
 
-            // Progress Counter Pill in Frosted Glass Capsule
+            // Progress Counter Pill in Sunken/Frosted Capsule
             GlassContainer(
-              borderRadius: GlassTokens.radiusMedium,
+              borderRadius: NeuTokens.radiusPill,
               enableLiveBlur: false,
-              backgroundColor: GlassTokens.surfaceLight,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              backgroundColor: NeuTokens.canvas,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 5,
-                    height: 5,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: GlassTokens.radiantGold,
-                      boxShadow: [
-                        BoxShadow(
-                          color: GlassTokens.radiantGoldGlow,
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
+                  const Icon(
+                    Icons.star_rounded,
+                    color: NeuTokens.accentAmber,
+                    size: 16,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     '${progress.completedCount}/$kTotalLevels',
                     style: const TextStyle(
                       fontFamily: 'Outfit',
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: GlassTokens.textMuted,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: NeuTokens.textPrimary,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -359,7 +304,7 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
     );
   }
 
-  /// Floating horizontal pill bar allowing rapid jump to any of The 4 Acts.
+  /// Sunken Debossed Act Navigator with Raised Extruded Active Pill.
   Widget _buildActNavigator() {
     return AnimatedBuilder(
       animation: _entranceController,
@@ -376,12 +321,13 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
           ),
         );
       },
-      child: GlassContainer(
+      child: NeuContainer(
         margin: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 6.0),
-        padding: const EdgeInsets.all(4.0),
-        borderRadius: 20,
-        enableLiveBlur: false,
-        backgroundColor: GlassTokens.surfaceLight,
+        padding: const EdgeInsets.all(5.0),
+        borderRadius: 22,
+        style: NeuStyle.inset,
+        depth: 3.5,
+        blur: 6.0,
         child: Row(
           children: [
             for (int i = 0; i < _acts.length; i++)
@@ -390,27 +336,27 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
                   onTap: () => _scrollToAct(i),
                   behavior: HitTestBehavior.opaque,
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    padding: const EdgeInsets.symmetric(vertical: 7.0),
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     decoration: BoxDecoration(
                       color: _selectedActIndex == i
-                          ? _acts[i].accentColor.withValues(alpha: 0.16)
+                          ? NeuTokens.surfaceLight
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: _selectedActIndex == i
-                            ? _acts[i].accentColor.withValues(alpha: 0.50)
-                            : Colors.transparent,
-                        width: 1.0,
-                      ),
-                      boxShadow: [
-                        if (_selectedActIndex == i)
-                          BoxShadow(
-                            color: _acts[i].accentColor.withValues(alpha: 0.20),
-                            blurRadius: 10,
-                            spreadRadius: 0,
-                          ),
-                      ],
+                      boxShadow: _selectedActIndex == i
+                          ? [
+                              const BoxShadow(
+                                color: NeuTokens.shadowLight,
+                                offset: Offset(-2, -2),
+                                blurRadius: 4,
+                              ),
+                              const BoxShadow(
+                                color: NeuTokens.shadowDark,
+                                offset: Offset(2, 2),
+                                blurRadius: 4,
+                              ),
+                            ]
+                          : null,
                     ),
                     child: Center(
                       child: Text(
@@ -419,11 +365,11 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
                           fontFamily: 'Outfit',
                           fontSize: 12,
                           fontWeight: _selectedActIndex == i
-                              ? FontWeight.w600
-                              : FontWeight.w400,
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                           color: _selectedActIndex == i
                               ? _acts[i].accentColor
-                              : GlassTokens.textDim,
+                              : NeuTokens.textMuted,
                           letterSpacing: 0.6,
                         ),
                       ),
@@ -437,15 +383,14 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
     );
   }
 
-  /// Builds a complete Bento Chapter representing one Act.
-  Widget _buildActBentoSection({
+  /// Builds an Act chapter section with Neumorphic card chassis and 4-column level grid.
+  Widget _buildActSection({
     required _ActInfo act,
     required GlobalKey actKey,
     required PlayerProgress playerProgress,
     required int nextPlayableId,
     required double parentWidth,
   }) {
-    // Calculate Act completion stats
     int completedInAct = 0;
     for (int lvl = act.startLevel; lvl <= act.endLevel; lvl++) {
       if (playerProgress.isCompleted(lvl)) {
@@ -454,10 +399,8 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
     }
     final double completionRatio = completedInAct / act.totalLevels;
 
-    // Grid sizing: 4 columns
     const double spacing = 10.0;
-    final double colWidth = (parentWidth - (spacing * 3)) / 4.0;
-    final double milestoneWidth = (colWidth * 2) + spacing;
+    final double colWidth = ((parentWidth - (spacing * 3)) / 4.0).floorToDouble();
 
     final int actIdx = act.actNumber - 1;
     final double start = (actIdx * 0.12).clamp(0.0, 0.6);
@@ -486,18 +429,17 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Act Bento Hero Card with parallax watermark
+            // 1. Extruded Neumorphic Act Hero Card
             _buildActHeroCard(act, completedInAct, completionRatio),
 
             const SizedBox(height: 14),
 
-            // 2. Asymmetric Bento Grid of Stage Nodes
-            _buildActBentoGrid(
+            // 2. Uniform 4-column grid of pure Neumorphic LevelButtons
+            _buildActGrid(
               act: act,
               playerProgress: playerProgress,
               nextPlayableId: nextPlayableId,
               colWidth: colWidth,
-              milestoneWidth: milestoneWidth,
               spacing: spacing,
             ),
           ],
@@ -506,7 +448,7 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
     );
   }
 
-  /// Glassmorphic Act Hero Card featuring poetic title and progress bar.
+  /// Extruded Neumorphic Act Card with chapter stats and sunken progress gauge.
   Widget _buildActHeroCard(
     _ActInfo act,
     int completedCount,
@@ -514,501 +456,142 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
   ) {
     return GlassContainer(
       width: double.infinity,
-      borderRadius: 20,
+      borderRadius: 18,
       enableLiveBlur: false,
-      backgroundColor: GlassTokens.surfaceSubtle,
-      borderGradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          act.accentColor.withValues(alpha: 0.35),
-          GlassTokens.borderShadow,
-        ],
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: act.accentColor.withValues(alpha: 0.05),
-          blurRadius: 20,
-          spreadRadius: 0,
-        ),
-      ],
-      child: Stack(
+      backgroundColor: NeuTokens.canvas,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Plane 2: Watermark Roman numeral with subtle differential scroll parallax
-          Positioned(
-            right: -10,
-            bottom: -22,
-            child: Transform.translate(
-              offset: Offset(0, -(_scrollOffset * 0.04) % 15),
-              child: Text(
-                act.romanNumeral,
+          Row(
+            children: [
+              Text(
+                'BABAK ${act.romanNumeral}',
                 style: TextStyle(
                   fontFamily: 'Outfit',
-                  fontSize: 90,
+                  fontSize: 12,
                   fontWeight: FontWeight.w800,
-                  color: act.accentColor.withValues(alpha: 0.04),
-                  letterSpacing: -4,
+                  color: act.accentColor,
+                  letterSpacing: 2.0,
                 ),
               ),
-            ),
-          ),
-
-          // Inner subtle radial highlight
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: RadialGradient(
-                  center: const Alignment(-0.8, -0.6),
-                  radius: 1.2,
-                  colors: [
-                    act.accentColor.withValues(alpha: 0.06),
-                    Colors.transparent,
-                  ],
+              const SizedBox(width: 8),
+              Text(
+                '•  ${act.subtitle}',
+                style: const TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: NeuTokens.textSecondary,
+                  letterSpacing: 0.5,
                 ),
               ),
+              const Spacer(),
+
+              // Act Progress Badge
+              NeuContainer(
+                borderRadius: 12,
+                style: NeuStyle.inset,
+                depth: 2.5,
+                blur: 4.0,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                child: Text(
+                  '$completedCount/${act.totalLevels} Selesai',
+                  style: TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: act.accentColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          Text(
+            act.title,
+            style: const TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: NeuTokens.textPrimary,
+              letterSpacing: 0.5,
             ),
           ),
+          const SizedBox(height: 12),
 
-          // Card content
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'BABAK ${act.romanNumeral}',
-                      style: TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: act.accentColor.withValues(alpha: 0.90),
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '•  ${act.subtitle}',
-                      style: const TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 11,
-                        fontWeight: FontWeight.w400,
-                        color: GlassTokens.textDim,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const Spacer(),
-
-                    // Act Progress Pill in subtle glass
-                    GlassContainer(
-                      borderRadius: 10,
-                      enableLiveBlur: false,
-                      backgroundColor: act.accentColor.withValues(alpha: 0.10),
-                      borderWidth: 0.8,
-                      borderGradient: LinearGradient(
-                        colors: [
-                          act.accentColor.withValues(alpha: 0.40),
-                          act.accentColor.withValues(alpha: 0.15),
-                        ],
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      child: Text(
-                        '$completedCount/${act.totalLevels} Selesai',
-                        style: TextStyle(
-                          fontFamily: 'Outfit',
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: act.accentColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-
-                Text(
-                  act.title,
-                  style: const TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: GlassTokens.textSpecular,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 3),
-
-                Text(
-                  act.mechanicsDescription,
-                  style: const TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: GlassTokens.textMuted,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Minimalist Frosted Progress Track
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: Container(
-                    height: 3.5,
-                    width: double.infinity,
-                    color: GlassTokens.obsidianVoid.withValues(alpha: 0.70),
-                    child: FractionallySizedBox(
-                      alignment: Alignment.centerLeft,
-                      widthFactor: completionRatio.clamp(0.0, 1.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              act.accentColor.withValues(alpha: 0.6),
-                              act.accentColor,
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: act.accentColor.withValues(alpha: 0.35),
-                              blurRadius: 4,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          // Sunken Neumorphic Progress Bar
+          NeuProgressBar(
+            value: completionRatio,
+            height: 8.0,
+            fillColor: act.accentColor,
           ),
         ],
       ),
     );
   }
 
-  /// Builds the asymmetric Bento Grid tiles for the given Act.
-  Widget _buildActBentoGrid({
+  /// Builds a clean, uniform 4-column grid of LevelButtons for the given Act.
+  Widget _buildActGrid({
     required _ActInfo act,
     required PlayerProgress playerProgress,
     required int nextPlayableId,
     required double colWidth,
-    required double milestoneWidth,
     required double spacing,
   }) {
-    Widget makeButton(int levelId, {bool isMilestone = false}) {
-      final isUnlocked = playerProgress.isUnlocked(levelId);
-      final isCompleted = playerProgress.isCompleted(levelId);
-      final isNext = (levelId == nextPlayableId) && isUnlocked && !isCompleted;
+    final List<Widget> rows = [];
+    final int count = act.totalLevels;
 
-      return LevelButton(
-        levelId: levelId,
-        isUnlocked: isUnlocked,
-        isCompleted: isCompleted,
-        accentColor: act.accentColor,
-        isNextPlayable: isNext,
-        isMilestone: isMilestone,
-        milestoneLabel: isMilestone ? act.milestoneLabel : null,
-        onTap: () {
-          ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
-          if (isUnlocked) {
-            context.push('/game/$levelId');
-          }
-        },
-      );
-    }
+    for (int i = 0; i < count; i += 4) {
+      final int rowEnd = math.min(i + 4, count);
+      final List<Widget> rowChildren = [];
 
-    // Compose layout depending on the act's stage count
-    if (act.actNumber == 1) {
-      // Act I (7 levels: 1..7, Milestone: 5)
-      // Row 1: 1, 2, 3, 4 (4 regular tiles)
-      // Row 2: 5 (Milestone: 2 cols), 6, 7 (2 cols) -> total 4 cols
-      return Column(
-        children: [
-          Row(
-            children: [
-              for (int i = 1; i <= 4; i++) ...[
-                SizedBox(
-                  width: colWidth,
-                  height: colWidth,
-                  child: makeButton(i),
-                ),
-                if (i < 4) SizedBox(width: spacing),
-              ],
-            ],
-          ),
-          SizedBox(height: spacing),
-          Row(
-            children: [
-              SizedBox(
-                width: milestoneWidth,
-                height: colWidth,
-                child: makeButton(5, isMilestone: true),
-              ),
-              SizedBox(width: spacing),
-              SizedBox(
-                width: colWidth,
-                height: colWidth,
-                child: makeButton(6),
-              ),
-              SizedBox(width: spacing),
-              SizedBox(
-                width: colWidth,
-                height: colWidth,
-                child: makeButton(7),
-              ),
-            ],
-          ),
-        ],
-      );
-    } else if (act.actNumber == 2) {
-      // Act II (8 levels: 8..15, Milestone: 10)
-      // Row 1: 8, 9 (2 cols), 10 (Milestone: 2 cols) -> total 4 cols
-      // Row 2: 11, 12, 13, 14 (4 cols)
-      // Row 3: 15 (1 col) + peaceful decorative flow badge (3 cols)
-      return Column(
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: colWidth,
-                height: colWidth,
-                child: makeButton(8),
-              ),
-              SizedBox(width: spacing),
-              SizedBox(
-                width: colWidth,
-                height: colWidth,
-                child: makeButton(9),
-              ),
-              SizedBox(width: spacing),
-              SizedBox(
-                width: milestoneWidth,
-                height: colWidth,
-                child: makeButton(10, isMilestone: true),
-              ),
-            ],
-          ),
-          SizedBox(height: spacing),
-          Row(
-            children: [
-              for (int i = 11; i <= 14; i++) ...[
-                SizedBox(
-                  width: colWidth,
-                  height: colWidth,
-                  child: makeButton(i),
-                ),
-                if (i < 14) SizedBox(width: spacing),
-              ],
-            ],
-          ),
-          SizedBox(height: spacing),
-          Row(
-            children: [
-              SizedBox(
-                width: colWidth,
-                height: colWidth,
-                child: makeButton(15),
-              ),
-              SizedBox(width: spacing),
-              Expanded(
-                child: _buildDecorativeZenBadge(
-                  label: 'Prisma Rose & Aqua Mengalir Murni',
-                  accentColor: act.accentColor,
-                  height: colWidth,
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    } else if (act.actNumber == 3) {
-      // Act III (7 levels: 16..22, Milestone: 18)
-      // Row 1: 16, 17 (2 cols), 18 (Milestone: 2 cols)
-      // Row 2: 19, 20, 21, 22 (4 cols)
-      return Column(
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: colWidth,
-                height: colWidth,
-                child: makeButton(16),
-              ),
-              SizedBox(width: spacing),
-              SizedBox(
-                width: colWidth,
-                height: colWidth,
-                child: makeButton(17),
-              ),
-              SizedBox(width: spacing),
-              SizedBox(
-                width: milestoneWidth,
-                height: colWidth,
-                child: makeButton(18, isMilestone: true),
-              ),
-            ],
-          ),
-          SizedBox(height: spacing),
-          Row(
-            children: [
-              for (int i = 19; i <= 22; i++) ...[
-                SizedBox(
-                  width: colWidth,
-                  height: colWidth,
-                  child: makeButton(i),
-                ),
-                if (i < 22) SizedBox(width: spacing),
-              ],
-            ],
-          ),
-        ],
-      );
-    } else {
-      // Act IV (8 levels: 23..30, Milestones: 25 & 30)
-      // Row 1: 23, 24 (2 cols), 25 (Milestone: 2 cols)
-      // Row 2: 26, 27, 28, 29 (4 cols)
-      // Row 3: 30 (Milestone: 2 cols) + Zen Grand Garden emblem badge (2 cols)
-      return Column(
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: colWidth,
-                height: colWidth,
-                child: makeButton(23),
-              ),
-              SizedBox(width: spacing),
-              SizedBox(
-                width: colWidth,
-                height: colWidth,
-                child: makeButton(24),
-              ),
-              SizedBox(width: spacing),
-              SizedBox(
-                width: milestoneWidth,
-                height: colWidth,
-                child: makeButton(25, isMilestone: true),
-              ),
-            ],
-          ),
-          SizedBox(height: spacing),
-          Row(
-            children: [
-              for (int i = 26; i <= 29; i++) ...[
-                SizedBox(
-                  width: colWidth,
-                  height: colWidth,
-                  child: makeButton(i),
-                ),
-                if (i < 29) SizedBox(width: spacing),
-              ],
-            ],
-          ),
-          SizedBox(height: spacing),
-          Row(
-            children: [
-              SizedBox(
-                width: milestoneWidth,
-                height: colWidth,
-                child: makeButton(30, isMilestone: true),
-              ),
-              SizedBox(width: spacing),
-              Expanded(
-                child: _buildDecorativeZenBadge(
-                  label: 'Keseimbangan Abadi 30 Taman',
-                  accentColor: act.accentColor,
-                  height: colWidth,
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    }
-  }
+      for (int j = i; j < rowEnd; j++) {
+        final int levelId = act.startLevel + j;
+        final isUnlocked = playerProgress.isUnlocked(levelId);
+        final isCompleted = playerProgress.isCompleted(levelId);
+        final isNext = (levelId == nextPlayableId) && isUnlocked && !isCompleted;
 
-  /// Subtle zen quote / aesthetic pill card to fill remaining Bento width elegantly.
-  Widget _buildDecorativeZenBadge({
-    required String label,
-    required Color accentColor,
-    required double height,
-  }) {
-    return GlassContainer(
-      height: height,
-      borderRadius: 18,
-      enableLiveBlur: false,
-      backgroundColor: GlassTokens.surfaceSubtle,
-      padding: const EdgeInsets.symmetric(horizontal: 14.0),
-      child: Center(
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Outfit',
-            fontSize: 11,
-            fontWeight: FontWeight.w400,
-            color: accentColor.withValues(alpha: 0.60),
-            letterSpacing: 0.6,
+        rowChildren.add(
+          SizedBox(
+            width: colWidth,
+            height: colWidth,
+            child: LevelButton(
+              levelId: levelId,
+              isUnlocked: isUnlocked,
+              isCompleted: isCompleted,
+              accentColor: act.accentColor,
+              isNextPlayable: isNext,
+              onTap: () {
+                ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
+                if (isUnlocked) {
+                  context.push('/game/$levelId');
+                }
+              },
+            ),
           ),
+        );
+
+        if (j < rowEnd - 1) {
+          rowChildren.add(SizedBox(width: spacing));
+        }
+      }
+
+      rows.add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: rowChildren,
         ),
-      ),
+      );
+
+      if (i + 4 < count) {
+        rows.add(SizedBox(height: spacing));
+      }
+    }
+
+    return Column(
+      children: rows,
     );
   }
-}
-
-/// A deterministic floating light mote for foreground depth parallax.
-class _ZenMote {
-  final double baseX;
-  final double baseY;
-  final double radius;
-  final double alpha;
-  final double phase;
-  final Color color;
-
-  _ZenMote({
-    required this.baseX,
-    required this.baseY,
-    required this.radius,
-    required this.alpha,
-    required this.phase,
-    required this.color,
-  });
-}
-
-/// Pure canvas painter rendering subtle translucent foreground motes
-/// that shift with differential optical parallax velocity.
-class _ForegroundMotesPainter extends CustomPainter {
-  final double scrollOffset;
-  final List<_ZenMote> motes;
-
-  _ForegroundMotesPainter({
-    required this.scrollOffset,
-    required this.motes,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    for (final mote in motes) {
-      final double dy =
-          (mote.baseY * size.height - scrollOffset * 0.22) % size.height;
-      final double actualY = dy < 0 ? dy + size.height : dy;
-      final double actualX = mote.baseX * size.width +
-          math.sin(mote.phase + scrollOffset * 0.004) * 8.0;
-
-      final paint = Paint()
-        ..color = mote.color.withValues(alpha: mote.alpha)
-        ..style = PaintingStyle.fill;
-
-      canvas.drawCircle(Offset(actualX, actualY), mote.radius, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _ForegroundMotesPainter oldDelegate) =>
-      oldDelegate.scrollOffset != scrollOffset;
 }

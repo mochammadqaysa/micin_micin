@@ -7,15 +7,16 @@ import '../../data/level_repository.dart';
 import '../../engine/drawing/virtual_coordinate_adapter.dart';
 import '../../engine/game_engine.dart';
 import '../../models/level_config.dart';
+import '../../models/level_visual_theme.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/player_progress_provider.dart';
-import '../../widgets/level_complete_dialog.dart';
 import '../../widgets/pause_overlay.dart';
 import 'game_hud.dart';
 import 'painters/background_painter.dart';
 import 'painters/level_painter.dart';
 import 'painters/line_painter.dart';
 import 'painters/particle_painter.dart';
+import 'painters/silhouette_painter.dart';
 
 /// Interactive game screen hosting the physical canvas, rendering pipeline,
 /// gesture recognition, and HUD overlay.
@@ -61,8 +62,14 @@ class _GameScreenState extends ConsumerState<GameScreen>
 
       if (!mounted) return;
 
+      final visualTheme = LevelVisualTheme.forLevel(widget.levelId);
+      final propColliders = visualTheme.silhouetteProps
+          .expand((prop) => prop.generateColliders())
+          .toList();
+
       final engine = GameEngine(
         levelConfig: config,
+        propColliders: propColliders,
         onParticleCaptured: (cup, particle) {
           if (!mounted) return;
           final target = cup.targetAmount;
@@ -105,6 +112,20 @@ class _GameScreenState extends ConsumerState<GameScreen>
       if (widget.levelId < kTotalLevels) {
         ref.read(playerProgressProvider.notifier).unlockLevel(widget.levelId + 1);
       }
+
+      // Direct seamless level transition without dialog (Bart Bonte style)
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (!mounted) return;
+        if (widget.levelId < kTotalLevels) {
+          context.pushReplacement('/game/${widget.levelId + 1}');
+        } else {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/levels');
+          }
+        }
+      });
     }
     setState(() {});
   }
@@ -143,6 +164,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
     }
 
     final engine = _gameEngine!;
+    final visualTheme = LevelVisualTheme.forLevel(widget.levelId);
 
     return PopScope(
       canPop: false,
@@ -151,7 +173,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
         engine.pause();
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFF101012),
+        backgroundColor: visualTheme.backgroundColor,
         body: LayoutBuilder(
           builder: (context, constraints) {
             final viewportSize = Size(constraints.maxWidth, constraints.maxHeight);
@@ -160,9 +182,18 @@ class _GameScreenState extends ConsumerState<GameScreen>
 
             return Stack(
               children: [
-                // 1. Static sand textured background covering entire device screen with touch parallax
+                // 1. Chromatic chalkboard background with touch parallax & diegetic canvas typography (REQ-003, REQ-004)
                 CustomPaint(
-                  painter: BackgroundPainter(parallaxOffset: _touchParallax),
+                  painter: BackgroundPainter(
+                    parallaxOffset: _touchParallax,
+                    backgroundColor: visualTheme.backgroundColor,
+                    canvasLabel: visualTheme.stageLabel,
+                    canvasLabelColor: visualTheme.canvasLabelColor,
+                    canvasLabelOpacity: visualTheme.canvasLabelOpacity,
+                    canvasLabelPosition: visualTheme.canvasLabelPosition,
+                    virtualOffset: offset,
+                    virtualScale: scale,
+                  ),
                   size: Size.infinite,
                 ),
 
@@ -179,6 +210,15 @@ class _GameScreenState extends ConsumerState<GameScreen>
                         child: ClipRect(
                           child: Stack(
                             children: [
+                              // Silhouette props layer (vector shadows & rigid colliders - REQ-005)
+                              if (visualTheme.silhouetteProps.isNotEmpty)
+                                RepaintBoundary(
+                                  child: CustomPaint(
+                                    painter: SilhouettePainter(visualTheme.silhouetteProps),
+                                    size: const Size(kVirtualWidth, kVirtualHeight),
+                                  ),
+                                ),
+
                               // Level geometry (cups, emitters, filter zones)
                               RepaintBoundary(
                                 child: CustomPaint(
@@ -315,34 +355,6 @@ class _GameScreenState extends ConsumerState<GameScreen>
                     onMenu: () {
                       ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
                       ref.read(audioManagerProvider).duckMusic(active: false);
-                      if (context.canPop()) {
-                        context.pop();
-                      } else {
-                        context.go('/levels');
-                      }
-                    },
-                  ),
-
-                // 8. Level complete dialog overlay (TASK-050)
-                if (engine.isComplete)
-                  LevelCompleteDialog(
-                    levelId: widget.levelId,
-                    levelConfig: widget.levelConfig,
-                    onNextLevel: widget.levelId < kTotalLevels
-                        ? () {
-                            ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
-                            context.pushReplacement('/game/${widget.levelId + 1}');
-                          }
-                        : null,
-                    onReplay: () {
-                      ref.read(audioManagerProvider).playSfx(SoundType.levelReset);
-                      setState(() {
-                        _hasHandledCompletion = false;
-                      });
-                      engine.reset();
-                    },
-                    onMenu: () {
-                      ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
                       if (context.canPop()) {
                         context.pop();
                       } else {

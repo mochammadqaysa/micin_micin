@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import '../models/level_config.dart';
 import 'collision/cup_hitbox.dart';
+import 'collision/line_segment.dart';
 import 'color_filter/color_filter_zone.dart';
 import 'drawing/line_controller.dart';
 import 'particle/particle_controller.dart';
@@ -15,6 +16,7 @@ class GameEngine with ChangeNotifier {
   final LineController lineController;
   final List<CupHitbox> cups;
   final List<ColorFilterZone> filters;
+  final List<LineSegment> propColliders;
 
   Ticker? _ticker;
   bool isPaused = false;
@@ -30,6 +32,7 @@ class GameEngine with ChangeNotifier {
     LineController? lineController,
     List<CupHitbox>? cups,
     List<ColorFilterZone>? filters,
+    List<LineSegment>? propColliders,
     this.onParticleCaptured,
     this.onFilterPassed,
   })  : particleController = particleController ??
@@ -43,7 +46,8 @@ class GameEngine with ChangeNotifier {
         cups = cups ??
             levelConfig.cups.map(CupHitbox.fromConfig).toList(),
         filters = filters ??
-            levelConfig.filters.map(ColorFilterZone.fromConfig).toList();
+            levelConfig.filters.map(ColorFilterZone.fromConfig).toList(),
+        propColliders = propColliders ?? const [];
 
   /// Starts the game loop using Flutter's [TickerProvider] (CON-001).
   void start(TickerProvider vsync) {
@@ -56,6 +60,7 @@ class GameEngine with ChangeNotifier {
 
     particleController.update(
       lines: lineController.allSegments,
+      obstacles: propColliders,
       cups: cups,
       filters: filters,
       canvasHeight: levelConfig.canvasHeight,

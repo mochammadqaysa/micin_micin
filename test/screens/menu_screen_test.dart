@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:micin_micin/screens/game/painters/background_painter.dart';
-import 'package:micin_micin/screens/game/painters/line_painter.dart';
 import 'package:micin_micin/screens/menu/menu_screen.dart';
 import 'package:micin_micin/widgets/glass_container.dart';
 
@@ -74,15 +73,15 @@ void main() {
       expect(find.text('LevelSelectScreen Arrived'), findsOneWidget);
     });
 
-    testWidgets('renders CHAMBERS button and navigates to /levels on tap',
+    testWidgets('renders LEVELS button and navigates to /levels on tap',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
 
-      final chambersButton = find.text('CHAMBERS');
-      expect(chambersButton, findsOneWidget);
+      final levelsButton = find.text('LEVELS');
+      expect(levelsButton, findsOneWidget);
 
-      await tester.tap(chambersButton);
+      await tester.tap(levelsButton);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -104,12 +103,12 @@ void main() {
       expect(find.text('CreditsScreen Arrived'), findsOneWidget);
     });
 
-    testWidgets('renders Zen Campaign Progress snapshot pill',
+    testWidgets('renders Campaign Progress snapshot status',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
 
-      expect(find.textContaining('Taman Selesai'), findsOneWidget);
+      expect(find.textContaining('Level Selesai'), findsOneWidget);
     });
 
     testWidgets('toggles audio on music icon button tap',
@@ -138,15 +137,12 @@ void main() {
       expect(find.text('Micin, Micin'), findsOneWidget);
     });
 
-    testWidgets('drawing a chalk line creates lines rendered with LinePainter and reveals CLEAR button',
+    testWidgets('dragging across canvas does not draw lines or show CLEAR button',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
 
-      // Initially no CLEAR button
-      expect(find.text('CLEAR'), findsNothing);
-
-      // Draw a line across the canvas
+      // Drag across the canvas
       final gesture = await tester.startGesture(const Offset(120, 250));
       await gesture.moveTo(const Offset(180, 280));
       await gesture.moveTo(const Offset(240, 310));
@@ -154,67 +150,14 @@ void main() {
       await gesture.up();
       await tester.pump();
 
-      // CLEAR button should now be visible in the header
-      expect(find.text('CLEAR'), findsOneWidget);
-
-      // LinePainter has active lines
-      final linePainter = tester
-          .widgetList<CustomPaint>(find.byType(CustomPaint))
-          .firstWhere((cp) => cp.painter is LinePainter)
-          .painter as LinePainter;
-      expect(linePainter.lines.isNotEmpty, isTrue);
-    });
-
-    testWidgets('tapping CLEAR button clears all drawn lines and hides CLEAR button',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pump();
-
-      // Draw a line
-      final gesture = await tester.startGesture(const Offset(120, 250));
-      await gesture.moveTo(const Offset(220, 300));
-      await tester.pump();
-      await gesture.up();
-      await tester.pump();
-
-      expect(find.text('CLEAR'), findsOneWidget);
-
-      // Tap CLEAR button
-      await tester.tap(find.text('CLEAR'));
-      await tester.pump();
-
-      // CLEAR button disappears
+      // No CLEAR button appears
       expect(find.text('CLEAR'), findsNothing);
 
-      // LinePainter has empty lines
-      final linePainter = tester
+      // Verify no LinePainter exists in MenuScreen
+      final hasLinePainter = tester
           .widgetList<CustomPaint>(find.byType(CustomPaint))
-          .firstWhere((cp) => cp.painter is LinePainter)
-          .painter as LinePainter;
-      expect(linePainter.lines.isEmpty, isTrue);
-    });
-
-    testWidgets('double tapping anywhere on the canvas clears drawn lines',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pump();
-
-      // Draw a line
-      final gesture = await tester.startGesture(const Offset(120, 250));
-      await gesture.moveTo(const Offset(220, 300));
-      await tester.pump();
-      await gesture.up();
-      await tester.pump();
-
-      expect(find.text('CLEAR'), findsOneWidget);
-
-      // Double tap on empty canvas space
-      await tester.tapAt(const Offset(200, 200));
-      await tester.pump(const Duration(milliseconds: 50));
-      await tester.tapAt(const Offset(200, 200));
-      await tester.pump();
-
-      expect(find.text('CLEAR'), findsNothing);
+          .any((cp) => cp.painter?.runtimeType.toString() == 'LinePainter');
+      expect(hasLinePainter, isFalse);
     });
   });
 }

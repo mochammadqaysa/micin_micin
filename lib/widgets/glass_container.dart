@@ -106,16 +106,27 @@ class GlassContainer extends StatelessWidget {
       child: content,
     );
 
-    if (boxShadow != null && boxShadow!.isNotEmpty) {
-      decorated = Container(
-        decoration: BoxDecoration(
-          shape: shape,
-          borderRadius: borderRRect,
-          boxShadow: boxShadow,
-        ),
-        child: decorated,
-      );
-    }
+    final effectiveShadows = boxShadow ?? const [
+      BoxShadow(
+        color: NeuTokens.shadowLight,
+        offset: Offset(-3, -3),
+        blurRadius: 6,
+      ),
+      BoxShadow(
+        color: NeuTokens.shadowDark,
+        offset: Offset(3, 3),
+        blurRadius: 6,
+      ),
+    ];
+
+    decorated = Container(
+      decoration: BoxDecoration(
+        shape: shape,
+        borderRadius: borderRRect,
+        boxShadow: effectiveShadows,
+      ),
+      child: decorated,
+    );
 
     if (margin != null) {
       decorated = Padding(

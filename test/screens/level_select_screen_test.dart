@@ -80,22 +80,19 @@ void main() {
       expect(find.text('Babak IV'), findsOneWidget);
     });
 
-    testWidgets('renders Act I content and stages in Bento layout',
+    testWidgets('renders Act I content and stages in grid layout',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
 
       // Verify Act I hero card title
       expect(find.text('BABAK I'), findsOneWidget);
-      expect(find.text('Aliran Lembut & Curam'), findsOneWidget);
+      expect(find.text('Dasar'), findsOneWidget);
 
       // Verify Act I stages (1 to 7) exist as LevelButtons
       for (int i = 1; i <= 7; i++) {
         expect(find.widgetWithText(LevelButton, '$i'), findsOneWidget);
       }
-
-      // Verify Act I milestone label
-      expect(find.text('Taman Bebas I'), findsOneWidget);
     });
 
     testWidgets('tapping quick-jump tab triggers scrolling smoothly',
@@ -110,7 +107,7 @@ void main() {
 
       // Verify Babak IV is now visible
       expect(find.text('BABAK IV'), findsOneWidget);
-      expect(find.text('Taman Zen Agung'), findsOneWidget);
+      expect(find.text('Tantangan Akhir'), findsOneWidget);
       expect(find.widgetWithText(LevelButton, '30'), findsOneWidget);
     });
 

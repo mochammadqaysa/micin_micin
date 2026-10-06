@@ -1,117 +1,182 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Canonical Zen Mineral Palette tokens for Micin Micin.
-/// Derived from the approved art direction brief and Stitch Zen Granular Minimalist design system.
-abstract final class ZenPalette {
-  /// Base canvas field tone: Deep matte charcoal slate.
-  static const Color slateFloor = Color(0xFF13171C);
+/// Pure Neumorphism (Soft UI) Design System Tokens for Micin Micin.
+///
+/// Implements authentic Neumorphism with dual directional lighting (135° Top-Left -> Bottom-Right),
+/// extruded tactile convex elements, sunken debossed bays, and energetic mobile game accents.
+abstract final class NeuTokens {
+  // ---------------------------------------------------------------------------
+  // Canvas & Surfaces (Titanium Clay / Slate Base)
+  // ---------------------------------------------------------------------------
+  /// The unifying canvas plane tone. In Neumorphism, all elements share this material base.
+  static const Color canvas = Color(0xFF1E222A);
 
-  /// Elevated inert basalt geometry: cup bodies and deflectors.
-  static const Color basaltContainer = Color(0xFF191F26);
+  /// Slightly elevated / illuminated surface stop (Top-Left of convex gradient).
+  static const Color surfaceLight = Color(0xFF262C36);
 
-  /// Subtle radial vignette darkened screen edge.
-  static const Color edgeVignette = Color(0xFF101418);
+  /// Standard flat surface plane tone.
+  static const Color surfaceBase = Color(0xFF1E222A);
 
-  /// Unfiltered crystalline grains, player guide strokes, and critical counters.
-  static const Color pureWhite = Color(0xFFFFFFFF);
+  /// Recessed / shaded surface stop (Bottom-Right of convex gradient).
+  static const Color surfaceDark = Color(0xFF161920);
 
-  /// Primary chromatic filter gate and calming cooling dynamic.
-  static const Color softAqua = Color(0xFF70C1B3);
+  // ---------------------------------------------------------------------------
+  // Dual Cast Shadows (Directional Lighting @ 135°)
+  // ---------------------------------------------------------------------------
+  /// Light specular reflection cast upward and left (-dx, -dy).
+  static const Color shadowLight = Color(0x24FFFFFF);
 
-  /// Resonant warm chromatic filter gate and dyed mineral stream.
-  static const Color pastelRose = Color(0xFFF4A7B9);
+  /// Deep ambient drop shadow cast downward and right (+dx, +dy).
+  static const Color shadowDark = Color(0xB8090B0E);
 
-  /// High-density grains, inverted gravity vectors, and completion highlights.
-  static const Color mutedGold = Color(0xFFE8C547);
+  // ---------------------------------------------------------------------------
+  // Inner Inset Shadows (for Sunken / Debossed / Pressed States)
+  // ---------------------------------------------------------------------------
+  /// Deep inner groove shadow at top-left inside of sunken wells.
+  static const Color insetDark = Color(0xD9080A0D);
 
-  /// Radiant gold bloom wash for victory state.
-  static const Color goldBloom = Color(0xFFFFD54F);
+  /// Subtle inner highlight reflection at bottom-right inside of sunken wells.
+  static const Color insetLight = Color(0x1FFFFFFF);
 
-  /// Viscous flow modifiers and kinetic deflection bumpers.
-  static const Color sageGreen = Color(0xFF95B8A2);
+  // ---------------------------------------------------------------------------
+  // Specular Edge Bevel (1px Subtle Chamfer)
+  // ---------------------------------------------------------------------------
+  static const Color bevelLight = Color(0x2EFFFFFF);
+  static const Color bevelDark = Color(0x1F000000);
 
-  /// Unfocused / resting HUD glyph alpha (0.35 - 0.40).
-  static const double restingAlpha = 0.35;
+  // ---------------------------------------------------------------------------
+  // Energetic Play Store Game Accents
+  // ---------------------------------------------------------------------------
+  /// Primary Game Action CTA, Star Rating, and Victory Trophy Gold.
+  static const Color accentAmber = Color(0xFFFFB300);
+  static const Color accentAmberGlow = Color(0x66FFB300);
 
-  /// Active HUD glyph interaction alpha.
-  static const double activeAlpha = 0.90;
+  /// High-energy secondary accent: Inverted gravity, dynamic tech gates.
+  static const Color accentCyan = Color(0xFF00E5FF);
+  static const Color accentCyanGlow = Color(0x6600E5FF);
+
+  /// Vibrant completion & positive action emerald green.
+  static const Color accentEmerald = Color(0xFF00E676);
+  static const Color accentEmeraldGlow = Color(0x6600E676);
+
+  /// Playful warm filter gate, powerup coral, danger accent.
+  static const Color accentCoral = Color(0xFFFF5252);
+  static const Color accentCoralGlow = Color(0x66FF5252);
+
+  /// Royal purple challenge accent.
+  static const Color accentPurple = Color(0xFFBD00FF);
+
+  // ---------------------------------------------------------------------------
+  // Typography & Content
+  // ---------------------------------------------------------------------------
+  static const Color textPrimary = Color(0xFFF8FAFC);
+  static const Color textSecondary = Color(0xFF94A3B8);
+  static const Color textMuted = Color(0xFF64748B);
+  static const Color textDark = Color(0xFF0F172A);
+
+  // ---------------------------------------------------------------------------
+  // Standard Geometric Radii
+  // ---------------------------------------------------------------------------
+  static const double radiusSmall = 10.0;
+  static const double radiusMedium = 16.0;
+  static const double radiusLarge = 24.0;
+  static const double radiusPill = 999.0;
+
+  // ---------------------------------------------------------------------------
+  // Standard Shadow Elevation Depths
+  // ---------------------------------------------------------------------------
+  static const double depthCard = 8.0;
+  static const double blurCard = 16.0;
+
+  static const double depthButton = 5.0;
+  static const double blurButton = 10.0;
+
+  static const double depthChip = 3.0;
+  static const double blurChip = 6.0;
 }
 
-/// Canonical Modern Minimalist & Glassmorphism Design Tokens for Micin Micin.
-/// Derived from spec-design-modern-glassmorphism-ui.md.
+/// Backwards-compatible bridge mapping legacy GlassTokens to NeuTokens.
 abstract final class GlassTokens {
-  // Base Canvas & Void
-  static const Color obsidianVoid = Color(0xFF0B0E14);
-  static const Color obsidianVignette = Color(0xFF06080C);
+  static const Color obsidianVoid = NeuTokens.canvas;
+  static const Color obsidianVignette = NeuTokens.surfaceDark;
 
-  // Frosted Glass Surfaces (Translucency)
-  static const Color surfaceLight = Color(0x14FFFFFF);    // 8% white
-  static const Color surfaceSubtle = Color(0x0AFFFFFF);   // 4% white
-  static const Color surfaceElevated = Color(0x1FFFFFFF); // 12% white
+  static const Color surfaceLight = NeuTokens.surfaceLight;
+  static const Color surfaceSubtle = NeuTokens.surfaceBase;
+  static const Color surfaceElevated = NeuTokens.surfaceLight;
 
-  // Glass Specular Borders (1px Gradient)
-  static const Color borderHighlight = Color(0x3DFFFFFF); // 24% white (Top-Left)
-  static const Color borderShadow = Color(0x0DFFFFFF);    // 5% white (Bottom-Right)
-  static const Color borderActive = Color(0x6600F2FE);    // Neon Cyan glow border
+  static const Color borderHighlight = NeuTokens.bevelLight;
+  static const Color borderShadow = NeuTokens.bevelDark;
+  static const Color borderActive = NeuTokens.accentCyan;
 
-  // Refractive Neon Accents
-  static const Color neonCyan = Color(0xFF00F2FE);
-  static const Color neonCyanGlow = Color(0x4D00F2FE);
-  static const Color neonRose = Color(0xFFFF6584);
-  static const Color radiantGold = Color(0xFFFFD200);
-  static const Color radiantGoldGlow = Color(0x66FFD200);
-  static const Color mintFlora = Color(0xFF4EECD5);
-  static const Color textSpecular = Color(0xFFFFFFFF);
-  static const Color textMuted = Color(0xFF8E9AA8);
-  static const Color textDim = Color(0xFF64748B);
+  static const Color neonCyan = NeuTokens.accentCyan;
+  static const Color neonCyanGlow = NeuTokens.accentCyanGlow;
+  static const Color neonRose = NeuTokens.accentCoral;
+  static const Color radiantGold = NeuTokens.accentAmber;
+  static const Color radiantGoldGlow = NeuTokens.accentAmberGlow;
+  static const Color mintFlora = NeuTokens.accentEmerald;
+  static const Color textSpecular = NeuTokens.textPrimary;
+  static const Color textMuted = NeuTokens.textSecondary;
+  static const Color textDim = NeuTokens.textMuted;
 
-  // Standard Glass Blur Radii
   static const double blurSubtle = 8.0;
   static const double blurLight = 12.0;
   static const double blurStandard = 18.0;
   static const double blurHeavy = 24.0;
   static const double blurOverlay = 24.0;
 
-  // Corner Radii
-  static const double radiusSmall = 10.0;
-  static const double radiusMedium = 16.0;
-  static const double radiusLarge = 24.0;
-  static const double radiusPill = 999.0;
+  static const double radiusSmall = NeuTokens.radiusSmall;
+  static const double radiusMedium = NeuTokens.radiusMedium;
+  static const double radiusLarge = NeuTokens.radiusLarge;
+  static const double radiusPill = NeuTokens.radiusPill;
+}
+
+/// Backwards-compatible bridge for legacy ZenPalette references.
+abstract final class ZenPalette {
+  static const Color slateFloor = NeuTokens.canvas;
+  static const Color basaltContainer = NeuTokens.surfaceDark;
+  static const Color edgeVignette = NeuTokens.surfaceDark;
+  static const Color pureWhite = NeuTokens.textPrimary;
+  static const Color softAqua = NeuTokens.accentCyan;
+  static const Color pastelRose = NeuTokens.accentCoral;
+  static const Color mutedGold = NeuTokens.accentAmber;
+  static const Color goldBloom = NeuTokens.accentAmber;
+  static const Color sageGreen = NeuTokens.accentEmerald;
+  static const double restingAlpha = 0.50;
+  static const double activeAlpha = 1.0;
 }
 
 /// Design system and theme configurations for Micin Micin.
 ///
-/// Features a Modern Minimalist & Glassmorphism dark theme with obsidian void canvas,
-/// frosted glass containers, and refractive neon accents, using the bundled offline Outfit font family.
+/// Features a Pure Neumorphic Slate theme with extruded soft tactile widgets,
+/// dual directional drop/highlight shadows, and energetic mobile game accents.
 class AppTheme {
   AppTheme._();
 
-  static const Color background = GlassTokens.obsidianVoid;
-  static const Color surface = GlassTokens.surfaceElevated;
-  static const Color primaryAccent = GlassTokens.radiantGold;
-  static const Color secondaryAccent = GlassTokens.neonCyan;
-  static const Color textPrimary = GlassTokens.textSpecular;
-  static const Color textSecondary = GlassTokens.textMuted;
-  static const Color dividerColor = Color(0xFF1E2630);
-
+  static const Color background = NeuTokens.canvas;
+  static const Color surface = NeuTokens.surfaceLight;
+  static const Color primaryAccent = NeuTokens.accentAmber;
+  static const Color secondaryAccent = NeuTokens.accentCyan;
+  static const Color textPrimary = NeuTokens.textPrimary;
+  static const Color textSecondary = NeuTokens.textSecondary;
+  static const Color dividerColor = Color(0xFF262C36);
 
   static ThemeData get darkTheme {
     final baseTheme = ThemeData.dark(useMaterial3: true);
     final textTheme = GoogleFonts.outfitTextTheme(baseTheme.textTheme).copyWith(
       displayLarge: GoogleFonts.outfit(
         color: textPrimary,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w800,
         fontSize: 32,
       ),
       displayMedium: GoogleFonts.outfit(
         color: textPrimary,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w700,
         fontSize: 24,
       ),
       titleLarge: GoogleFonts.outfit(
         color: textPrimary,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         fontSize: 20,
       ),
       bodyLarge: GoogleFonts.outfit(
@@ -124,7 +189,7 @@ class AppTheme {
       ),
       labelLarge: GoogleFonts.outfit(
         color: Colors.black,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w800,
         fontSize: 16,
       ),
     );
@@ -152,12 +217,12 @@ class AppTheme {
           backgroundColor: primaryAccent,
           foregroundColor: Colors.black,
           textStyle: GoogleFonts.outfit(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
             fontSize: 16,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       ),
