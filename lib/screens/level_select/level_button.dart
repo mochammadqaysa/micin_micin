@@ -1,15 +1,15 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme.dart';
 import '../../widgets/lock_badge.dart';
-import '../../widgets/neu_container.dart';
 
-/// Pure Neumorphism node representing a playable level on the stage matrix.
-/// - Unlocked: Tactile extruded convex cylinder with dual directional shadows and 3-star rating row.
-/// - Next Playable: Raised high-elevation node with breathing pulse aura beckoning the player.
-/// - Completed: Radiant golden illuminated rim with 3 glowing gold stars.
-/// - Locked: Deeply sunken debossed socket with engraved lock badge and micro-shake on tap.
+/// 3D Cartoon Level Button representing a playable level on the stage matrix.
+/// - Unlocked: Cyan/blue candy 3D button face with gloss top highlight and bottom bevel.
+/// - Next Playable: Raised vibrant green button with breathing pulse aura beckoning the player.
+/// - Completed: Radiant golden/amber face with 3 gold stars.
+/// - Locked: Deep slate 3D socket with lock badge and micro-shake on tap.
 class LevelButton extends StatefulWidget {
   final int levelId;
   final bool isUnlocked;
@@ -26,7 +26,7 @@ class LevelButton extends StatefulWidget {
     required this.isUnlocked,
     required this.isCompleted,
     required this.onTap,
-    this.accentColor = NeuTokens.accentAmber,
+    this.accentColor = CartoonTokens.amberTop,
     this.isNextPlayable = false,
     this.isMilestone = false,
     this.milestoneLabel,
@@ -145,36 +145,37 @@ class _LevelButtonState extends State<LevelButton>
 
         // Visual styling parameters
         final isDepressed = _isDown;
-        final neuStyle = !widget.isUnlocked
-            ? NeuStyle.inset
-            : (isDepressed ? NeuStyle.inset : NeuStyle.convex);
+        const double bevelDepth = 4.0;
+        final double shift = isDepressed ? 3.0 : 0.0;
 
-        final depth = !widget.isUnlocked
-            ? 3.5
-            : (widget.isNextPlayable ? 6.5 : (isDepressed ? 2.5 : 5.0));
+        Color topColor;
+        Color bottomColor;
+        Color shadowColor;
+        Color borderColor;
+        Color textColor = Colors.white;
 
-        final blur = !widget.isUnlocked
-            ? 6.0
-            : (widget.isNextPlayable ? 12.0 : (isDepressed ? 4.0 : 10.0));
-
-        final textColor = widget.isUnlocked
-            ? (widget.isCompleted
-                ? NeuTokens.accentAmber
-                : (widget.isNextPlayable
-                    ? NeuTokens.textPrimary
-                    : NeuTokens.textPrimary.withValues(alpha: 0.90)))
-            : NeuTokens.textMuted;
-
-        final border = Border.all(
-          color: widget.isCompleted
-              ? NeuTokens.accentAmber.withValues(alpha: 0.85)
-              : (widget.isNextPlayable
-                  ? NeuTokens.accentCyan.withValues(alpha: 0.45 + pulseVal * 0.45)
-                  : (widget.isUnlocked
-                      ? NeuTokens.bevelLight
-                      : NeuTokens.bevelDark)),
-          width: widget.isCompleted || widget.isNextPlayable ? 1.6 : 1.0,
-        );
+        if (!widget.isUnlocked) {
+          topColor = const Color(0xFF282050);
+          bottomColor = const Color(0xFF1B143A);
+          shadowColor = const Color(0xFF110C24);
+          borderColor = const Color(0xFF3F3475);
+          textColor = const Color(0xFF6B619E);
+        } else if (widget.isCompleted) {
+          topColor = CartoonTokens.amberTop;
+          bottomColor = CartoonTokens.amberBottom;
+          shadowColor = CartoonTokens.amberShadow;
+          borderColor = Colors.white;
+        } else if (widget.isNextPlayable) {
+          topColor = CartoonTokens.greenTop;
+          bottomColor = CartoonTokens.greenBottom;
+          shadowColor = CartoonTokens.greenShadow;
+          borderColor = Colors.white;
+        } else {
+          topColor = CartoonTokens.cyanTop;
+          bottomColor = CartoonTokens.cyanBottom;
+          shadowColor = CartoonTokens.cyanShadow;
+          borderColor = Colors.white.withValues(alpha: 0.9);
+        }
 
         return Transform.translate(
           offset: Offset(wiggleDx, 0),
@@ -185,94 +186,135 @@ class _LevelButtonState extends State<LevelButton>
               onTapUp: _handleTapUp,
               onTapCancel: _handleTapCancel,
               behavior: HitTestBehavior.opaque,
-              child: NeuContainer(
-                borderRadius: 18.0,
-                style: neuStyle,
-                depth: depth,
-                blur: blur,
-                accentColor: widget.isNextPlayable
-                    ? NeuTokens.accentCyan
-                    : (widget.isCompleted ? NeuTokens.accentAmber : null),
-                accentGlow: widget.isNextPlayable || widget.isCompleted,
-                border: border,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Center Stage Numeral and Milestone tag
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '${widget.levelId}',
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: widget.isMilestone ? 20 : 18,
-                            fontWeight: FontWeight.w800,
-                            color: textColor,
-                            letterSpacing: 0.6,
-                            shadows: widget.isCompleted
-                                ? [
-                                    Shadow(
-                                      color: NeuTokens.accentAmberGlow,
-                                      blurRadius: 8,
-                                    ),
-                                  ]
-                                : null,
-                          ),
-                        ),
-
-                        // Stars row for mobile game look & feel
-                        if (widget.isUnlocked)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 3.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: List.generate(3, (starIndex) {
-                                final isEarned = widget.isCompleted;
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 1.0),
-                                  child: Icon(
-                                    Icons.star_rounded,
-                                    size: 11,
-                                    color: isEarned
-                                        ? NeuTokens.accentAmber
-                                        : NeuTokens.textMuted.withValues(alpha: 0.35),
-                                  ),
-                                );
-                              }),
-                            ),
-                          ),
-
-                        if (widget.isMilestone && widget.milestoneLabel != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 2.0),
-                            child: Text(
-                              widget.milestoneLabel!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontFamily: 'Outfit',
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700,
-                                color: widget.accentColor.withValues(
-                                  alpha: widget.isUnlocked ? 0.90 : 0.40,
-                                ),
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                          ),
-                      ],
+              child: Container(
+                decoration: BoxDecoration(
+                  color: shadowColor,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    if (widget.isNextPlayable)
+                      BoxShadow(
+                        color: CartoonTokens.greenTop.withValues(alpha: 0.35 + 0.35 * pulseVal),
+                        blurRadius: 10 + 6 * pulseVal,
+                        spreadRadius: 1,
+                      ),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      offset: const Offset(0, 3),
+                      blurRadius: 4,
                     ),
-
-                    // Locked State: Sunken Debossed Lock Socket
-                    if (!widget.isUnlocked)
-                      const Positioned.fill(
-                        child: Center(
-                          child: LockBadge(size: 16),
+                  ],
+                ),
+                child: Container(
+                  margin: EdgeInsets.only(top: shift, bottom: bevelDepth - shift),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [topColor, bottomColor],
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: borderColor,
+                      width: 2.0,
+                    ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Top Gloss highlight
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 14,
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.white.withValues(alpha: widget.isUnlocked ? 0.35 : 0.12),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                  ],
+
+                      // Center Stage Numeral and Milestone tag
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${widget.levelId}',
+                            style: GoogleFonts.outfit(
+                              fontSize: widget.isMilestone ? 20 : 18,
+                              fontWeight: FontWeight.w900,
+                              color: textColor,
+                              letterSpacing: 0.6,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withValues(alpha: 0.45),
+                                  offset: const Offset(0, 1.5),
+                                  blurRadius: 2,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Stars row for mobile game look & feel
+                          if (widget.isUnlocked)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: List.generate(3, (starIndex) {
+                                  final isEarned = widget.isCompleted;
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                                    child: Icon(
+                                      Icons.star_rounded,
+                                      size: 11,
+                                      color: isEarned
+                                          ? const Color(0xFFFFD54F)
+                                          : Colors.white.withValues(alpha: 0.35),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ),
+
+                          if (widget.isMilestone && widget.milestoneLabel != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2.0),
+                              child: Text(
+                                widget.milestoneLabel!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.outfit(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  color: widget.accentColor.withValues(
+                                    alpha: widget.isUnlocked ? 1.0 : 0.50,
+                                  ),
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+
+                      // Locked State: Sunken Debossed Lock Socket
+                      if (!widget.isUnlocked)
+                        const Positioned.fill(
+                          child: Center(
+                            child: LockBadge(size: 16),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),

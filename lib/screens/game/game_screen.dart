@@ -1,25 +1,27 @@
+import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../audio/audio_manager.dart';
 import '../../core/constants.dart';
 import '../../data/level_repository.dart';
-import '../../engine/drawing/virtual_coordinate_adapter.dart';
 import '../../engine/game_engine.dart';
 import '../../models/level_config.dart';
 import '../../models/level_visual_theme.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/player_progress_provider.dart';
+import '../../widgets/countdown_overlay.dart';
 import '../../widgets/pause_overlay.dart';
+import '../../flame_game/micin_game.dart';
+import '../../flame_game/components/level_geometry_component.dart';
+import '../../flame_game/components/particle_system_component.dart';
 import 'game_hud.dart';
-import 'painters/background_painter.dart';
-import 'painters/level_painter.dart';
-import 'painters/line_painter.dart';
-import 'painters/particle_painter.dart';
-import 'painters/silhouette_painter.dart';
 
-/// Interactive game screen hosting the physical canvas, rendering pipeline,
-/// gesture recognition, and HUD overlay.
+/// Interactive game screen hosting the Flame game canvas, HUD, and overlays.
+///
+/// Replaces the CustomPainter + Flutter Ticker stack with a [GameWidget] that
+/// hosts [MicinGame]. All physics remain in the unchanged [GameEngine].
 class GameScreen extends ConsumerStatefulWidget {
   final int levelId;
   final LevelConfig? levelConfig;
@@ -34,37 +36,33 @@ class GameScreen extends ConsumerStatefulWidget {
   ConsumerState<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends ConsumerState<GameScreen>
-    with SingleTickerProviderStateMixin {
+class _GameScreenState extends ConsumerState<GameScreen> {
+  MicinGame? _game;
   GameEngine? _gameEngine;
   bool _isLoading = true;
   bool _hasHandledCompletion = false;
   String? _errorMessage;
-  Offset _touchParallax = Offset.zero;
   late final AudioManager _audioManager;
 
   @override
   void initState() {
     super.initState();
     _audioManager = ref.read(audioManagerProvider);
-    _initializeEngine();
+    _initializeGame();
   }
 
-  Future<void> _initializeEngine() async {
+  Future<void> _initializeGame() async {
     try {
       LevelConfig? config = widget.levelConfig;
-
-      // Null safety fallback: load from asset repository if not provided in extra
       if (config == null) {
         const repo = LevelRepository();
         config = await repo.loadLevel(widget.levelId);
       }
-
       if (!mounted) return;
 
       final visualTheme = LevelVisualTheme.forLevel(widget.levelId);
       final propColliders = visualTheme.silhouetteProps
-          .expand((prop) => prop.generateColliders())
+          .expand((p) => p.generateColliders())
           .toList();
 
       final engine = GameEngine(
@@ -72,20 +70,24 @@ class _GameScreenState extends ConsumerState<GameScreen>
         propColliders: propColliders,
         onParticleCaptured: (cup, particle) {
           if (!mounted) return;
-          final target = cup.targetAmount;
-          final fillRatio = target > 0 ? (cup.capturedCount / target).clamp(0.0, 1.0) : 0.0;
-          _audioManager.playParticleCapture(fillPercentage: fillRatio);
+          final ratio = cup.targetAmount > 0
+              ? (cup.capturedCount / cup.targetAmount).clamp(0.0, 1.0)
+              : 0.0;
+          _audioManager.playParticleCapture(fillPercentage: ratio);
         },
         onFilterPassed: (filter, particle) {
           if (!mounted) return;
           _audioManager.playFilterResonance(filterColor: filter.targetColor);
         },
       );
-      engine.start(this);
+      engine.isSpawningActive = false;
       engine.addListener(_onEngineUpdate);
+
+      final game = MicinGame(engine: engine, visualTheme: visualTheme);
 
       setState(() {
         _gameEngine = engine;
+        _game = game;
         _isLoading = false;
       });
     } catch (e) {
@@ -99,22 +101,25 @@ class _GameScreenState extends ConsumerState<GameScreen>
 
   void _onEngineUpdate() {
     if (!mounted) return;
-    if (_gameEngine != null) {
-      final totalTarget = _gameEngine!.totalTarget;
-      final totalCaptured = _gameEngine!.totalCaptured;
-      final progressRatio = totalTarget > 0 ? (totalCaptured / totalTarget).clamp(0.0, 1.0) : 0.0;
-      _audioManager.updateProgress(progressRatio);
+
+    // Update audio progress stem
+    final engine = _gameEngine;
+    if (engine != null) {
+      final total = engine.totalTarget;
+      final ratio = total > 0 ? (engine.totalCaptured / total).clamp(0.0, 1.0) : 0.0;
+      _audioManager.updateProgress(ratio);
     }
+
+    // Level completion handler
     if (_gameEngine?.isComplete == true && !_hasHandledCompletion) {
       _hasHandledCompletion = true;
+      _game?.addTrauma(0.45);
       _audioManager.playSfx(SoundType.levelComplete);
       ref.read(playerProgressProvider.notifier).markCompleted(widget.levelId);
       if (widget.levelId < kTotalLevels) {
         ref.read(playerProgressProvider.notifier).unlockLevel(widget.levelId + 1);
       }
-
-      // Direct seamless level transition without dialog (Bart Bonte style)
-      Future.delayed(const Duration(milliseconds: 1000), () {
+      Future.delayed(const Duration(milliseconds: 1100), () {
         if (!mounted) return;
         if (widget.levelId < kTotalLevels) {
           context.pushReplacement('/game/${widget.levelId + 1}');
@@ -127,7 +132,12 @@ class _GameScreenState extends ConsumerState<GameScreen>
         }
       });
     }
-    setState(() {});
+
+    // Defer setState to post-frame to avoid calling it during Flame's update
+    // which runs inside GameWidget's build/layout phase.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -135,8 +145,8 @@ class _GameScreenState extends ConsumerState<GameScreen>
     _gameEngine?.removeListener(_onEngineUpdate);
     _gameEngine?.dispose();
     _audioManager.duckMusic(active: false);
-    LevelPainter.clearCache();
-    ParticlePainter.clearBuffers();
+    LevelGeometryFlameComponent.clearCache();
+    ParticleSystemFlameComponent.clearBuffers();
     super.dispose();
   }
 
@@ -144,226 +154,112 @@ class _GameScreenState extends ConsumerState<GameScreen>
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
-        backgroundColor: Color(0xFF101012),
+        backgroundColor: Color(0xFF0B0E14),
         body: Center(
-          child: CircularProgressIndicator(color: Color(0xFFFFD54F)),
+          child: CircularProgressIndicator(
+            color: Color(0xFFFFB300),
+            strokeWidth: 2.5,
+          ),
         ),
       );
     }
 
-    if (_errorMessage != null || _gameEngine == null) {
+    if (_errorMessage != null || _game == null || _gameEngine == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFF101012),
+        backgroundColor: const Color(0xFF0B0E14),
         body: Center(
           child: Text(
             _errorMessage ?? 'Unknown error',
-            style: const TextStyle(color: Colors.red),
+            style: const TextStyle(color: Color(0xFFFF6B6B), fontFamily: 'Outfit'),
           ),
         ),
       );
     }
 
     final engine = _gameEngine!;
-    final visualTheme = LevelVisualTheme.forLevel(widget.levelId);
+    final game = _game!;
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        engine.pause();
+        game.pauseGame();
+        _audioManager.duckMusic(active: true, duckDb: -10.0);
       },
       child: Scaffold(
-        backgroundColor: visualTheme.backgroundColor,
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            final viewportSize = Size(constraints.maxWidth, constraints.maxHeight);
-            final scale = VirtualCoordinateAdapter.computeScale(viewportSize);
-            final offset = VirtualCoordinateAdapter.computeOffset(viewportSize, scale);
+        backgroundColor: Colors.black,
+        body: GameWidget(
+          game: game,
+          overlayBuilderMap: {
+            // ── HUD (always visible during gameplay) ─────────────────────────
+            MicinGame.kOverlayHud: (context, _) => GameHud(
+              levelId: engine.levelConfig.id,
+              capturedCount: engine.particleController.capturedCount,
+              totalSugar: engine.levelConfig.totalSugar,
+              hasGravityToggle: engine.levelConfig.hasGravityToggle,
+              isMusicEnabled: ref.watch(audioManagerProvider).isMusicEnabled,
+              onPause: () {
+                _audioManager.playSfx(SoundType.buttonClick);
+                _audioManager.duckMusic(active: true, duckDb: -10.0);
+                game.pauseGame();
+              },
+              onReset: () {
+                _audioManager.playSfx(SoundType.levelReset);
+                _audioManager.updateProgress(0.0);
+                _audioManager.duckMusic(active: false);
+                game.resetGame();
+                setState(() {
+                  _hasHandledCompletion = false;
+                });
+              },
+              onToggleGravity: () {
+                _audioManager.playSfx(SoundType.gravityInvert);
+                engine.toggleGravity();
+              },
+            ),
 
-            return Stack(
-              children: [
-                // 1. Chromatic chalkboard background with touch parallax & diegetic canvas typography (REQ-003, REQ-004)
-                CustomPaint(
-                  painter: BackgroundPainter(
-                    parallaxOffset: _touchParallax,
-                    backgroundColor: visualTheme.backgroundColor,
-                    canvasLabel: visualTheme.stageLabel,
-                    canvasLabelColor: visualTheme.canvasLabelColor,
-                    canvasLabelOpacity: visualTheme.canvasLabelOpacity,
-                    canvasLabelPosition: visualTheme.canvasLabelPosition,
-                    virtualOffset: offset,
-                    virtualScale: scale,
-                  ),
-                  size: Size.infinite,
-                ),
+            // ── Pause overlay ─────────────────────────────────────────────────
+            MicinGame.kOverlayPause: (context, _) => PauseOverlay(
+              levelId: widget.levelId,
+              isMusicEnabled: ref.watch(audioManagerProvider).isMusicEnabled,
+              onToggleMusic: () {
+                _audioManager.playSfx(SoundType.buttonClick);
+                _audioManager.toggleMusic();
+                setState(() {});
+              },
+              onResume: () {
+                _audioManager.playSfx(SoundType.buttonClick);
+                _audioManager.duckMusic(active: false);
+                game.resumeGame();
+              },
+              onReplay: () {
+                _audioManager.playSfx(SoundType.levelReset);
+                _audioManager.updateProgress(0.0);
+                _audioManager.duckMusic(active: false);
+                game.resetGame();
+                game.resumeGame();
+                setState(() {
+                  _hasHandledCompletion = false;
+                });
+              },
+              onMenu: () {
+                _audioManager.playSfx(SoundType.buttonClick);
+                _audioManager.duckMusic(active: false);
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/levels');
+                }
+              },
+            ),
 
-                // 2. Transformed virtual game world (400x700)
-                Positioned.fill(
-                  child: Transform.translate(
-                    offset: offset,
-                    child: Transform.scale(
-                      scale: scale,
-                      alignment: Alignment.topLeft,
-                      child: SizedBox(
-                        width: kVirtualWidth,
-                        height: kVirtualHeight,
-                        child: ClipRect(
-                          child: Stack(
-                            children: [
-                              // Silhouette props layer (vector shadows & rigid colliders - REQ-005)
-                              if (visualTheme.silhouetteProps.isNotEmpty)
-                                RepaintBoundary(
-                                  child: CustomPaint(
-                                    painter: SilhouettePainter(visualTheme.silhouetteProps),
-                                    size: const Size(kVirtualWidth, kVirtualHeight),
-                                  ),
-                                ),
-
-                              // Level geometry (cups, emitters, filter zones)
-                              RepaintBoundary(
-                                child: CustomPaint(
-                                  painter: LevelPainter(
-                                    levelConfig: engine.levelConfig,
-                                    liveCups: engine.cups,
-                                  ),
-                                  size: const Size(kVirtualWidth, kVirtualHeight),
-                                ),
-                              ),
-
-                              // Particle layer (batch rendered via Canvas.drawPoints)
-                              RepaintBoundary(
-                                child: CustomPaint(
-                                  painter: ParticlePainter(
-                                    engine.particleController.pool.activeParticles,
-                                    cups: engine.cups,
-                                  ),
-                                  size: const Size(kVirtualWidth, kVirtualHeight),
-                                ),
-                              ),
-
-                              // Player-drawn lines layer (dissolves gently on victory)
-                              AnimatedOpacity(
-                                duration: const Duration(milliseconds: 700),
-                                curve: Curves.easeOut,
-                                opacity: engine.isComplete ? 0.0 : 1.0,
-                                child: RepaintBoundary(
-                                  child: CustomPaint(
-                                    painter: LinePainter(engine.lineController.lines),
-                                    size: const Size(kVirtualWidth, kVirtualHeight),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // 3. Touch gesture detector capturing user finger strokes
-                GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onPanStart: (details) {
-                    if (!engine.isPaused) {
-                      final virtualPoint = VirtualCoordinateAdapter.screenToVirtual(
-                        details.localPosition,
-                        viewportSize,
-                      );
-                      engine.lineController.onPanStart(virtualPoint);
-                    }
-                  },
-                  onPanUpdate: (details) {
-                    if (!engine.isPaused) {
-                      final virtualPoint = VirtualCoordinateAdapter.screenToVirtual(
-                        details.localPosition,
-                        viewportSize,
-                      );
-                      engine.lineController.onPanUpdate(virtualPoint);
-                      final center = Offset(viewportSize.width / 2.0, viewportSize.height / 2.0);
-                      final delta = details.localPosition - center;
-                      setState(() {
-                        _touchParallax = Offset(
-                          (delta.dx * 0.02).clamp(-12.0, 12.0),
-                          (delta.dy * 0.02).clamp(-12.0, 12.0),
-                        );
-                      });
-                    }
-                  },
-                  onPanEnd: (_) {
-                    engine.lineController.onPanEnd();
-                    if (_touchParallax != Offset.zero) {
-                      setState(() {
-                        _touchParallax = Offset.zero;
-                      });
-                    }
-                  },
-                ),
-
-                // 6. HUD Controls and statistics (Pure Diegetic: Stage Numeral, Reset, Pause)
-                GameHud(
-                  levelId: engine.levelConfig.id,
-                  capturedCount: engine.particleController.capturedCount,
-                  totalSugar: engine.levelConfig.totalSugar,
-                  hasGravityToggle: engine.levelConfig.hasGravityToggle,
-                  isMusicEnabled: ref.watch(audioManagerProvider).isMusicEnabled,
-                  onPause: () {
-                    ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
-                    ref.read(audioManagerProvider).duckMusic(active: true, duckDb: -10.0);
-                    engine.pause();
-                  },
-                  onReset: () {
-                    ref.read(audioManagerProvider).playSfx(SoundType.levelReset);
-                    ref.read(audioManagerProvider).updateProgress(0.0);
-                    ref.read(audioManagerProvider).duckMusic(active: false);
-                    setState(() {
-                      _hasHandledCompletion = false;
-                    });
-                    engine.reset();
-                  },
-                  onToggleGravity: () {
-                    ref.read(audioManagerProvider).playSfx(SoundType.gravityInvert);
-                    engine.toggleGravity();
-                  },
-                ),
-
-                // 7. Pause overlay modal with whispered chamber info and audio soundscape control
-                if (engine.isPaused)
-                  PauseOverlay(
-                    levelId: widget.levelId,
-                    isMusicEnabled: ref.watch(audioManagerProvider).isMusicEnabled,
-                    onToggleMusic: () {
-                      ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
-                      ref.read(audioManagerProvider).toggleMusic();
-                      setState(() {});
-                    },
-                    onResume: () {
-                      ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
-                      ref.read(audioManagerProvider).duckMusic(active: false);
-                      engine.resume();
-                    },
-                    onReplay: () {
-                      ref.read(audioManagerProvider).playSfx(SoundType.levelReset);
-                      ref.read(audioManagerProvider).updateProgress(0.0);
-                      ref.read(audioManagerProvider).duckMusic(active: false);
-                      setState(() {
-                        _hasHandledCompletion = false;
-                      });
-                      engine.reset();
-                      engine.resume();
-                    },
-                    onMenu: () {
-                      ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
-                      ref.read(audioManagerProvider).duckMusic(active: false);
-                      if (context.canPop()) {
-                        context.pop();
-                      } else {
-                        context.go('/levels');
-                      }
-                    },
-                  ),
-              ],
-            );
+            // ── Countdown overlay ─────────────────────────────────────────────
+            MicinGame.kOverlayCountdown: (context, _) => CountdownOverlay(
+              onFinished: () {
+                if (!mounted) return;
+                game.onCountdownComplete();
+              },
+            ),
           },
         ),
       ),

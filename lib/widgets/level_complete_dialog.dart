@@ -6,9 +6,9 @@ import '../core/constants.dart';
 import '../core/theme.dart';
 import '../models/level_ambiance.dart';
 import '../models/level_config.dart';
-import 'glass_container.dart';
-import 'glass_pill_button.dart';
-import 'neu_container.dart';
+import 'cartoon_button.dart';
+import 'cartoon_panel.dart';
+
 
 /// Full-bleed Modern Minimalist & Glassmorphism victory overlay:
 /// - Radiant gold bloom wash and floating ambient victory motes.
@@ -194,220 +194,233 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog>
                     child: Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        child: NeuContainer(
+                        child: CartoonPanel(
+                          style: CartoonPanelStyle.cream,
                           borderRadius: 28,
-                          style: NeuStyle.convex,
-                          depth: 12.0,
-                          blur: 24.0,
-                          backgroundColor: NeuTokens.canvas,
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 26.0),
+                          borderWidth: 3.5,
+                          bevelDepth: 8.0,
+                          padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 20.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // 1. Three Neumorphic Star Podiums
+                              // 1. Generated 3D Cartoon Victory Ribbon Banner
+                              Container(
+                                height: 86,
+                                margin: const EdgeInsets.only(bottom: 6),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Image.asset(
+                                    'assets/images/cartoon/cartoon_victory.jpg',
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                                  ),
+                                ),
+                              ),
+
+                              // 2. Three Bubbly Cartoon Star Podiums
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  NeuContainer(
-                                    width: 44,
-                                    height: 44,
-                                    shape: BoxShape.circle,
-                                    style: NeuStyle.convex,
-                                    depth: 4.0,
-                                    blur: 8.0,
-                                    accentColor: NeuTokens.accentAmber,
-                                    accentGlow: true,
+                                  Container(
+                                    width: 46,
+                                    height: 46,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: CartoonTokens.amberTop,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 6,
+                                          offset: Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
                                     child: const Center(
-                                      child: Icon(Icons.star_rounded, size: 26, color: NeuTokens.accentAmber),
+                                      child: Icon(Icons.star_rounded, size: 28, color: Colors.white),
                                     ),
                                   ),
-                                  const SizedBox(width: 14),
-                                  NeuContainer(
-                                    width: 58,
-                                    height: 58,
-                                    shape: BoxShape.circle,
-                                    style: NeuStyle.convex,
-                                    depth: 6.0,
-                                    blur: 12.0,
-                                    accentColor: NeuTokens.accentAmber,
-                                    accentGlow: true,
+                                  const SizedBox(width: 12),
+                                  Container(
+                                    width: 62,
+                                    height: 62,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: CartoonTokens.amberTop,
+                                      border: Border.all(color: Colors.white, width: 2.5),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 10,
+                                          offset: Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
                                     child: const Center(
-                                      child: Icon(Icons.star_rounded, size: 36, color: NeuTokens.accentAmber),
+                                      child: Icon(Icons.star_rounded, size: 40, color: Colors.white),
                                     ),
                                   ),
-                                  const SizedBox(width: 14),
-                                  NeuContainer(
-                                    width: 44,
-                                    height: 44,
-                                    shape: BoxShape.circle,
-                                    style: NeuStyle.convex,
-                                    depth: 4.0,
-                                    blur: 8.0,
-                                    accentColor: NeuTokens.accentAmber,
-                                    accentGlow: true,
+                                  const SizedBox(width: 12),
+                                  Container(
+                                    width: 46,
+                                    height: 46,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: CartoonTokens.amberTop,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 6,
+                                          offset: Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
                                     child: const Center(
-                                      child: Icon(Icons.star_rounded, size: 26, color: NeuTokens.accentAmber),
+                                      child: Icon(Icons.star_rounded, size: 28, color: Colors.white),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 18),
+                              const SizedBox(height: 14),
 
-                              // 2. Victory Title with 3D Embossed Shadows
+                              // 3. Victory Title
                               Text(
                                 isFinalLevel ? 'Selamat!' : 'Level ${widget.levelId} Selesai!',
                                 style: GoogleFonts.outfit(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w800,
-                                  color: NeuTokens.textPrimary,
-                                  letterSpacing: 1.5,
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.w900,
+                                  color: CartoonTokens.textDarkBrown,
+                                  letterSpacing: 1.2,
                                   shadows: const [
                                     Shadow(
-                                      color: NeuTokens.shadowDark,
-                                      offset: Offset(2, 2),
-                                      blurRadius: 4,
+                                      color: Colors.black12,
+                                      offset: Offset(1, 2),
+                                      blurRadius: 2,
                                     ),
                                   ],
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 6),
 
-                              // 3. Subtitle
+                              // 4. Subtitle
                               Text(
                                 isFinalLevel
                                     ? 'Semua 30 level telah berhasil Anda selesaikan!'
                                     : 'Target butiran berhasil dipenuhi.',
                                 style: GoogleFonts.outfit(
                                   fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: NeuTokens.textSecondary,
-                                  letterSpacing: 0.6,
-                                  height: 1.4,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF78350F),
+                                  letterSpacing: 0.5,
+                                  height: 1.3,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
 
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
 
-                              // 4. Sunken Accuracy & Rating Chip
-                              NeuContainer(
-                                borderRadius: 14,
-                                style: NeuStyle.inset,
-                                depth: 3.0,
-                                blur: 5.0,
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              // 5. Accuracy & Rating Chip
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFDCFCE7),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: const Color(0xFF86EFAC),
+                                    width: 1.5,
+                                  ),
+                                ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const Icon(
                                       Icons.check_circle_rounded,
                                       size: 16,
-                                      color: NeuTokens.accentEmerald,
+                                      color: Color(0xFF16A34A),
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
                                       'Akurasi 100% • Sempurna',
                                       style: GoogleFonts.outfit(
                                         fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: NeuTokens.accentEmerald,
-                                        letterSpacing: 0.8,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF15803D),
+                                        letterSpacing: 0.6,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
 
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 20),
 
-                              // 5. Primary Glass Action (Proceed / Return to Menu)
+                              // 6. Primary Action Button
                               if (!isFinalLevel && widget.onNextLevel != null) ...[
-                                GlassPillButton(
+                                CartoonButton(
                                   key: const Key('dialog_next_level'),
-                                  label: 'Level Berikutnya',
-                                  icon: const Icon(
+                                  text: 'Level Berikutnya',
+                                  variant: CartoonButtonVariant.green,
+                                  height: 52,
+                                  fontSize: 16,
+                                  trailing: const Icon(
                                     Icons.arrow_forward_rounded,
-                                    size: 18,
-                                    color: Colors.black,
+                                    size: 20,
+                                    color: Colors.white,
                                   ),
-                                  isPrimary: true,
-                                  accentGlow: NeuTokens.accentAmber,
-                                  textStyle: GoogleFonts.outfit(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.black,
-                                    letterSpacing: 1.2,
-                                  ),
-                                  onTap: widget.onNextLevel!,
+                                  onPressed: widget.onNextLevel!,
                                 ),
-                                const SizedBox(height: 14),
+                                const SizedBox(height: 12),
                               ],
 
                               if (isFinalLevel) ...[
-                                GlassPillButton(
+                                CartoonButton(
                                   key: const Key('dialog_menu'),
-                                  label: 'Kembali ke Menu',
-                                  icon: const Icon(
+                                  text: 'Kembali ke Menu',
+                                  variant: CartoonButtonVariant.green,
+                                  height: 52,
+                                  fontSize: 16,
+                                  trailing: const Icon(
                                     Icons.check_circle_outline_rounded,
-                                    size: 18,
-                                    color: Colors.black,
+                                    size: 20,
+                                    color: Colors.white,
                                   ),
-                                  isPrimary: true,
-                                  accentGlow: NeuTokens.accentAmber,
-                                  textStyle: GoogleFonts.outfit(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.black,
-                                    letterSpacing: 1.2,
-                                  ),
-                                  onTap: widget.onMenu,
+                                  onPressed: widget.onMenu,
                                 ),
-                                const SizedBox(height: 14),
+                                const SizedBox(height: 12),
                               ],
 
-                              // 6. Secondary Controls: Replay (↺) & Stages (←)
+                              // 7. Secondary Controls: Replay (↺) & Stages (←)
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  GlassPillButton(
+                                  CartoonButton(
                                     key: const Key('dialog_replay'),
-                                    label: 'Ulangi',
-                                    icon: const Icon(
+                                    text: 'Ulangi',
+                                    variant: CartoonButtonVariant.amber,
+                                    height: 42,
+                                    fontSize: 13,
+                                    leading: const Icon(
                                       Icons.refresh_rounded,
                                       size: 16,
-                                      color: NeuTokens.textPrimary,
+                                      color: Colors.white,
                                     ),
-                                    height: 40,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                    textStyle: GoogleFonts.outfit(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: NeuTokens.textPrimary,
-                                      letterSpacing: 0.8,
-                                    ),
-                                    onTap: widget.onReplay,
+                                    onPressed: widget.onReplay,
                                   ),
                                   if (!isFinalLevel) ...[
-                                    const SizedBox(width: 14),
-                                    GlassPillButton(
+                                    const SizedBox(width: 12),
+                                    CartoonButton(
                                       key: const Key('dialog_menu_level'),
-                                      label: 'Level',
-                                      icon: const Icon(
+                                      text: 'Level',
+                                      variant: CartoonButtonVariant.cyan,
+                                      height: 42,
+                                      fontSize: 13,
+                                      leading: const Icon(
                                         Icons.arrow_back_rounded,
                                         size: 16,
-                                        color: NeuTokens.textPrimary,
+                                        color: Colors.white,
                                       ),
-                                      height: 40,
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                      textStyle: GoogleFonts.outfit(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: NeuTokens.textPrimary,
-                                        letterSpacing: 0.8,
-                                      ),
-                                      onTap: widget.onMenu,
+                                      onPressed: widget.onMenu,
                                     ),
                                   ],
                                 ],

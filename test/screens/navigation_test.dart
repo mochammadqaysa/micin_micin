@@ -72,21 +72,35 @@ void main() {
   }
 
   group('Navigation Flow Tests (TASK-053)', () {
-    testWidgets('(a) Tap PLAY from MenuScreen -> LevelSelectScreen terender',
+    testWidgets('(a) Tap PLAY from MenuScreen -> GameScreen terender langsung',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestApp(initialLocation: '/menu'));
       await tester.pump();
 
-      // Verify MenuScreen is visible
-      expect(find.text('Micin, Micin'), findsOneWidget);
+      // Verify MenuScreen is visible — new arcade logo uses 'micin' (repeated)
+      expect(find.text('micin'), findsWidgets);
       expect(find.text('PLAY'), findsOneWidget);
 
-      // Tap the PLAY button
+      // Tap the PLAY button — new behavior: goes directly to GameScreen
       await tester.tap(find.text('PLAY'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300)); // Allow route transition
 
-      // Verify LevelSelectScreen is rendered
+      // PLAY navigates directly to GameScreen (not LevelSelectScreen)
+      expect(find.byType(GameScreen), findsOneWidget);
+    });
+
+    testWidgets('(a2) Tap LEVELS from MenuScreen -> LevelSelectScreen terender',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestApp(initialLocation: '/menu'));
+      await tester.pump();
+
+      expect(find.text('LEVELS'), findsOneWidget);
+
+      await tester.tap(find.text('LEVELS'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
       expect(find.text('Pilih Level'), findsOneWidget);
     });
 
@@ -106,9 +120,9 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300)); // Allow transition
 
-      // Verify GameScreen is rendered with Level 1 HUD
+      // Verify GameScreen is rendered with Level 1 HUD (new badge: '01', no space)
       expect(find.byType(GameScreen), findsOneWidget);
-      expect(find.text('0 1'), findsOneWidget);
+      expect(find.text('01'), findsOneWidget);
     });
 
     testWidgets('(c) Tap Level 2 (terkunci) -> tetap di LevelSelectScreen tanpa SnackBar',

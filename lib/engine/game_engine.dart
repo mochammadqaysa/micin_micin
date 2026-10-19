@@ -95,6 +95,13 @@ class GameEngine with ChangeNotifier {
   /// Status of the completion flag.
   bool get isComplete => _isComplete;
 
+  /// Controls whether emitters actively release particles (false during initial prep countdown).
+  bool get isSpawningActive => particleController.isSpawningActive;
+  set isSpawningActive(bool value) {
+    particleController.isSpawningActive = value;
+    notifyListeners();
+  }
+
   /// Total target amount required across all target cups in the stage.
   int get totalTarget =>
       cups.fold<int>(0, (sum, cup) => sum + cup.targetAmount);

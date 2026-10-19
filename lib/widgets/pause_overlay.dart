@@ -4,16 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/theme.dart';
 import '../screens/game/game_hud.dart';
-import 'glass_container.dart';
-import 'neu_container.dart';
+import 'cartoon_panel.dart';
 
-/// Full-bleed Modern Minimalist & Glassmorphism Pause Overlay:
-/// - Gaussian blur (sigma=24.0) with obsidian void radial vignette.
-/// - Top-Left: Whispered chamber indicator ("• CHAMBER XX") with Neon Cyan pulse.
-/// - Centerpiece: Spaced "PAUSED" typography and 3 floating action buttons with staggered breathing offsets:
-///   Resume (▶) as hero central glyph with Neon Cyan aura, Replay (↺), and Stages (⠿).
-/// - Bottom-Left: Audio soundscape capsule toggle ("CHIMES ON / MUTED").
-/// - Zero ink meter / zero unwanted debug metrics.
+/// Arcade-style Pause Overlay for Micin Micin.
+///
+/// Full-bleed blurred backdrop, chunky cartoon panel center-piece.
+/// Three floating action buttons: RESUME (green hero), REPLAY (amber), BACK (slate).
 class PauseOverlay extends StatefulWidget {
   final int levelId;
   final bool isMusicEnabled;
@@ -61,19 +57,16 @@ class _PauseOverlayState extends State<PauseOverlay>
 
     return SizedBox.expand(
       child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: GlassTokens.blurOverlay,
-          sigmaY: GlassTokens.blurOverlay,
-        ),
+        filter: ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
         child: Container(
           decoration: BoxDecoration(
             gradient: RadialGradient(
               center: Alignment.center,
-              radius: 1.0,
+              radius: 1.1,
               colors: [
-                GlassTokens.surfaceLight.withValues(alpha: 0.70),
-                GlassTokens.obsidianVoid.withValues(alpha: 0.88),
-                GlassTokens.obsidianVoid.withValues(alpha: 0.96),
+                const Color(0xFF1E1645).withValues(alpha: 0.85),
+                const Color(0xFF0F0A26).withValues(alpha: 0.94),
+                Colors.black.withValues(alpha: 0.98),
               ],
               stops: const [0.0, 0.65, 1.0],
             ),
@@ -83,7 +76,6 @@ class _PauseOverlayState extends State<PauseOverlay>
               animation: _floatController,
               builder: (context, child) {
                 final double t = _floatController.value * 2 * math.pi;
-                // Staggered sinusoidal vertical parallax drift
                 final double replayDy = math.sin(t) * 3.5;
                 final double resumeDy = math.sin(t + 1.2) * 4.5;
                 final double stagesDy = math.sin(t + 2.4) * 3.5;
@@ -91,68 +83,65 @@ class _PauseOverlayState extends State<PauseOverlay>
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // 1. Top Header: Whispered metadata
+                    // Header: Level badge
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 14.0,
-                      ),
+                          horizontal: 24.0, vertical: 14.0),
                       child: Row(
                         children: [
-                          // Glowing Neon Cyan dot indicator
                           Container(
-                            width: 6,
-                            height: 6,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: GlassTokens.neonCyan.withValues(
-                                alpha: 0.60 + 0.35 * _floatController.value,
+                              color: const Color(0xFF1E1A3A),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFF4B3F8C).withValues(alpha: 0.7),
+                                width: 1.5,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: GlassTokens.neonCyan.withValues(alpha: 0.40),
-                                  blurRadius: 8,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.star_rounded,
+                                    color: Color(0xFFFFB300), size: 16),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '• CHAMBER $formattedChamber',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: 1.5,
+                                  ),
                                 ),
                               ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'CHAMBER $formattedChamber',
-                            style: GoogleFonts.outfit(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w400,
-                              color: GlassTokens.textMuted,
-                              letterSpacing: 2.4,
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    // 2. Centerpiece: State title, floating glyph cluster, and subtitle
-                    NeuContainer(
-                      borderRadius: 28,
-                      style: NeuStyle.convex,
-                      depth: 12.0,
-                      blur: 24.0,
-                      backgroundColor: NeuTokens.canvas,
-                      padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 32.0),
+                    // Center panel
+                    CartoonPanel(
+                      borderRadius: 20,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 28),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // 3D Embossed State Typography
+                          // PAUSED title
                           Text(
                             'PAUSED',
                             style: GoogleFonts.outfit(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 6.0,
-                              color: NeuTokens.textPrimary,
-                              shadows: const [
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 3.0,
+                              shadows: [
                                 Shadow(
-                                  color: NeuTokens.shadowDark,
-                                  offset: Offset(2, 2),
+                                  color: Colors.black.withValues(alpha: 0.5),
+                                  offset: const Offset(0, 2),
                                   blurRadius: 4,
                                 ),
                               ],
@@ -160,21 +149,21 @@ class _PauseOverlayState extends State<PauseOverlay>
                           ),
                           const SizedBox(height: 8),
                           Container(
-                            width: 32,
                             height: 2,
+                            width: 80,
                             decoration: BoxDecoration(
-                              color: NeuTokens.accentAmber,
+                              color: Colors.white.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(1),
                             ),
                           ),
                           const SizedBox(height: 28),
 
-                          // Action Nodes Cluster with Trigonometric Floating Micro-Parallax
+                          // Action button trio
                           Row(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              // Secondary Action Left: Ulangi Chamber ('↺')
+                              // REPLAY
                               Transform.translate(
                                 offset: Offset(0, replayDy),
                                 child: Column(
@@ -185,19 +174,28 @@ class _PauseOverlayState extends State<PauseOverlay>
                                       tooltip: 'Ulangi Level',
                                       size: 56,
                                       isCircularBasalt: true,
+                                      backgroundColor: CartoonTokens.amberTop,
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: CartoonTokens.amberShadow,
+                                          offset: Offset(0, 4),
+                                          blurRadius: 0,
+                                        ),
+                                      ],
                                       icon: Icons.refresh_rounded,
-                                      iconSize: 26,
-                                      iconColor: NeuTokens.textPrimary,
-                                      onPressed: widget.onReplay ?? widget.onResume,
+                                      iconSize: 28,
+                                      iconColor: Colors.white,
+                                      onPressed:
+                                          widget.onReplay ?? widget.onResume,
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
                                       'ULANGI',
                                       style: GoogleFonts.outfit(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 1.4,
-                                        color: NeuTokens.textSecondary,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 1.2,
+                                        color: CartoonTokens.amberTop,
                                       ),
                                     ),
                                   ],
@@ -205,59 +203,38 @@ class _PauseOverlayState extends State<PauseOverlay>
                               ),
                               const SizedBox(width: 24),
 
-                              // Primary Action Center (Hero): Lanjutkan ('▶') with Amber Aura
+                              // RESUME (hero — larger)
                               Transform.translate(
                                 offset: Offset(0, resumeDy),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        // Soft pulsing halo aura
-                                        Container(
-                                          width: 86,
-                                          height: 86,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: NeuTokens.accentAmber.withValues(
-                                              alpha: 0.12 + 0.08 * math.sin(t).abs(),
-                                            ),
-                                          ),
-                                        ),
-                                        ZenGlyphButton(
-                                          key: const Key('pause_resume'),
-                                          tooltip: 'Lanjutkan',
-                                          size: 70,
-                                          isCircularBasalt: true,
-                                          backgroundColor: NeuTokens.surfaceLight,
-                                          activeColor: NeuTokens.accentAmber,
-                                          border: Border.all(
-                                            color: NeuTokens.accentAmber.withValues(alpha: 0.85),
-                                            width: 1.6,
-                                          ),
-                                          boxShadow: const [
-                                            BoxShadow(
-                                              color: NeuTokens.accentAmberGlow,
-                                              blurRadius: 18,
-                                              spreadRadius: 2,
-                                            ),
-                                          ],
-                                          icon: Icons.play_arrow_rounded,
-                                          iconSize: 42,
-                                          iconColor: NeuTokens.accentAmber,
-                                          onPressed: widget.onResume,
+                                    ZenGlyphButton(
+                                      key: const Key('pause_resume'),
+                                      tooltip: 'Lanjutkan',
+                                      size: 72,
+                                      isCircularBasalt: true,
+                                      backgroundColor: CartoonTokens.greenTop,
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: CartoonTokens.greenShadow,
+                                          offset: Offset(0, 5),
+                                          blurRadius: 0,
                                         ),
                                       ],
+                                      icon: Icons.play_arrow_rounded,
+                                      iconSize: 44,
+                                      iconColor: Colors.white,
+                                      onPressed: widget.onResume,
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
                                       'LANJUT',
                                       style: GoogleFonts.outfit(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w800,
                                         letterSpacing: 1.4,
-                                        color: NeuTokens.accentAmber,
+                                        color: CartoonTokens.greenTop,
                                       ),
                                     ),
                                   ],
@@ -265,7 +242,7 @@ class _PauseOverlayState extends State<PauseOverlay>
                               ),
                               const SizedBox(width: 24),
 
-                              // Secondary Action Right: Kembali ke Level ('←')
+                              // BACK
                               Transform.translate(
                                 offset: Offset(0, stagesDy),
                                 child: Column(
@@ -276,19 +253,27 @@ class _PauseOverlayState extends State<PauseOverlay>
                                       tooltip: 'Kembali ke Level',
                                       size: 56,
                                       isCircularBasalt: true,
+                                      backgroundColor: CartoonTokens.cyanTop,
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: CartoonTokens.cyanShadow,
+                                          offset: Offset(0, 4),
+                                          blurRadius: 0,
+                                        ),
+                                      ],
                                       icon: Icons.arrow_back_rounded,
-                                      iconSize: 24,
-                                      iconColor: NeuTokens.textPrimary,
+                                      iconSize: 26,
+                                      iconColor: Colors.white,
                                       onPressed: widget.onMenu,
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
                                       'KEMBALI',
                                       style: GoogleFonts.outfit(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 1.4,
-                                        color: NeuTokens.textSecondary,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 1.2,
+                                        color: CartoonTokens.cyanTop,
                                       ),
                                     ),
                                   ],
@@ -296,72 +281,60 @@ class _PauseOverlayState extends State<PauseOverlay>
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
-
-                          // Instruction hint
-                          Text(
-                            'SENTUH DI MANA SAJA UNTUK LANJUT',
-                            style: GoogleFonts.outfit(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.8,
-                              color: NeuTokens.textMuted,
-                            ),
-                          ),
                         ],
                       ),
                     ),
 
-                    // 3. Bottom Footer: Ambient Soundscape Toggle
+                    // Bottom: audio toggle
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 14.0,
-                      ),
+                          horizontal: 24.0, vertical: 16.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Audio Soundscape Toggle Capsule
                           if (widget.onToggleMusic != null)
                             GestureDetector(
-                              key: const Key('pause_audio'),
                               onTap: widget.onToggleMusic,
-                              child: GlassContainer(
-                                enableLiveBlur: false,
-                                borderRadius: GlassTokens.radiusPill,
+                              child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 8,
-                                ),
-                                backgroundColor: GlassTokens.surfaceSubtle.withValues(alpha: 0.50),
-                                borderGradient: LinearGradient(
-                                  colors: [
-                                    widget.isMusicEnabled
-                                        ? GlassTokens.neonCyan.withValues(alpha: 0.40)
-                                        : GlassTokens.borderHighlight,
-                                    GlassTokens.borderShadow,
-                                  ],
+                                    horizontal: 14, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: widget.isMusicEnabled
+                                      ? const Color(0xFF1A2E44)
+                                      : const Color(0xFF1C1C1C),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: widget.isMusicEnabled
+                                        ? const Color(0xFF2E5080)
+                                            .withValues(alpha: 0.8)
+                                        : Colors.white.withValues(alpha: 0.08),
+                                    width: 1.2,
+                                  ),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
-                                      Icons.graphic_eq_rounded,
-                                      size: 16,
+                                      widget.isMusicEnabled
+                                          ? Icons.graphic_eq_rounded
+                                          : Icons.volume_off_rounded,
                                       color: widget.isMusicEnabled
-                                          ? GlassTokens.neonCyan
-                                          : GlassTokens.textDim,
+                                          ? const Color(0xFF64B5F6)
+                                          : Colors.white.withValues(alpha: 0.30),
+                                      size: 18,
                                     ),
-                                    const SizedBox(width: 8),
+                                    const SizedBox(width: 6),
                                     Text(
-                                      widget.isMusicEnabled ? 'CHIMES ON' : 'CHIMES MUTED',
+                                      widget.isMusicEnabled
+                                          ? 'MUSIC ON'
+                                          : 'MUTED',
                                       style: GoogleFonts.outfit(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w400,
-                                        letterSpacing: 1.6,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 1.5,
                                         color: widget.isMusicEnabled
-                                            ? GlassTokens.textSpecular
-                                            : GlassTokens.textDim,
+                                            ? const Color(0xFF64B5F6)
+                                            : Colors.white.withValues(alpha: 0.25),
                                       ),
                                     ),
                                   ],
@@ -370,8 +343,6 @@ class _PauseOverlayState extends State<PauseOverlay>
                             )
                           else
                             const SizedBox.shrink(),
-
-                          // Intentionally blank right side (zero ink meter / zero counters)
                           const SizedBox.shrink(),
                         ],
                       ),
@@ -386,4 +357,3 @@ class _PauseOverlayState extends State<PauseOverlay>
     );
   }
 }
-

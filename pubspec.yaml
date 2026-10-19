@@ -14,6 +14,7 @@ dependencies:
   shared_preferences: ^2.3.2
   go_router: ^14.6.0
   google_fonts: ^6.2.1
+  flame: ^1.38.2
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +33,7 @@ flutter:
     - assets/images/vessels/
     - assets/images/emitters/
     - assets/images/gates/
+    - assets/images/cartoon/
 
   fonts:
     - family: Outfit

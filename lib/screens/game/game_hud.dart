@@ -1,14 +1,15 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/theme.dart';
-import '../../widgets/glass_container.dart';
 
-/// In-game Heads-Up Display (HUD) adhering to Modern Minimalist & Glassmorphism:
-/// - Strictly DIEGETIC: No status bar or fraction counter. Objectives are etched on vessels.
-/// - Mode B Pre-composited frosted glass chips (zero live blur overhead on particle hot path).
-/// - SafeArea corner anchoring: Subtle level numeral at Top-Left, glass chip cluster at Top-Right,
-///   and ethereal pulsing gravity toggle at Bottom-Center.
+/// Arcade-style in-game HUD for Micin Micin.
+///
+/// Design language matches the new arcade menu:
+/// - Top-left: amber coin badge with level number.
+/// - Top-right: three chunky circular icon buttons (audio, reset, pause)
+///   with hard solid drop-shadow — no blur, no glassmorphism.
+/// - Bottom-center: GRAVITY pill with cosmic purple + cyan glow halo,
+///   only visible when level has gravity toggle mechanic.
 class GameHud extends StatelessWidget {
   final int levelId;
   final int capturedCount;
@@ -35,92 +36,69 @@ class GameHud extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Formatted level indicator: "0 1", "0 2", "3 0"
-    final formattedLevel =
-        levelId.toString().padLeft(2, '0').split('').join(' ');
+    final formattedLevel = levelId.toString().padLeft(2, '0');
 
     return SafeArea(
       child: Stack(
         children: [
-          // 1. Top-Left: Subtle, quiet level indicator in Mode B glass chip
-          Positioned(
-            top: 12,
-            left: 18,
-            child: GlassContainer(
-              enableLiveBlur: false,
-              borderRadius: GlassTokens.radiusSmall,
-              backgroundColor: GlassTokens.surfaceLight.withValues(alpha: 0.35),
-              borderGradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [GlassTokens.borderHighlight, GlassTokens.borderShadow],
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              child: Text(
-                formattedLevel,
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: GlassTokens.textSpecular.withValues(alpha: 0.70),
-                  letterSpacing: 3.0,
-                ),
-              ),
-            ),
-          ),
-
-          // 2. Top-Right: Ambient Mode B glass chip cluster for Reset, Pause, Audio
+          // 1. Top-Left: Amber coin badge with level number
           Positioned(
             top: 10,
-            right: 16,
+            left: 14,
+            child: _LevelCoinBadge(levelText: formattedLevel),
+          ),
+
+          // 2. Top-Right: Icon button cluster
+          Positioned(
+            top: 8,
+            right: 12,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (onToggleMusic != null) ...[
-                  ZenGlyphButton(
+                  _HudIconButton(
                     key: const Key('hud_audio'),
-                    tooltip: isMusicEnabled ? 'Bisu Musik' : 'Bunyikan Musik',
                     icon: isMusicEnabled
                         ? Icons.graphic_eq_rounded
                         : Icons.volume_off_rounded,
-                    iconSize: 18,
-                    size: 38,
-                    isCircularBasalt: true,
-                    activeColor: isMusicEnabled ? GlassTokens.neonCyan : null,
-                    onPressed: onToggleMusic,
+                    faceColor: isMusicEnabled
+                        ? const Color(0xFF1E5080)
+                        : const Color(0xFF2C2C2C),
+                    shadowColor: isMusicEnabled
+                        ? const Color(0xFF0A2540)
+                        : const Color(0xFF111111),
+                    onTap: onToggleMusic!,
                   ),
                   const SizedBox(width: 8),
                 ],
-                ZenGlyphButton(
+                _HudIconButton(
                   key: const Key('hud_reset'),
-                  tooltip: 'Reset Level',
                   icon: Icons.refresh_rounded,
-                  iconSize: 20,
-                  size: 38,
-                  isCircularBasalt: true,
-                  onPressed: onReset,
+                  faceColor: const Color(0xFFB45309),
+                  shadowColor: const Color(0xFF5C2800),
+                  onTap: onReset,
                 ),
                 const SizedBox(width: 8),
-                ZenGlyphButton(
+                _HudIconButton(
                   key: const Key('hud_pause'),
-                  tooltip: 'Pause Game',
                   icon: Icons.pause_rounded,
-                  iconSize: 20,
-                  size: 38,
-                  isCircularBasalt: true,
-                  onPressed: onPause,
+                  faceColor: const Color(0xFF1E293B),
+                  shadowColor: const Color(0xFF060A12),
+                  onTap: onPause,
                 ),
               ],
             ),
           ),
 
-          // 3. Bottom-Center: Ethereal pulsing gravity inversion glyph
+          // 3. Bottom-Center: GRAVITY pulsing pill
           if (hasGravityToggle)
             Positioned(
               bottom: 14,
               left: 0,
               right: 0,
               child: Center(
-                child: _PulsingGravityGlyphButton(
+                child: _GravityPill(
+                  key: const Key('hud_gravity'),
                   onPressed: onToggleGravity,
                 ),
               ),
@@ -131,40 +109,367 @@ class GameHud extends StatelessWidget {
   }
 }
 
-/// Interactive button hosting bespoke vector line glyphs or Material icons
-/// with smooth micro-scale and opacity animations, optionally in a tactile circular basalt pebble.
-class ZenGlyphButton extends StatefulWidget {
-  final CustomPainter? painter;
-  final Widget? child;
-  final IconData? icon;
-  final Color? iconColor;
-  final double? iconSize;
+// ─────────────────────────────────────────────────────────────────────────────
+// Level Coin Badge
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _LevelCoinBadge extends StatelessWidget {
+  final String levelText;
+  const _LevelCoinBadge({required this.levelText});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _CoinPainter(),
+      child: SizedBox(
+        width: 52,
+        height: 52,
+        child: Center(
+          child: Text(
+            levelText,
+            style: GoogleFonts.outfit(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF7A3F00),
+              letterSpacing: 0,
+              shadows: [
+                Shadow(
+                  color: Colors.white.withValues(alpha: 0.35),
+                  offset: const Offset(0, 1),
+                  blurRadius: 1,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CoinPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final r = size.width / 2;
+
+    // Shadow disc
+    canvas.drawCircle(
+      Offset(cx, cy + 4),
+      r,
+      Paint()..color = const Color(0xFF7A3F00),
+    );
+
+    // Main gold face
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r,
+      Paint()
+        ..shader = const RadialGradient(
+          center: Alignment(-0.3, -0.4),
+          radius: 0.9,
+          colors: [Color(0xFFFFD54F), Color(0xFFFFB300), Color(0xFFE65100)],
+          stops: [0.0, 0.55, 1.0],
+        ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: r)),
+    );
+
+    // Rim highlight
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r,
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.25)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_CoinPainter _) => false;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HUD Icon Button (circular, hard drop-shadow)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _HudIconButton extends StatefulWidget {
+  final IconData icon;
+  final Color faceColor;
+  final Color shadowColor;
+  final VoidCallback onTap;
+
+  const _HudIconButton({
+    super.key,
+    required this.icon,
+    required this.faceColor,
+    required this.shadowColor,
+    required this.onTap,
+  });
+
+  @override
+  State<_HudIconButton> createState() => _HudIconButtonState();
+}
+
+class _HudIconButtonState extends State<_HudIconButton> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    const size = 42.0;
+    const depth = 4.0;
+    final depressed = _pressed ? depth : 0.0;
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 55),
+        margin: EdgeInsets.only(top: depressed, bottom: depth - depressed),
+        child: CustomPaint(
+          painter: _CircleButtonPainter(
+            faceColor: widget.faceColor,
+            shadowColor: widget.shadowColor,
+            depressed: _pressed,
+          ),
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Icon(
+              widget.icon,
+              color: Colors.white,
+              size: 20,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  offset: const Offset(0, 1),
+                  blurRadius: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CircleButtonPainter extends CustomPainter {
+  final Color faceColor;
+  final Color shadowColor;
+  final bool depressed;
+
+  const _CircleButtonPainter({
+    required this.faceColor,
+    required this.shadowColor,
+    required this.depressed,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final r = size.width / 2;
+    const depth = 4.0;
+
+    if (!depressed) {
+      // Hard shadow disc below
+      canvas.drawCircle(
+        Offset(cx, cy + depth),
+        r,
+        Paint()..color = shadowColor,
+      );
+    }
+
+    // Face gradient
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.lerp(faceColor, Colors.white, 0.20)!,
+            faceColor,
+            Color.lerp(faceColor, Colors.black, 0.25)!,
+          ],
+        ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: r)),
+    );
+
+    // Rim
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r,
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.18)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_CircleButtonPainter old) =>
+      old.faceColor != faceColor ||
+      old.shadowColor != shadowColor ||
+      old.depressed != depressed;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Gravity Pill Button (pulsing glow)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _GravityPill extends StatefulWidget {
   final VoidCallback? onPressed;
-  final String tooltip;
+  const _GravityPill({super.key, this.onPressed});
+
+  @override
+  State<_GravityPill> createState() => _GravityPillState();
+}
+
+class _GravityPillState extends State<_GravityPill>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse;
+  late final Animation<double> _glow;
+  bool _pressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
+
+    _glow = Tween<double>(begin: 8.0, end: 18.0).animate(
+      CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const depth = 3.0;
+    final depressed = _pressed ? depth : 0.0;
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onPressed?.call();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedBuilder(
+        animation: _glow,
+        builder: (context, _) {
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 55),
+            margin:
+                EdgeInsets.only(top: depressed, bottom: depth - depressed),
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 28, vertical: 13),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(40),
+                gradient: const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF7C3AED), Color(0xFF4C1D95)],
+                ),
+                boxShadow: [
+                  // Hard arcade drop shadow
+                  BoxShadow(
+                    color: const Color(0xFF2D0A6E),
+                    offset: Offset(0, depth - depressed),
+                    blurRadius: 0,
+                  ),
+                  // Pulsing cyan glow halo
+                  BoxShadow(
+                    color: const Color(0xFF00E5FF).withValues(alpha: 0.55),
+                    blurRadius: _glow.value,
+                    spreadRadius: 1.0,
+                  ),
+                ],
+                border: Border.all(
+                  color: const Color(0xFF00E5FF).withValues(alpha: 0.70),
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Transform.rotate(
+                    angle: math.pi / 2,
+                    child: const Icon(
+                      Icons.swap_horiz_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'GRAVITY',
+                    style: GoogleFonts.outfit(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 2.5,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          offset: const Offset(0, 1),
+                          blurRadius: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Legacy ZenGlyphButton kept for backward compatibility (used by tests/overlays)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class ZenGlyphButton extends StatefulWidget {
+  final IconData icon;
   final double size;
-  final Color? activeColor;
+  final double iconSize;
+  final Color backgroundColor;
+  final Color iconColor;
+  final VoidCallback? onPressed;
+  final String? tooltip;
   final bool isCircularBasalt;
-  final Color? backgroundColor;
-  final Border? border;
+  final LinearGradient? borderGradient;
   final List<BoxShadow>? boxShadow;
-  final double restingOpacity;
 
   const ZenGlyphButton({
     super.key,
-    this.painter,
-    this.child,
-    this.icon,
-    this.iconColor,
-    this.iconSize,
-    required this.onPressed,
-    required this.tooltip,
+    required this.icon,
     this.size = 44,
-    this.activeColor,
+    this.iconSize = 22,
+    this.backgroundColor = const Color(0xFF1E293B),
+    this.iconColor = Colors.white,
+    this.onPressed,
+    this.tooltip,
     this.isCircularBasalt = false,
-    this.backgroundColor,
-    this.border,
+    this.borderGradient,
     this.boxShadow,
-    this.restingOpacity = 0.45,
   });
 
   @override
@@ -172,470 +477,38 @@ class ZenGlyphButton extends StatefulWidget {
 }
 
 class _ZenGlyphButtonState extends State<ZenGlyphButton> {
-  bool _isInteracting = false;
-
-  void _setInteracting(bool value) {
-    if (_isInteracting != value) {
-      setState(() {
-        _isInteracting = value;
-      });
-    }
-  }
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = widget.iconColor ??
-        (widget.isCircularBasalt ? const Color(0xFFE2E8F0) : const Color(0xFFE2E8F0));
-    final effectiveOpacity = widget.isCircularBasalt
-        ? (_isInteracting ? 1.0 : 0.88)
-        : (_isInteracting ? 0.95 : widget.restingOpacity);
-
-    Widget content;
-    if (widget.child != null) {
-      content = widget.child!;
-    } else if (widget.icon != null) {
-      content = Icon(
-        widget.icon,
-        size: widget.iconSize ?? (widget.size * 0.48),
-        color: effectiveColor,
-      );
-    } else if (widget.painter != null) {
-      content = CustomPaint(
-        size: Size(widget.iconSize ?? 22, widget.iconSize ?? 22),
-        painter: widget.painter,
-      );
-    } else {
-      content = const SizedBox.shrink();
-    }
-
-    final buttonBody = AnimatedOpacity(
-      duration: const Duration(milliseconds: 140),
-      curve: Curves.easeOutCubic,
-      opacity: effectiveOpacity,
+    final button = GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onPressed?.call();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedScale(
-        duration: const Duration(milliseconds: 120),
-        scale: _isInteracting ? 0.92 : 1.0,
-        curve: Curves.easeOutCubic,
-        child: widget.isCircularBasalt
-            ? GlassContainer(
-                width: widget.size,
-                height: widget.size,
-                shape: BoxShape.circle,
-                enableLiveBlur: false, // Mode B for Zero-GC HUD performance
-                backgroundColor: widget.backgroundColor ??
-                    GlassTokens.surfaceLight.withValues(alpha: 0.65),
-                borderGradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    widget.activeColor != null
-                        ? widget.activeColor!.withValues(alpha: 0.70)
-                        : GlassTokens.borderHighlight,
-                    GlassTokens.borderShadow,
-                  ],
-                ),
-                borderWidth: 1.0,
-                boxShadow: widget.boxShadow,
-                child: Center(child: content),
-              )
-            : SizedBox(
-                width: widget.size,
-                height: widget.size,
-                child: Center(child: content),
-              ),
-      ),
-    );
-
-    return Tooltip(
-      message: widget.tooltip,
-      child: MouseRegion(
-        onEnter: (_) => _setInteracting(true),
-        onExit: (_) => _setInteracting(false),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: (_) => _setInteracting(true),
-          onTapUp: (_) => _setInteracting(false),
-          onTapCancel: () => _setInteracting(false),
-          onTap: widget.onPressed,
-          child: buttonBody,
+        scale: _pressed ? 0.93 : 1.0,
+        duration: const Duration(milliseconds: 60),
+        child: Container(
+          width: widget.size,
+          height: widget.size,
+          decoration: BoxDecoration(
+            color: widget.backgroundColor,
+            shape: BoxShape.circle,
+            boxShadow: widget.boxShadow,
+          ),
+          child: Icon(widget.icon, color: widget.iconColor, size: widget.iconSize),
         ),
       ),
     );
-  }
-}
 
-/// Gently breathing / pulsing gravity inversion button for inverted stages.
-class _PulsingGravityGlyphButton extends StatefulWidget {
-  final VoidCallback? onPressed;
-
-  const _PulsingGravityGlyphButton({required this.onPressed});
-
-  @override
-  State<_PulsingGravityGlyphButton> createState() =>
-      _PulsingGravityGlyphButtonState();
-}
-
-class _PulsingGravityGlyphButtonState extends State<_PulsingGravityGlyphButton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2400),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final double pulse = _controller.value;
-        final double pulseOpacity = 0.55 + (pulse * 0.45);
-
-        return Tooltip(
-          message: 'Toggle Gravity',
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: widget.onPressed,
-            child: Opacity(
-              opacity: pulseOpacity,
-              child: GlassContainer(
-                key: const Key('hud_gravity'),
-                enableLiveBlur: false, // Mode B
-                borderRadius: GlassTokens.radiusPill,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                backgroundColor: GlassTokens.surfaceElevated.withValues(alpha: 0.70),
-                borderGradient: LinearGradient(
-                  colors: [
-                    GlassTokens.radiantGold.withValues(alpha: 0.40 + 0.45 * pulse),
-                    GlassTokens.borderHighlight,
-                    GlassTokens.radiantGold.withValues(alpha: 0.15 + 0.20 * pulse),
-                  ],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: GlassTokens.radiantGold.withValues(alpha: 0.20 * pulse),
-                    blurRadius: 14 + 6 * pulse,
-                  ),
-                ],
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CustomPaint(
-                      size: const Size(18, 18),
-                      painter: const GravityGlyphPainter(color: GlassTokens.radiantGold),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'GRAVITY',
-                      style: GoogleFonts.outfit(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 2.2,
-                        color: GlassTokens.radiantGold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Bespoke Vector Line Glyphs (Zero Allocation CustomPainters, Stroke Width 2.0)
-// ---------------------------------------------------------------------------
-
-/// Bespoke minimalist Reset glyph: 270-degree continuous circular arc with integrated arrow.
-class ResetGlyphPainter extends CustomPainter {
-  final Color color;
-  final double strokeWidth;
-
-  const ResetGlyphPainter({
-    this.color = const Color(0xFFE2E8F0),
-    this.strokeWidth = 2.0,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final strokePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final center = Offset(size.width / 2.0, size.height / 2.0);
-    final radius = size.width * 0.36;
-
-    // Sweeps clockwise 280 degrees from -135 deg to +145 deg
-    const startAngle = -math.pi * 0.75;
-    const sweepAngle = math.pi * 1.55;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      sweepAngle,
-      false,
-      strokePaint,
-    );
-
-    // End point of the circular arc
-    final endAngle = startAngle + sweepAngle;
-    final endPoint = Offset(
-      center.dx + radius * math.cos(endAngle),
-      center.dy + radius * math.sin(endAngle),
-    );
-
-    // Clockwise tangent vector at endPoint
-    final tangent = Offset(-math.sin(endAngle), math.cos(endAngle));
-    final normal = Offset(-tangent.dy, tangent.dx); // outward normal
-
-    final arrowLen = size.width * 0.22;
-    final arrowSpread = size.width * 0.18;
-
-    final wing1 = endPoint - (tangent * arrowLen) + (normal * arrowSpread);
-    final wing2 = endPoint - (tangent * arrowLen) - (normal * arrowSpread);
-
-    final arrowPath = Path()
-      ..moveTo(wing1.dx, wing1.dy)
-      ..lineTo(endPoint.dx, endPoint.dy)
-      ..lineTo(wing2.dx, wing2.dy);
-
-    canvas.drawPath(arrowPath, strokePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant ResetGlyphPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.strokeWidth != strokeWidth;
-}
-
-/// Bespoke minimalist Pause glyph: Twin rounded slender vertical capsules.
-class PauseGlyphPainter extends CustomPainter {
-  final Color color;
-
-  const PauseGlyphPainter({this.color = const Color(0xFFE2E8F0)});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final strokePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round;
-
-    final leftX = size.width * 0.35;
-    final rightX = size.width * 0.65;
-    final topY = size.height * 0.22;
-    final bottomY = size.height * 0.78;
-
-    canvas.drawLine(Offset(leftX, topY), Offset(leftX, bottomY), strokePaint);
-    canvas.drawLine(Offset(rightX, topY), Offset(rightX, bottomY), strokePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant PauseGlyphPainter oldDelegate) =>
-      oldDelegate.color != color;
-}
-
-/// Bespoke minimalist Gravity Inversion glyph: Dual opposing vertical arrows.
-class GravityGlyphPainter extends CustomPainter {
-  final Color color;
-
-  const GravityGlyphPainter({this.color = const Color(0xFFFFD54F)});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final strokePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final w = size.width;
-    final h = size.height;
-
-    // Left arrow pointing down
-    final leftX = w * 0.34;
-    canvas.drawLine(Offset(leftX, h * 0.22), Offset(leftX, h * 0.78), strokePaint);
-    final downPath = Path()
-      ..moveTo(leftX - 3.5, h * 0.64)
-      ..lineTo(leftX, h * 0.78)
-      ..lineTo(leftX + 3.5, h * 0.64);
-    canvas.drawPath(downPath, strokePaint);
-
-    // Right arrow pointing up
-    final rightX = w * 0.66;
-    canvas.drawLine(Offset(rightX, h * 0.78), Offset(rightX, h * 0.22), strokePaint);
-    final upPath = Path()
-      ..moveTo(rightX - 3.5, h * 0.36)
-      ..lineTo(rightX, h * 0.22)
-      ..lineTo(rightX + 3.5, h * 0.36);
-    canvas.drawPath(upPath, strokePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant GravityGlyphPainter oldDelegate) =>
-      oldDelegate.color != color;
-}
-
-/// Bespoke minimalist Audio glyph: Clean sound-wave speaker.
-class AudioGlyphPainter extends CustomPainter {
-  final Color color;
-  final bool isMuted;
-
-  const AudioGlyphPainter({
-    this.color = const Color(0xFFE2E8F0),
-    this.isMuted = false,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final strokePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final w = size.width;
-    final h = size.height;
-
-    // Speaker body
-    final speakerPath = Path()
-      ..moveTo(w * 0.22, h * 0.40)
-      ..lineTo(w * 0.38, h * 0.40)
-      ..lineTo(w * 0.55, h * 0.25)
-      ..lineTo(w * 0.55, h * 0.75)
-      ..lineTo(w * 0.38, h * 0.60)
-      ..lineTo(w * 0.22, h * 0.60)
-      ..close();
-
-    canvas.drawPath(speakerPath, strokePaint);
-
-    if (isMuted) {
-      // Minimalist strike-through line
-      canvas.drawLine(
-        Offset(w * 0.20, h * 0.80),
-        Offset(w * 0.80, h * 0.20),
-        strokePaint,
-      );
-    } else {
-      // Sound wave arc
-      final waveRect = Rect.fromCenter(
-        center: Offset(w * 0.55, h * 0.50),
-        width: w * 0.45,
-        height: h * 0.50,
-      );
-      canvas.drawArc(waveRect, -math.pi * 0.35, math.pi * 0.70, false, strokePaint);
+    if (widget.tooltip != null) {
+      return Tooltip(message: widget.tooltip!, child: button);
     }
+    return button;
   }
-
-  @override
-  bool shouldRepaint(covariant AudioGlyphPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.isMuted != isMuted;
 }
 
-/// Minimalist Play / Resume vector glyph.
-class PlayGlyphPainter extends CustomPainter {
-  final Color color;
-
-  const PlayGlyphPainter({this.color = const Color(0xFFE2E8F0)});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final strokePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final w = size.width;
-    final h = size.height;
-
-    final path = Path()
-      ..moveTo(w * 0.36, h * 0.24)
-      ..lineTo(w * 0.74, h * 0.50)
-      ..lineTo(w * 0.36, h * 0.76)
-      ..close();
-
-    canvas.drawPath(path, strokePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant PlayGlyphPainter oldDelegate) =>
-      oldDelegate.color != color;
-}
-
-/// Minimalist Stages / 2x2 Bento Matrix vector glyph.
-class StagesGlyphPainter extends CustomPainter {
-  final Color color;
-
-  const StagesGlyphPainter({this.color = const Color(0xFFE2E8F0)});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final strokePaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.6
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final fillPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    final w = size.width;
-    final h = size.height;
-    final nodeSize = w * 0.28;
-    final r = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, nodeSize, nodeSize),
-      Radius.circular(nodeSize * 0.32),
-    );
-
-    // Top-Left
-    canvas.save();
-    canvas.translate(w * 0.14, h * 0.14);
-    canvas.drawRRect(r, strokePaint);
-    canvas.restore();
-
-    // Top-Right
-    canvas.save();
-    canvas.translate(w * 0.58, h * 0.14);
-    canvas.drawRRect(r, strokePaint);
-    canvas.restore();
-
-    // Bottom-Left
-    canvas.save();
-    canvas.translate(w * 0.14, h * 0.58);
-    canvas.drawRRect(r, strokePaint);
-    canvas.restore();
-
-    // Bottom-Right
-    canvas.save();
-    canvas.translate(w * 0.58, h * 0.58);
-    canvas.drawRRect(r, fillPaint);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant StagesGlyphPainter oldDelegate) =>
-      oldDelegate.color != color;
-}
-
+// ignore_for_file: non_constant_identifier_names

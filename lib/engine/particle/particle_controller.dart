@@ -14,12 +14,14 @@ class ParticleController {
   final List<ParticleEmitter> emitters;
   double gravity;
   int capturedCount;
+  bool isSpawningActive;
 
   ParticleController({
     ParticlePool? pool,
     required this.emitters,
     this.gravity = kGravityDefault,
     this.capturedCount = 0,
+    this.isSpawningActive = true,
   }) : pool = pool ?? ParticlePool();
 
   /// Updates physics simulation for one frame step.
@@ -32,9 +34,11 @@ class ParticleController {
     void Function(CupHitbox cup, SugarParticle particle)? onParticleCaptured,
     void Function(ColorFilterZone filter, SugarParticle particle)? onFilterPassed,
   }) {
-    // 1. Tick all emitters to spawn new particles if scheduled
-    for (final emitter in emitters) {
-      emitter.tick(pool);
+    // 1. Tick all emitters to spawn new particles if scheduled and spawning is active
+    if (isSpawningActive) {
+      for (final emitter in emitters) {
+        emitter.tick(pool);
+      }
     }
 
     // Determine out-of-bounds safety buffer depending on coordinate space

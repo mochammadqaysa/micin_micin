@@ -1,6 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Cartoonish Casual Mobile Game Design System Tokens for Micin Micin.
+///
+/// Features bold, playful candy colors, 3D extruded button slabs,
+/// specular gloss highlights, golden victory ribbons, and tactile bouncy UI.
+abstract final class CartoonTokens {
+  // Canvas & Background (Vibrant Midnight Indigo Gradient)
+  static const Color canvasTop = Color(0xFF1E1645);
+  static const Color canvasBottom = Color(0xFF110C29);
+  static const Color canvasLight = Color(0xFF2C2263);
+
+  // Panels & Containers
+  static const Color panelBg = Color(0xFF241C52);
+  static const Color panelBorder = Color(0xFF45368E);
+  static const Color panelCreamBg = Color(0xFFFFF9E8);
+  static const Color panelCreamBorder = Color(0xFFE8C888);
+  static const Color panelCreamHeader = Color(0xFFFDE68A);
+
+  // Buttons - 3D Beveled Faces, Gloss, and Sunk Shadows
+  // Green Button (PLAY / PRIMARY / NEXT)
+  static const Color greenTop = Color(0xFF4ADE80);
+  static const Color greenBottom = Color(0xFF16A34A);
+  static const Color greenShadow = Color(0xFF15803D);
+
+  // Amber / Gold Button (LEVELS / SECONDARY / STARS)
+  static const Color amberTop = Color(0xFFFBBF24);
+  static const Color amberBottom = Color(0xFFD97706);
+  static const Color amberShadow = Color(0xFFB45309);
+
+  // Blue / Cyan Button (INFO / RESET / UTILITY)
+  static const Color cyanTop = Color(0xFF38BDF8);
+  static const Color cyanBottom = Color(0xFF0284C7);
+  static const Color cyanShadow = Color(0xFF0369A1);
+
+  // Red / Coral Button (CANCEL / PAUSE / DANGER)
+  static const Color coralTop = Color(0xFFFB7185);
+  static const Color coralBottom = Color(0xFFE11D48);
+  static const Color coralShadow = Color(0xFFBE123C);
+
+  // Aliases for intuitive palette access
+  static const Color blueTop = cyanTop;
+  static const Color blueBottom = cyanBottom;
+  static const Color blueShadow = cyanShadow;
+  static const Color redTop = coralTop;
+  static const Color redBottom = coralBottom;
+  static const Color redShadow = coralShadow;
+
+  // Purple / Violet Button (MAGIC / GRAVITY / CREDITS)
+  static const Color purpleTop = Color(0xFFC084FC);
+  static const Color purpleBottom = Color(0xFF9333EA);
+  static const Color purpleShadow = Color(0xFF7E22CE);
+
+  // Star & Rating Accents
+  static const Color starGold = Color(0xFFFFD700);
+  static const Color starOrange = Color(0xFFFFA000);
+  static const Color starEmpty = Color(0x40FFFFFF);
+
+  // Gloss and Shadows
+  static const Color glossWhite = Color(0x66FFFFFF);
+  static const Color bevelDark = Color(0x4D000000);
+  static const Color textShadow = Color(0x80000000);
+
+  // Text
+  static const Color textWhite = Color(0xFFFFFFFF);
+  static const Color textCream = Color(0xFFFFFBEB);
+  static const Color textDarkBrown = Color(0xFF451A03);
+  static const Color textMuted = Color(0xFF9CA3AF);
+}
+
 /// Pure Neumorphism (Soft UI) Design System Tokens for Micin Micin.
 ///
 /// Implements authentic Neumorphism with dual directional lighting (135° Top-Left -> Bottom-Right),

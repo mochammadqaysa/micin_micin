@@ -8,7 +8,6 @@ import 'package:micin_micin/providers/player_progress_provider.dart';
 import 'package:micin_micin/screens/game/painters/background_painter.dart';
 import 'package:micin_micin/screens/level_select/level_button.dart';
 import 'package:micin_micin/screens/level_select/level_select_screen.dart';
-import 'package:micin_micin/widgets/glass_container.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -74,10 +73,11 @@ void main() {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
 
-      expect(find.text('Babak I'), findsOneWidget);
-      expect(find.text('Babak II'), findsOneWidget);
-      expect(find.text('Babak III'), findsOneWidget);
-      expect(find.text('Babak IV'), findsOneWidget);
+      // New design: tabs show roman numerals only (I, II, III, IV)
+      expect(find.text('I'), findsOneWidget);
+      expect(find.text('II'), findsOneWidget);
+      expect(find.text('III'), findsOneWidget);
+      expect(find.text('IV'), findsOneWidget);
     });
 
     testWidgets('renders Act I content and stages in grid layout',
@@ -100,8 +100,8 @@ void main() {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
 
-      // Tap Babak IV tab
-      await tester.tap(find.text('Babak IV'));
+      // Tap Babak IV tab — new design uses roman numeral 'IV'
+      await tester.tap(find.text('IV'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600)); // Allow scroll animation
 
@@ -127,13 +127,15 @@ void main() {
       expect(find.text('MenuScreen'), findsOneWidget);
     });
 
-    testWidgets('renders GlassContainer components across header, tabs, and act cards',
+    testWidgets('renders solid arcade container components (no glassmorphism)',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget());
       await tester.pump();
 
-      // Verify presence of GlassContainer widgets
-      expect(find.byType(GlassContainer), findsWidgets);
+      // New design uses solid arcade panels (no GlassContainer).
+      // Verify act section content is rendered correctly.
+      expect(find.text('BABAK I'), findsOneWidget);
+      expect(find.text('Dasar'), findsOneWidget);
     });
 
     testWidgets('tapping unlocked level 1 navigates to game screen',

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:micin_micin/screens/game/game_hud.dart';
-import 'package:micin_micin/widgets/glass_container.dart';
 
 void main() {
   group('GameHud Widget Tests (TASK-206)', () {
-    testWidgets('renders level indicator in Mode B glass container and action keys',
+    testWidgets('renders level indicator coin badge and action keys',
         (WidgetTester tester) async {
       bool resetPressed = false;
       bool pausePressed = false;
@@ -25,19 +24,16 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('0 7'), findsOneWidget);
+      // New arcade HUD: level shown as "07" in coin badge (no space separator)
+      expect(find.text('07'), findsOneWidget);
+
+      // Action keys present by their keys
       expect(find.byKey(const Key('hud_reset')), findsOneWidget);
       expect(find.byKey(const Key('hud_pause')), findsOneWidget);
       expect(find.byKey(const Key('hud_audio')), findsOneWidget);
 
-      // Verify Mode B: GlassContainer inside HUD has enableLiveBlur false
-      final glassContainers = tester.widgetList<GlassContainer>(
-        find.byType(GlassContainer),
-      );
-      expect(glassContainers.isNotEmpty, isTrue);
-      for (final container in glassContainers) {
-        expect(container.enableLiveBlur, isFalse);
-      }
+      // No GlassContainer in new HUD (uses custom painters instead)
+      // — no assertion needed; the old GlassContainer test is retired.
 
       await tester.tap(find.byKey(const Key('hud_reset')));
       expect(resetPressed, isTrue);
@@ -68,6 +64,7 @@ void main() {
       );
       await tester.pump();
 
+      // Gravity pill has its Key and shows label
       expect(find.byKey(const Key('hud_gravity')), findsOneWidget);
       expect(find.text('GRAVITY'), findsOneWidget);
 
