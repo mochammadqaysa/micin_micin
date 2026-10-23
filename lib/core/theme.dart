@@ -216,8 +216,8 @@ abstract final class ZenPalette {
 
 /// Design system and theme configurations for Micin Micin.
 ///
-/// Features a Pure Neumorphic Slate theme with extruded soft tactile widgets,
-/// dual directional drop/highlight shadows, and energetic mobile game accents.
+/// Features the Chunky Arcade theme with CartoonTokens, high-contrast
+/// dark indigo canvas, and energetic candy mobile game accents.
 class AppTheme {
   AppTheme._();
 

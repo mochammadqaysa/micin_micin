@@ -10,9 +10,9 @@ import 'cartoon_button.dart';
 import 'cartoon_panel.dart';
 
 
-/// Full-bleed Modern Minimalist & Glassmorphism victory overlay:
-/// - Radiant gold bloom wash and floating ambient victory motes.
-/// - Level status badge and tactile progression buttons.
+/// Full-bleed Chunky Arcade victory overlay:
+/// - Celebratory pop-scale star ratings and level score badge.
+/// - 3D extruded CartoonButton progression actions (Next, Replay, Menu).
 /// - Modern typography in Google Fonts Outfit.
 class LevelCompleteDialog extends StatefulWidget {
   final int levelId;
