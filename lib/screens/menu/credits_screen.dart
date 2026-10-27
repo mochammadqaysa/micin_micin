@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/theme.dart';
-import '../../widgets/neu_button.dart';
-import '../../widgets/neu_container.dart';
+import 'package:pixel_ui/pixel_ui.dart';
+import '../../core/pixel_terrain_tokens.dart';
 
-/// Pure Neumorphic Credits screen acknowledging the original creator Bart Bonte and clone authorship.
+/// 16-bit Pixel Zen Credits screen acknowledging original creator Bart Bonte and clone authorship.
 class CreditsScreen extends StatelessWidget {
   const CreditsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: NeuTokens.canvas,
+      backgroundColor: PixelTerrainTokens.slate,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: NeuIconButton(
-            icon: Icons.arrow_back_rounded,
-            size: 40,
-            iconSize: 20,
-            iconColor: NeuTokens.textPrimary,
+          child: PixelButton(
+            logicalWidth: 10,
+            logicalHeight: 10,
+            width: 40,
+            height: 40,
+            normalStyle: PixelTerrainTokens.pauseButtonNormal,
+            pressedStyle: PixelTerrainTokens.pauseButtonPressed,
+            pressChildOffset: const Offset(0, 1),
             onPressed: () {
               if (context.canPop()) {
                 context.pop();
@@ -29,15 +31,18 @@ class CreditsScreen extends StatelessWidget {
                 context.go('/menu');
               }
             },
+            child: const Icon(
+              Icons.arrow_back_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
         ),
-        title: const Text(
-          'Kredit',
-          style: TextStyle(
-            fontFamily: 'Outfit',
+        title: Text(
+          'KREDIT',
+          style: PixelText.mulmaru(
             fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: NeuTokens.textPrimary,
+            color: PixelTerrainTokens.sand,
             letterSpacing: 1.5,
           ),
         ),
@@ -47,151 +52,146 @@ class CreditsScreen extends StatelessWidget {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: NeuContainer(
-              borderRadius: 24,
-              style: NeuStyle.convex,
-              depth: 8.0,
-              blur: 16.0,
-              padding: const EdgeInsets.all(28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Extruded Heart Badge
-                  NeuContainer(
-                    width: 72,
-                    height: 72,
-                    shape: BoxShape.circle,
-                    style: NeuStyle.convex,
-                    depth: 5.0,
-                    blur: 10.0,
-                    accentColor: NeuTokens.accentAmber,
-                    accentGlow: true,
-                    child: const Center(
-                      child: Icon(
-                        Icons.favorite_rounded,
-                        color: NeuTokens.accentAmber,
-                        size: 36,
+            child: PixelBox(
+              logicalWidth: 70,
+              logicalHeight: 100,
+              style: PixelTerrainTokens.tealBoxStyle,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Pixel Heart Badge
+                    PixelBox(
+                      logicalWidth: 14,
+                      logicalHeight: 14,
+                      width: 56,
+                      height: 56,
+                      style: PixelTerrainTokens.mossBoxStyle,
+                      child: const Center(
+                        child: Icon(
+                          Icons.favorite_rounded,
+                          color: PixelTerrainTokens.sand,
+                          size: 28,
+                        ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 18),
 
-                  const Text(
-                    'Micin, Micin',
-                    style: TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      color: NeuTokens.textPrimary,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Game teka-teki fisika menggambar garis',
-                    style: TextStyle(
-                      fontFamily: 'Outfit',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: NeuTokens.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Sunken Attribution Plate
-                  NeuContainer(
-                    borderRadius: 16,
-                    style: NeuStyle.inset,
-                    depth: 3.5,
-                    blur: 6.0,
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'Ide & Game Asli (Sugar, Sugar):',
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: NeuTokens.textMuted,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Bart Bonte',
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: NeuTokens.accentAmber,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        const Text(
-                          'bontegames.com',
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: 12,
-                            color: NeuTokens.textMuted,
-                          ),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12.0),
-                          child: Divider(color: NeuTokens.bevelDark, height: 1),
-                        ),
-                        const Text(
-                          'Pengembang Clone Flutter:',
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: NeuTokens.textMuted,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Kayzz Dev',
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: NeuTokens.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // Tactile Neumorphic Back Button
-                  NeuButton(
-                    width: 180,
-                    height: 48,
-                    isPill: true,
-                    accentColor: NeuTokens.accentAmber,
-                    onPressed: () {
-                      if (context.canPop()) {
-                        context.pop();
-                      } else {
-                        context.go('/menu');
-                      }
-                    },
-                    child: const Text(
-                      'Kembali',
-                      style: TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: NeuTokens.textPrimary,
-                        letterSpacing: 1.2,
+                    Text(
+                      'MICIN, MICIN',
+                      style: PixelText.mulmaru(
+                        fontSize: 22,
+                        color: PixelTerrainTokens.sand,
+                        letterSpacing: 1.5,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 6),
+                    Text(
+                      'Game teka-teki fisika garis & butiran',
+                      style: PixelText.mulmaru(
+                        fontSize: 11,
+                        color: PixelTerrainTokens.sage.withValues(alpha: 0.9),
+                        letterSpacing: 0.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Attribution Plate
+                    PixelBox(
+                      logicalWidth: 60,
+                      logicalHeight: 40,
+                      style: PixelTerrainTokens.slateBoxStyle,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Ide & Game Asli (Sugar, Sugar):',
+                              style: PixelText.mulmaru(
+                                fontSize: 10,
+                                color: PixelTerrainTokens.sage.withValues(alpha: 0.75),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Bart Bonte',
+                              style: PixelText.mulmaru(
+                                fontSize: 16,
+                                color: PixelTerrainTokens.sand,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'bontegames.com',
+                              style: PixelText.mulmaru(
+                                fontSize: 10,
+                                color: PixelTerrainTokens.sage.withValues(alpha: 0.6),
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 10.0),
+                              child: Divider(
+                                color: PixelTerrainTokens.sage,
+                                height: 1,
+                              ),
+                            ),
+                            Text(
+                              'Pengembang Clone Flutter:',
+                              style: PixelText.mulmaru(
+                                fontSize: 10,
+                                color: PixelTerrainTokens.sage.withValues(alpha: 0.75),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Kayzz Dev',
+                              style: PixelText.mulmaru(
+                                fontSize: 14,
+                                color: Colors.white,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Tactile Back Button
+                    PixelButton(
+                      logicalWidth: 40,
+                      logicalHeight: 11,
+                      width: 160,
+                      height: 44,
+                      normalStyle: PixelTerrainTokens.actionButtonNormal,
+                      pressedStyle: PixelTerrainTokens.actionButtonPressed,
+                      pressChildOffset: const Offset(0, 1),
+                      onPressed: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('/menu');
+                        }
+                      },
+                      child: Center(
+                        child: Text(
+                          'KEMBALI',
+                          style: PixelText.mulmaru(
+                            fontSize: 13,
+                            color: Colors.white,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

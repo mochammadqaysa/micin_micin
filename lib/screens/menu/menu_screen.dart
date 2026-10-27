@@ -2,19 +2,18 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:pixel_ui/pixel_ui.dart';
 import '../../audio/audio_manager.dart';
 import '../../core/constants.dart';
+import '../../core/pixel_terrain_tokens.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/player_progress_provider.dart';
 import '../game/painters/background_painter.dart';
 
-/// Micin Micin Main Menu — arcade game aesthetic.
+/// Micin Micin Main Menu — authentic 16-bit Pixel Zen aesthetic.
 ///
-/// Design language: diegetic chalkboard world, tactile chunky buttons with
-/// hard drop-shadows, chalk-dust logo, animated sugar-grain rain waterfall.
-/// References: Bart Bonte's Sugar Sugar, classic Flash puzzle game menus.
-/// Explicitly avoids: glassmorphism, generic rounded cards, mobile-app patterns.
+/// Features PixelButton tactile interactions, zen pixel logo plaque,
+/// falling sugar-grain rain, and Mulmaru pixel typography.
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
 
@@ -33,8 +32,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   final math.Random _rng = math.Random(42);
   bool _isNavigating = false;
 
-  static const _bgColor = Color(0xFF0B1828);
-  static const _dotColor = Color(0xFFFFF8E7);
+  static const _bgColor = PixelTerrainTokens.slate;
+  static const _dotColor = PixelTerrainTokens.sand;
 
   @override
   void initState() {
@@ -165,12 +164,28 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                         // Primary PLAY button
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                          child: _ArcadeButton(
-                            label: 'PLAY',
-                            topColor: const Color(0xFFFFB300),
-                            shadowColor: const Color(0xFF7A5200),
-                            textColor: Colors.white,
-                            onTap: () => _navigate('/game/$lastLevel'),
+                          child: Center(
+                            child: PixelButton(
+                              key: const Key('menu_play_button'),
+                              logicalWidth: 64,
+                              logicalHeight: 13,
+                              width: 260,
+                              height: 52,
+                              normalStyle: PixelTerrainTokens.playButtonNormal,
+                              pressedStyle: PixelTerrainTokens.playButtonPressed,
+                              pressChildOffset: const Offset(0, 2),
+                              onPressed: () => _navigate('/game/$lastLevel'),
+                              child: Center(
+                                child: Text(
+                                  'PLAY',
+                                  style: PixelText.mulmaru(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                    letterSpacing: 2.0,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
 
@@ -180,26 +195,49 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 40.0),
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(
-                                child: _ArcadeButton(
-                                  label: 'LEVELS',
-                                  topColor: const Color(0xFF1E3A5F),
-                                  shadowColor: const Color(0xFF0A1520),
-                                  textColor: const Color(0xFF90CAF9),
-                                  fontSize: 16,
-                                  onTap: () => _navigate('/levels'),
+                              PixelButton(
+                                key: const Key('menu_levels_button'),
+                                logicalWidth: 31,
+                                logicalHeight: 11,
+                                width: 124,
+                                height: 46,
+                                normalStyle: PixelTerrainTokens.actionButtonNormal,
+                                pressedStyle: PixelTerrainTokens.actionButtonPressed,
+                                pressChildOffset: const Offset(0, 2),
+                                onPressed: () => _navigate('/levels'),
+                                child: Center(
+                                  child: Text(
+                                    'LEVELS',
+                                    style: PixelText.mulmaru(
+                                      fontSize: 13,
+                                      color: Colors.white,
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: _ArcadeButton(
-                                  label: 'CREDITS',
-                                  topColor: const Color(0xFF1B3A2E),
-                                  shadowColor: const Color(0xFF081510),
-                                  textColor: const Color(0xFF80CBC4),
-                                  fontSize: 16,
-                                  onTap: () => _navigate('/credits'),
+                              const SizedBox(width: 12),
+                              PixelButton(
+                                key: const Key('menu_credits_button'),
+                                logicalWidth: 31,
+                                logicalHeight: 11,
+                                width: 124,
+                                height: 46,
+                                normalStyle: PixelTerrainTokens.pauseButtonNormal,
+                                pressedStyle: PixelTerrainTokens.pauseButtonPressed,
+                                pressChildOffset: const Offset(0, 2),
+                                onPressed: () => _navigate('/credits'),
+                                child: Center(
+                                  child: Text(
+                                    'CREDITS',
+                                    style: PixelText.mulmaru(
+                                      fontSize: 13,
+                                      color: Colors.white,
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],
@@ -215,22 +253,53 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              _AudioToggleButton(
-                                isMusicEnabled:
-                                    ref.watch(audioManagerProvider).isMusicEnabled,
-                                onTap: () {
+                              PixelButton(
+                                key: const Key('menu_audio_toggle'),
+                                logicalWidth: 32,
+                                logicalHeight: 11,
+                                width: 128,
+                                height: 44,
+                                normalStyle: ref.watch(audioManagerProvider).isMusicEnabled
+                                    ? PixelTerrainTokens.audioButtonNormal
+                                    : PixelTerrainTokens.pauseButtonNormal,
+                                pressedStyle: PixelTerrainTokens.audioButtonPressed,
+                                pressChildOffset: const Offset(0, 1),
+                                onPressed: () {
                                   ref
                                       .read(audioManagerProvider)
                                       .playSfx(SoundType.buttonClick);
                                   ref.read(audioManagerProvider).toggleMusic();
                                   setState(() {});
                                 },
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      ref.watch(audioManagerProvider).isMusicEnabled
+                                          ? Icons.graphic_eq_rounded
+                                          : Icons.volume_off_rounded,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      ref.watch(audioManagerProvider).isMusicEnabled
+                                          ? 'MUSIC ON'
+                                          : 'MUTED',
+                                      style: PixelText.mulmaru(
+                                        fontSize: 10,
+                                        color: Colors.white,
+                                        letterSpacing: 1.0,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                               Text(
                                 'v1.0.0',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 11,
-                                  color: Colors.white.withValues(alpha: 0.25),
+                                style: PixelText.mulmaru(
+                                  fontSize: 10,
+                                  color: PixelTerrainTokens.sage.withValues(alpha: 0.6),
                                   letterSpacing: 1.2,
                                 ),
                               ),
@@ -259,257 +328,55 @@ class _ChalkLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Chalk-texture sugar emitter icon
-        CustomPaint(
-          size: const Size(48, 48),
-          painter: _EmitterIconPainter(),
+        Image.asset(
+          'assets/images/cartoon/zen_pixel_logo.png',
+          width: 280,
+          height: 94,
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.none,
+          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
         ),
-        const SizedBox(height: 14),
-        // Main title — two-line chalk style
-        ShaderMask(
-          blendMode: BlendMode.srcIn,
-          shaderCallback: (bounds) => const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFFFFF), Color(0xFFCDD5E0)],
-          ).createShader(bounds),
-          child: Column(
-            children: [
-              Text(
-                'micin',
-                style: GoogleFonts.outfit(
-                  fontSize: 52,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1.5,
-                  height: 1.0,
-                ),
+        const SizedBox(height: 4),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'micin',
+              style: PixelText.mulmaru(
+                fontSize: 14,
+                letterSpacing: 2.0,
+                color: PixelTerrainTokens.sand,
               ),
-              Text(
-                'micin',
-                style: GoogleFonts.outfit(
-                  fontSize: 52,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1.5,
-                  height: 1.0,
-                  color: const Color(0xFFFFB300),
-                ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '•',
+              style: TextStyle(
+                color: PixelTerrainTokens.sage.withValues(alpha: 0.6),
+                fontSize: 12,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'micin',
+              style: PixelText.mulmaru(
+                fontSize: 14,
+                letterSpacing: 2.0,
+                color: PixelTerrainTokens.sage,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        // Tagline
+        const SizedBox(height: 6),
         Text(
           'draw · guide · fill',
-          style: GoogleFonts.outfit(
-            fontSize: 13,
-            letterSpacing: 3.0,
-            color: Colors.white.withValues(alpha: 0.35),
-            fontWeight: FontWeight.w500,
+          style: PixelText.mulmaru(
+            fontSize: 11,
+            letterSpacing: 2.0,
+            color: PixelTerrainTokens.sage.withValues(alpha: 0.75),
           ),
         ),
       ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Arcade-Style Chunky Button with Hard Drop Shadow
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _ArcadeButton extends StatefulWidget {
-  final String label;
-  final Color topColor;
-  final Color shadowColor;
-  final Color textColor;
-  final double fontSize;
-  final VoidCallback onTap;
-
-  const _ArcadeButton({
-    required this.label,
-    required this.topColor,
-    required this.shadowColor,
-    required this.textColor,
-    this.fontSize = 20,
-    required this.onTap,
-  });
-
-  @override
-  State<_ArcadeButton> createState() => _ArcadeButtonState();
-}
-
-class _ArcadeButtonState extends State<_ArcadeButton> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    const pressDepth = 4.0;
-    final depressed = _pressed ? pressDepth : 0.0;
-
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 60),
-        margin: EdgeInsets.only(top: depressed, bottom: pressDepth - depressed),
-        child: CustomPaint(
-          painter: _ArcadeButtonPainter(
-            topColor: widget.topColor,
-            shadowColor: widget.shadowColor,
-            depressed: _pressed,
-          ),
-          child: Container(
-            height: 52,
-            alignment: Alignment.center,
-            child: Text(
-              widget.label,
-              style: GoogleFonts.outfit(
-                fontSize: widget.fontSize,
-                fontWeight: FontWeight.w800,
-                color: widget.textColor,
-                letterSpacing: 2.5,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    offset: const Offset(0, 1.5),
-                    blurRadius: 3,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ArcadeButtonPainter extends CustomPainter {
-  final Color topColor;
-  final Color shadowColor;
-  final bool depressed;
-
-  const _ArcadeButtonPainter({
-    required this.topColor,
-    required this.shadowColor,
-    required this.depressed,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const radius = Radius.circular(8.0);
-    const depth = 5.0;
-
-    if (!depressed) {
-      // Hard drop shadow (solid, no blur — arcade style)
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(0, depth, size.width, size.height),
-          radius,
-        ),
-        Paint()..color = shadowColor,
-      );
-    }
-
-    // Top face with subtle vertical gradient
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        radius,
-      ),
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color.lerp(topColor, Colors.white, 0.15)!,
-            topColor,
-            Color.lerp(topColor, Colors.black, 0.15)!,
-          ],
-          stops: const [0.0, 0.5, 1.0],
-        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
-    );
-
-    // Top highlight edge
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        radius,
-      ),
-      Paint()
-        ..color = Colors.white.withValues(alpha: 0.18)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_ArcadeButtonPainter old) =>
-      old.topColor != topColor ||
-      old.shadowColor != shadowColor ||
-      old.depressed != depressed;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Audio Toggle Button
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _AudioToggleButton extends StatelessWidget {
-  final bool isMusicEnabled;
-  final VoidCallback onTap;
-
-  const _AudioToggleButton({
-    required this.isMusicEnabled,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isMusicEnabled
-              ? const Color(0xFF1A2E44)
-              : const Color(0xFF1C1C1C),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isMusicEnabled
-                ? const Color(0xFF2E5080).withValues(alpha: 0.8)
-                : Colors.white.withValues(alpha: 0.08),
-            width: 1.2,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isMusicEnabled ? Icons.graphic_eq_rounded : Icons.volume_off_rounded,
-              color: isMusicEnabled
-                  ? const Color(0xFF64B5F6)
-                  : Colors.white.withValues(alpha: 0.30),
-              size: 18,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              isMusicEnabled ? 'MUSIC ON' : 'MUTED',
-              style: GoogleFonts.outfit(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.5,
-                color: isMusicEnabled
-                    ? const Color(0xFF64B5F6)
-                    : Colors.white.withValues(alpha: 0.25),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -538,56 +405,6 @@ class _SugarRainPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SugarRainPainter old) => true;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Emitter Icon Painter (decorative sugar funnel above logo)
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _EmitterIconPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-
-    // Funnel body
-    final path = Path()
-      ..moveTo(w * 0.1, h * 0.15)
-      ..lineTo(w * 0.35, h * 0.75)
-      ..lineTo(w * 0.65, h * 0.75)
-      ..lineTo(w * 0.9, h * 0.15)
-      ..close();
-
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = const Color(0xFFFFB300).withValues(alpha: 0.25)
-        ..style = PaintingStyle.fill,
-    );
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = const Color(0xFFFFB300)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.8
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round,
-    );
-
-    // Spout
-    final spout = Path()
-      ..moveTo(w * 0.35, h * 0.75)
-      ..lineTo(w * 0.38, h * 0.90)
-      ..lineTo(w * 0.62, h * 0.90)
-      ..lineTo(w * 0.65, h * 0.75);
-    canvas.drawPath(spout, Paint()
-      ..color = const Color(0xFFFFB300)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8);
-  }
-
-  @override
-  bool shouldRepaint(_EmitterIconPainter _) => false;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

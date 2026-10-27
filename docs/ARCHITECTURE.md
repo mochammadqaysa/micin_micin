@@ -36,19 +36,23 @@ The objective of the game is to guide falling granular particles ("micin" / suga
   - Touch input routed via `DragCallbacks` mixin; `canvasStartPosition` mapped to virtual space via `VirtualCoordinateAdapter`.
 - **Virtual Resolution Pipeline:** Unified $400 \times 700$ virtual coordinate space (`VirtualCoordinateAdapter`). Letterboxing/pillarboxing guarantees 100% deterministic physics across any device aspect ratio.
 - **Granular Physics & Sand Piling Engine:** Calibrated powdery sand physics ($r = 1.1\text{ virtual px}$, $g = 0.14\text{ px/frame}^2$, $v_{\max} = 4.8\text{ px/frame}$). Target cups feature a 1D Discrete Column Heightmap with Angle of Repose slope relaxation and Overflow Spill mechanics.
-- **Arcade Visual Identity ("Chunky Arcade" Design Language):**
-  - **Design Tokens (`CartoonTokens` in `core/theme.dart`):** Hard drop-shadow 3D buttons, no glassmorphism, no live blur on hot paths.
+- **Visual Design & Token System:**
+  - **Design Tokens (`PixelTerrainTokens` in `lib/core/pixel_terrain_tokens.dart` & `CartoonTokens` in `core/theme.dart`):** Topographic terrain palette (Sage, Teal, Moss, Sand, Slate) and `PixelShapeStyle` tokens with stepped `PixelCorners`.
+  - **Pixel Sprite Caching (`PixelSprites` in `lib/core/pixel_sprites.dart`):** Null-safe async preloading and caching of 16-bit pixel art sprite assets (`assets/images/vessels/cup_pixel.png`, `emitters/emitter_pixel.png`, `gates/filter_pixel.png`, `gates/gravity_pixel.png`, `terrain/terrain_pixel.png`) with graceful procedural fallback for headless testing.
+  - **In-Game HUD (`GameHud`):** Built with `pixel_ui` primitives (`PixelButton`, `PixelBox`, `PixelCorners`) and `PixelText.mulmaru`. Tactile button cluster with drop shadows, washi level badge, and purple/cyan gravity switch with pixel amulet icon.
+  - **Level Geometry & Sprites (`LevelGeometryFlameComponent`):** Hybrid rendering rendering cached pixel-art sprites via `drawImageRect` onto virtual $400 \times 700$ coordinates, preserving target color tinting and dynamic countdown numbers.
+  - **Terrain Background Component (`BackgroundFlameComponent`):** Quantized elevation contour shelves (pixelated stair-steps) with stepped edge outlines, blended pixel terrain texture overlay (`_terrainPaint`), multi-plane parallax depth, and 4-tier fine point stippling texture (mineral sand, moss, slate, caustics).
   - **Main Menu (`MenuScreen`):** Diegetic chalk/arcade aesthetic — stacked `micin` logotype, `draw · guide · fill` tagline, falling sugar grain rain (`AnimatedBuilder`), chunky capsule buttons with hard coin-shadow depth.
-  - **In-Game HUD (`GameHud`):** Amber coin badge (custom-painted `_CoinPainter`), circular icon buttons with solid hard-shadow depth, pulsing GRAVITY pill with cyan glow halo.
   - **Pause Overlay (`PauseOverlay`):** Full-bleed `BackdropFilter` blur, cartoon panel center-piece with floating action buttons (RESUME, ULANGI, KEMBALI) using `ZenGlyphButton` with hard shadow.
   - **Countdown Overlay (`CountdownOverlay`):** Pop-scale `TweenSequence` animation, amber/green gradient pill badge.
   - **Level Select (`LevelSelectScreen`):** Chunky arcade design — solid drop-shadow act cards (colored top accent stripe, BABAK label badge, progress bar), roman-numeral-only act tab navigator with hard shadow on active tab, solid amber coin progress badge in header. Zero `GlassContainer`. `LevelButton` grid with 3D bevel unlock/completed/locked states.
 - **Rendering Paradigm:** Flame `GameWidget` (priority-ordered `Component` tree) as the game canvas. Flutter `Overlay` builders for HUD and pause overlays composited on top via `GameWidget.overlayBuilderMap`.
 - **Persistence:** SharedPreferences (`sugarshared` key, zero backend dependency)
 - **Audio:** `audioplayers` 6.1 with Hierarchical Audio Mixer (`AudioBus` tree: `MasterBus ← [MusicBus, AmbienceBus, SfxBus, InteractionBus]`), sidechain ducking, stem layering, and pentatonic pitch-interpolated grain capture pings.
-- **Typography:** Google Fonts (`Outfit` font family, pre-bundled offline)
+- **Typography:** `PixelText.mulmaru` (bundled via `pixel_ui`) and Google Fonts (`Outfit` font family, pre-bundled offline)
 
 ---
+
 
 ## 3. Data Flow & Layer Dependencies
 
@@ -248,7 +252,7 @@ d:/kayzz/flutter/micin/
 - **Two-Layer Mandate:**
   1. **Micro-Level:** Unit and widget tests per model, engine component, painter, and screen.
   2. **Macro-Level:** Integration test suite (`test/integration/`) verifying full multi-frame particle routing, color mutating gates, and gravity toggle behavior.
-- **Current Test Metrics:** 190 tests passing across 28 test files with **100% pass rate**, 0 failures, and 0 analyzer issues (`flutter test`, `flutter analyze`).
+- **Current Test Metrics:** 198 tests passing across 32 test files with **100% pass rate**, 0 failures, and 0 analyzer issues (`flutter test`, `flutter analyze`).
 - **Execution Commands:**
   - Run all tests: `flutter test`
   - Run with coverage: `flutter test --coverage`

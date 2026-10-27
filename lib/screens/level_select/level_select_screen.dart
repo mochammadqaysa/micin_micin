@@ -2,15 +2,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:pixel_ui/pixel_ui.dart';
 import '../../core/constants.dart';
-import '../../core/theme.dart';
+import '../../core/pixel_terrain_tokens.dart';
 import '../../models/player_progress.dart';
 import '../../audio/audio_manager.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/player_progress_provider.dart';
-import '../../widgets/cartoon_button.dart';
-import '../../widgets/cartoon_icon_button.dart';
 import '../game/painters/background_painter.dart';
 import 'level_button.dart';
 
@@ -51,10 +49,46 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
   final List<GlobalKey> _actKeys = List.generate(4, (_) => GlobalKey());
 
   static const List<_ActInfo> _acts = [
-    _ActInfo(actNumber: 1, romanNumeral: 'I', title: 'Dasar', subtitle: 'Level 1 - 7', accentColor: CartoonTokens.greenTop, shadowColor: CartoonTokens.greenShadow, startLevel: 1, endLevel: 7),
-    _ActInfo(actNumber: 2, romanNumeral: 'II', title: 'Filter Warna', subtitle: 'Level 8 - 15', accentColor: CartoonTokens.coralTop, shadowColor: CartoonTokens.coralShadow, startLevel: 8, endLevel: 15),
-    _ActInfo(actNumber: 3, romanNumeral: 'III', title: 'Inversi Gravitasi', subtitle: 'Level 16 - 22', accentColor: CartoonTokens.cyanTop, shadowColor: CartoonTokens.cyanShadow, startLevel: 16, endLevel: 22),
-    _ActInfo(actNumber: 4, romanNumeral: 'IV', title: 'Tantangan Akhir', subtitle: 'Level 23 - 30', accentColor: CartoonTokens.amberTop, shadowColor: CartoonTokens.amberShadow, startLevel: 23, endLevel: 30),
+    _ActInfo(
+      actNumber: 1,
+      romanNumeral: 'I',
+      title: 'Dasar',
+      subtitle: 'Level 1 - 7',
+      accentColor: PixelTerrainTokens.sage,
+      shadowColor: PixelTerrainTokens.slate,
+      startLevel: 1,
+      endLevel: 7,
+    ),
+    _ActInfo(
+      actNumber: 2,
+      romanNumeral: 'II',
+      title: 'Filter Warna',
+      subtitle: 'Level 8 - 15',
+      accentColor: PixelTerrainTokens.teal,
+      shadowColor: PixelTerrainTokens.slate,
+      startLevel: 8,
+      endLevel: 15,
+    ),
+    _ActInfo(
+      actNumber: 3,
+      romanNumeral: 'III',
+      title: 'Inversi Gravitasi',
+      subtitle: 'Level 16 - 22',
+      accentColor: PixelTerrainTokens.moss,
+      shadowColor: PixelTerrainTokens.slate,
+      startLevel: 16,
+      endLevel: 22,
+    ),
+    _ActInfo(
+      actNumber: 4,
+      romanNumeral: 'IV',
+      title: 'Tantangan Akhir',
+      subtitle: 'Level 23 - 30',
+      accentColor: PixelTerrainTokens.sand,
+      shadowColor: PixelTerrainTokens.slate,
+      startLevel: 23,
+      endLevel: 30,
+    ),
   ];
 
   @override
@@ -91,9 +125,9 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
       if (playerProgress.isUnlocked(i) && !playerProgress.isCompleted(i)) { nextPlayableLevelId = i; break; }
     }
     return Scaffold(
-      backgroundColor: const Color(0xFF1E1645),
+      backgroundColor: PixelTerrainTokens.slate,
       body: Stack(children: [
-        Positioned.fill(child: CustomPaint(painter: BackgroundPainter(backgroundColor: const Color(0xFF1E1645), parallaxOffset: Offset(0, -_scrollOffset * 0.14)))),
+        Positioned.fill(child: CustomPaint(painter: BackgroundPainter(backgroundColor: PixelTerrainTokens.slate, parallaxOffset: Offset(0, -_scrollOffset * 0.14)))),
         SafeArea(child: Column(children: [
           _buildHeader(context, playerProgress),
           _buildActNavigator(),
@@ -124,15 +158,29 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Row(children: [
-          CartoonIconButton(
-            icon: Icons.arrow_back_rounded, size: 42, iconSize: 22, variant: CartoonButtonVariant.amber,
+          PixelButton(
+            logicalWidth: 11,
+            logicalHeight: 11,
+            width: 44,
+            height: 44,
+            normalStyle: PixelTerrainTokens.pauseButtonNormal,
+            pressedStyle: PixelTerrainTokens.pauseButtonPressed,
+            pressChildOffset: const Offset(0, 1),
             onPressed: () {
               ref.read(audioManagerProvider).playSfx(SoundType.buttonClick);
               if (context.canPop()) { context.pop(); } else { context.go('/menu'); }
             },
+            child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
           ),
           const Spacer(),
-          Text('Pilih Level', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 2.0, shadows: const [Shadow(color: Color(0xFF000000), offset: Offset(0, 3), blurRadius: 0)])),
+          Text(
+            'Pilih Level',
+            style: PixelText.mulmaru(
+              fontSize: 20,
+              color: PixelTerrainTokens.sand,
+              letterSpacing: 2.0,
+            ),
+          ),
           const Spacer(),
           _ProgressBadge(progress: progress),
         ]),
@@ -149,19 +197,16 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 6.0),
-        padding: const EdgeInsets.all(5.0),
-        decoration: BoxDecoration(
-          color: const Color(0xFF120E30),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: const Color(0xFF2A2060), width: 2.0),
-          boxShadow: const [BoxShadow(color: Color(0xFF0A0820), offset: Offset(0, 4), blurRadius: 0)],
-        ),
+        padding: const EdgeInsets.all(4.0),
         child: Row(children: [
           for (int i = 0; i < _acts.length; i++)
-            Expanded(child: GestureDetector(
-              onTap: () => _scrollToAct(i),
-              behavior: HitTestBehavior.opaque,
-              child: _ActTab(act: _acts[i], isSelected: _selectedActIndex == i),
+            Expanded(child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 3.0),
+              child: GestureDetector(
+                onTap: () => _scrollToAct(i),
+                behavior: HitTestBehavior.opaque,
+                child: _ActTab(act: _acts[i], isSelected: _selectedActIndex == i),
+              ),
             )),
         ]),
       ),
@@ -194,43 +239,88 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen>
 
   Widget _buildActHeroCard(_ActInfo act, int completedCount, double completionRatio) {
     return Container(
-      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1540),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: act.accentColor, width: 2.5),
-        boxShadow: [BoxShadow(color: act.shadowColor, offset: const Offset(0, 5), blurRadius: 0)],
-      ),
-      child: ClipRRect(borderRadius: BorderRadius.circular(13.5), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(height: 6, decoration: BoxDecoration(gradient: LinearGradient(colors: [act.accentColor, act.accentColor.withValues(alpha: 0.6)]))),
-        Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 14), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(color: act.accentColor, borderRadius: BorderRadius.circular(6), boxShadow: [BoxShadow(color: act.shadowColor, offset: const Offset(0, 2), blurRadius: 0)]),
-              child: Text('BABAK ${act.romanNumeral}', style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.5)),
-            ),
-            const SizedBox(width: 8),
-            Text(act.subtitle, style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF9186C0), letterSpacing: 0.4)),
-            const Spacer(),
-            Text('$completedCount/${act.totalLevels}', style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.w900, color: act.accentColor, letterSpacing: 0.5)),
-            const SizedBox(width: 4),
-            Icon(Icons.star_rounded, color: act.accentColor, size: 16),
-          ]),
-          const SizedBox(height: 8),
-          Text(act.title, style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.3, shadows: const [Shadow(color: Color(0x88000000), offset: Offset(0, 2), blurRadius: 0)])),
-          const SizedBox(height: 10),
-          Container(
-            height: 10,
-            decoration: BoxDecoration(color: const Color(0xFF0E0B28), borderRadius: BorderRadius.circular(5), border: Border.all(color: act.accentColor.withValues(alpha: 0.3), width: 1)),
-            child: ClipRRect(borderRadius: BorderRadius.circular(4), child: FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: completionRatio.clamp(0.0, 1.0),
-              child: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [act.accentColor, act.accentColor.withValues(alpha: 0.75)]), boxShadow: [BoxShadow(color: act.accentColor.withValues(alpha: 0.6), blurRadius: 6)])),
-            )),
+        color: PixelTerrainTokens.tealSurface,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: act.accentColor, width: 2),
+        boxShadow: const [
+          BoxShadow(
+            color: PixelTerrainTokens.slateBedrock,
+            offset: Offset(2, 2),
           ),
-        ])),
-      ])),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              PixelBox(
+                logicalWidth: 20,
+                logicalHeight: 7,
+                style: PixelTerrainTokens.mossBoxStyle,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  child: Text(
+                    'BABAK ${act.romanNumeral}',
+                    style: PixelText.mulmaru(
+                      fontSize: 11,
+                      color: Colors.white,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                act.subtitle,
+                style: PixelText.mulmaru(
+                  fontSize: 10,
+                  color: PixelTerrainTokens.sage.withValues(alpha: 0.8),
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '$completedCount/${act.totalLevels}',
+                style: PixelText.mulmaru(
+                  fontSize: 11,
+                  color: act.accentColor,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(Icons.star_rounded, color: act.accentColor, size: 16),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            act.title,
+            style: PixelText.mulmaru(
+              fontSize: 18,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+          PixelBox(
+            logicalWidth: 60,
+            logicalHeight: 2,
+            style: PixelTerrainTokens.slateBoxStyle,
+            child: SizedBox(
+              height: 8,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: FractionallySizedBox(
+                  widthFactor: completionRatio.clamp(0.0, 1.0),
+                  child: Container(color: act.accentColor),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -264,19 +354,28 @@ class _ProgressBadge extends StatelessWidget {
   const _ProgressBadge({required this.progress});
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      decoration: BoxDecoration(
-        color: CartoonTokens.amberBottom,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.5),
-        boxShadow: const [BoxShadow(color: CartoonTokens.amberShadow, offset: Offset(0, 4), blurRadius: 0)],
+    return PixelBox(
+      logicalWidth: 24,
+      logicalHeight: 11,
+      style: PixelTerrainTokens.mossBoxStyle,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.star_rounded, color: PixelTerrainTokens.sand, size: 16),
+            const SizedBox(width: 5),
+            Text(
+              '${progress.completedCount}/$kTotalLevels',
+              style: PixelText.mulmaru(
+                fontSize: 11,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.star_rounded, color: Colors.white, size: 17),
-        const SizedBox(width: 5),
-        Text('${progress.completedCount}/$kTotalLevels', style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5)),
-      ]),
     );
   }
 }
@@ -287,15 +386,24 @@ class _ActTab extends StatelessWidget {
   const _ActTab({required this.act, required this.isSelected});
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      decoration: BoxDecoration(
-        color: isSelected ? act.accentColor : Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: isSelected ? [BoxShadow(color: act.shadowColor, offset: const Offset(0, 3), blurRadius: 0)] : null,
+    return PixelBox(
+      logicalWidth: 18,
+      logicalHeight: 9,
+      style: isSelected ? PixelTerrainTokens.mossBoxStyle : PixelTerrainTokens.slateBoxStyle,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6.0),
+        child: Center(
+          child: Text(
+            act.romanNumeral,
+            style: PixelText.mulmaru(
+              fontSize: 11,
+              color: isSelected ? Colors.white : PixelTerrainTokens.sage,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ),
       ),
-      child: Center(child: Text(act.romanNumeral, style: GoogleFonts.outfit(fontSize: 14, fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600, color: isSelected ? Colors.white : const Color(0xFF6B5FA0), letterSpacing: 0.8))),
     );
   }
 }
+

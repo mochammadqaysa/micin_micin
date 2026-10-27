@@ -3,12 +3,16 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart'
     show
         Alignment,
+        BlendMode,
+        BlurStyle,
         Canvas,
         Color,
+        ColorFilter,
         Colors,
+        FilterQuality,
+        FontWeight,
         LinearGradient,
         MaskFilter,
-        BlurStyle,
         Offset,
         Paint,
         PaintingStyle,
@@ -22,8 +26,8 @@ import 'package:flutter/material.dart'
         TextDirection,
         TextPainter,
         TextSpan,
-        TextStyle,
-        FontWeight;
+        TextStyle;
+import '../../core/pixel_sprites.dart';
 import '../../engine/collision/cup_hitbox.dart';
 import '../../models/level_config.dart';
 
@@ -34,6 +38,7 @@ import '../../models/level_config.dart';
 class LevelGeometryFlameComponent extends Component {
   final LevelConfig levelConfig;
   final List<CupHitbox> Function() liveCupsGetter;
+  double _elapsedSeconds = 0.0;
 
   LevelGeometryFlameComponent({
     required this.levelConfig,
@@ -42,6 +47,12 @@ class LevelGeometryFlameComponent extends Component {
 
   @override
   int get priority => 10;
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    _elapsedSeconds += dt;
+  }
 
   @override
   void render(Canvas canvas) {
@@ -54,58 +65,129 @@ class LevelGeometryFlameComponent extends Component {
   // ── Color filter zones ────────────────────────────────────────────────────
 
   void _renderColorFilters(Canvas canvas, List<CupHitbox> liveCups) {
+    final filterSheet = PixelSprites.filterSheet;
+    final filterImage = PixelSprites.filter;
+
     for (final filter in levelConfig.filters) {
       final rect = Rect.fromLTWH(filter.x, filter.y, filter.width, filter.height);
 
-      // Translucent glassmorphic body
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(rect, const Radius.circular(6.0)),
-        Paint()
-          ..color = filter.targetColor.withValues(alpha: 0.18)
-          ..style = PaintingStyle.fill,
-      );
+      if (filterSheet != null) {
+        // Animated Torii crystal prism gate
+        final frameW = filterSheet.width / 6.0;
+        final frameH = filterSheet.height.toDouble();
+        final frameIndex = ((_elapsedSeconds * 6).toInt()) % 6;
+        final src = Rect.fromLTWH(frameIndex * frameW, 0, frameW, frameH);
 
-      // Specular gradient border
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(rect, const Radius.circular(6.0)),
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              filter.targetColor.withValues(alpha: 0.85),
-              Colors.white.withValues(alpha: 0.40),
-              filter.targetColor.withValues(alpha: 0.25),
-            ],
-          ).createShader(rect)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.2,
-      );
+        canvas.drawImageRect(
+          filterSheet,
+          src,
+          rect,
+          Paint()
+            ..colorFilter = ColorFilter.mode(
+              filter.targetColor.withValues(alpha: 0.65),
+              BlendMode.srcATop,
+            )
+            ..filterQuality = FilterQuality.none,
+        );
 
-      // Resonance halo ring
-      canvas.drawCircle(
-        rect.center,
-        5.0,
-        Paint()
-          ..color = filter.targetColor.withValues(alpha: 0.35)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.8,
-      );
+        // Specular gradient border
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect, const Radius.circular(4.0)),
+          Paint()
+            ..color = filter.targetColor.withValues(alpha: 0.40)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.0,
+        );
+      } else if (filterImage != null) {
+        final src = Rect.fromLTWH(
+          0,
+          0,
+          filterImage.width.toDouble(),
+          filterImage.height.toDouble(),
+        );
+        canvas.drawImageRect(
+          filterImage,
+          src,
+          rect,
+          Paint()
+            ..colorFilter = ColorFilter.mode(
+              filter.targetColor.withValues(alpha: 0.60),
+              BlendMode.srcATop,
+            )
+            ..filterQuality = FilterQuality.none,
+        );
 
-      // Jewel center pip
-      canvas.drawCircle(
-        rect.center,
-        2.5,
-        Paint()
-          ..color = filter.targetColor
-          ..style = PaintingStyle.fill,
-      );
+        // Specular gradient border
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect, const Radius.circular(4.0)),
+          Paint()
+            ..color = filter.targetColor.withValues(alpha: 0.40)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.0,
+        );
+
+        // Jewel center pip
+        canvas.drawCircle(
+          rect.center,
+          2.5,
+          Paint()
+            ..color = filter.targetColor
+            ..style = PaintingStyle.fill,
+        );
+      } else {
+        // Translucent glassmorphic body fallback
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect, const Radius.circular(6.0)),
+          Paint()
+            ..color = filter.targetColor.withValues(alpha: 0.18)
+            ..style = PaintingStyle.fill,
+        );
+
+        // Specular gradient border
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect, const Radius.circular(6.0)),
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                filter.targetColor.withValues(alpha: 0.85),
+                Colors.white.withValues(alpha: 0.40),
+                filter.targetColor.withValues(alpha: 0.25),
+              ],
+            ).createShader(rect)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.2,
+        );
+
+        // Resonance halo ring
+        canvas.drawCircle(
+          rect.center,
+          5.0,
+          Paint()
+            ..color = filter.targetColor.withValues(alpha: 0.35)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 0.8,
+        );
+
+        // Jewel center pip
+        canvas.drawCircle(
+          rect.center,
+          2.5,
+          Paint()
+            ..color = filter.targetColor
+            ..style = PaintingStyle.fill,
+        );
+      }
     }
   }
 
   // ── Target cups ───────────────────────────────────────────────────────────
 
   void _renderCups(Canvas canvas, List<CupHitbox> liveCups) {
+    final cupSheet = PixelSprites.cupSheet;
+    final cupImage = PixelSprites.cup;
+
     for (int i = 0; i < levelConfig.cups.length; i++) {
       final cup = levelConfig.cups[i];
       final currentCaptured =
@@ -125,89 +207,126 @@ class LevelGeometryFlameComponent extends Component {
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0),
       );
 
-      // 2. Isometric vessel body
-      final bodyPath = Path()
-        ..moveTo(rect.left, rect.top + 3.0)
-        ..lineTo(rect.left + 2.0, rect.bottom - 6.0)
-        ..quadraticBezierTo(
-            rect.left + 3.0, rect.bottom, rect.left + 8.0, rect.bottom)
-        ..lineTo(rect.right - 8.0, rect.bottom)
-        ..quadraticBezierTo(
-            rect.right - 3.0, rect.bottom, rect.right - 2.0, rect.bottom - 6.0)
-        ..lineTo(rect.right, rect.top + 3.0)
-        ..close();
+      if (cupSheet != null) {
+        // Animated Tsukubai stone basin with concentric water ripples
+        final frameW = cupSheet.width / 8.0;
+        final frameH = cupSheet.height.toDouble();
+        final frameIndex = ((_elapsedSeconds * 6).toInt()) % 8;
+        final src = Rect.fromLTWH(frameIndex * frameW, 0, frameW, frameH);
 
-      canvas.drawPath(
-        bodyPath,
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              cup.color.withValues(alpha: 0.22),
-              const Color(0xFF0F172A).withValues(alpha: 0.78),
-              const Color(0xFF0A0D14).withValues(alpha: 0.88),
-            ],
-            stops: const [0.0, 0.45, 1.0],
-          ).createShader(rect)
-          ..style = PaintingStyle.fill,
-      );
+        final isNeutral =
+            cup.color.toARGB32() == 0xFFE2E8F0 || cup.color == Colors.white;
+        final paint = Paint()..filterQuality = FilterQuality.none;
+        if (!isNeutral) {
+          paint.colorFilter = ColorFilter.mode(
+            cup.color.withValues(alpha: 0.35),
+            BlendMode.srcATop,
+          );
+        }
+        canvas.drawImageRect(cupSheet, src, rect, paint);
+      } else if (cupImage != null) {
+        // Render pixel art stone basin / Tsukubai cup fallback
+        final src = Rect.fromLTWH(
+          0,
+          0,
+          cupImage.width.toDouble(),
+          cupImage.height.toDouble(),
+        );
+        final isNeutral =
+            cup.color.toARGB32() == 0xFFE2E8F0 || cup.color == Colors.white;
+        final paint = Paint()..filterQuality = FilterQuality.none;
+        if (!isNeutral) {
+          paint.colorFilter = ColorFilter.mode(
+            cup.color.withValues(alpha: 0.32),
+            BlendMode.srcATop,
+          );
+        }
+        canvas.drawImageRect(cupImage, src, rect, paint);
+      } else {
+        // 2. Isometric vessel body fallback
+        final bodyPath = Path()
+          ..moveTo(rect.left, rect.top + 3.0)
+          ..lineTo(rect.left + 2.0, rect.bottom - 6.0)
+          ..quadraticBezierTo(
+              rect.left + 3.0, rect.bottom, rect.left + 8.0, rect.bottom)
+          ..lineTo(rect.right - 8.0, rect.bottom)
+          ..quadraticBezierTo(
+              rect.right - 3.0, rect.bottom, rect.right - 2.0, rect.bottom - 6.0)
+          ..lineTo(rect.right, rect.top + 3.0)
+          ..close();
 
-      canvas.drawPath(
-        bodyPath,
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white.withValues(alpha: 0.70),
-              cup.color.withValues(alpha: 0.85),
-              cup.color.withValues(alpha: 0.30),
-            ],
-          ).createShader(rect)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.6
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round,
-      );
+        canvas.drawPath(
+          bodyPath,
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                cup.color.withValues(alpha: 0.22),
+                const Color(0xFF0F172A).withValues(alpha: 0.78),
+                const Color(0xFF0A0D14).withValues(alpha: 0.88),
+              ],
+              stops: const [0.0, 0.45, 1.0],
+            ).createShader(rect)
+            ..style = PaintingStyle.fill,
+        );
 
-      // 3. Isometric elliptical rim
-      final rimHeight = (rect.width * 0.28).clamp(8.0, 16.0);
-      final rimRect = Rect.fromCenter(
-        center: Offset(rect.center.dx, rect.top + 2.0),
-        width: rect.width,
-        height: rimHeight,
-      );
+        canvas.drawPath(
+          bodyPath,
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white.withValues(alpha: 0.70),
+                cup.color.withValues(alpha: 0.85),
+                cup.color.withValues(alpha: 0.30),
+              ],
+            ).createShader(rect)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.6
+            ..strokeCap = StrokeCap.round
+            ..strokeJoin = StrokeJoin.round,
+        );
 
-      canvas.drawOval(
-        rimRect,
-        Paint()
-          ..shader = RadialGradient(
-            center: const Alignment(0.0, -0.2),
-            radius: 0.9,
-            colors: [
-              const Color(0xFF05070B).withValues(alpha: 0.95),
-              cup.color.withValues(alpha: 0.30),
-            ],
-          ).createShader(rimRect)
-          ..style = PaintingStyle.fill,
-      );
+        // 3. Isometric elliptical rim
+        final rimHeight = (rect.width * 0.28).clamp(8.0, 16.0);
+        final rimRect = Rect.fromCenter(
+          center: Offset(rect.center.dx, rect.top + 2.0),
+          width: rect.width,
+          height: rimHeight,
+        );
 
-      canvas.drawOval(
-        rimRect,
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white.withValues(alpha: 0.90),
-              cup.color.withValues(alpha: 0.95),
-              cup.color.withValues(alpha: 0.45),
-            ],
-          ).createShader(rimRect)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.8,
-      );
+        canvas.drawOval(
+          rimRect,
+          Paint()
+            ..shader = RadialGradient(
+              center: const Alignment(0.0, -0.2),
+              radius: 0.9,
+              colors: [
+                const Color(0xFF05070B).withValues(alpha: 0.95),
+                cup.color.withValues(alpha: 0.30),
+              ],
+            ).createShader(rimRect)
+            ..style = PaintingStyle.fill,
+        );
+
+        canvas.drawOval(
+          rimRect,
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white.withValues(alpha: 0.90),
+                cup.color.withValues(alpha: 0.95),
+                cup.color.withValues(alpha: 0.45),
+              ],
+            ).createShader(rimRect)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.8,
+        );
+      }
 
       // 4. Countdown number with 80ms capture pulse
       final remaining =
@@ -259,6 +378,9 @@ class LevelGeometryFlameComponent extends Component {
   // ── Particle emitters ─────────────────────────────────────────────────────
 
   void _renderEmitters(Canvas canvas) {
+    final emitterSheet = PixelSprites.emitterSheet;
+    final emitterImage = PixelSprites.emitter;
+
     for (final emitter in levelConfig.emitters) {
       final center = Offset(emitter.x, emitter.y);
       const funnelW = 18.0;
@@ -266,69 +388,114 @@ class LevelGeometryFlameComponent extends Component {
       const mouthW = 10.0;
       const mouthH = 5.0;
 
-      // Top mounting collar
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromCenter(
-            center: Offset(center.dx, center.dy - funnelH * 0.5),
-            width: funnelW + 4.0,
-            height: 3.5,
+      if (emitterSheet != null) {
+        // Animated bamboo water spout trickling droplets
+        final frameW = emitterSheet.width / 6.0;
+        final frameH = emitterSheet.height.toDouble();
+        final frameIndex = ((_elapsedSeconds * 8).toInt()) % 6;
+        final src = Rect.fromLTWH(frameIndex * frameW, 0, frameW, frameH);
+        final dst = Rect.fromCenter(
+          center: center,
+          width: funnelW + 8.0,
+          height: funnelH + 6.0,
+        );
+        final paint = Paint()..filterQuality = FilterQuality.none;
+        if (emitter.color != Colors.white) {
+          paint.colorFilter = ColorFilter.mode(
+            emitter.color.withValues(alpha: 0.30),
+            BlendMode.srcATop,
+          );
+        }
+        canvas.drawImageRect(emitterSheet, src, dst, paint);
+      } else if (emitterImage != null) {
+        final src = Rect.fromLTWH(
+          0,
+          0,
+          emitterImage.width.toDouble(),
+          emitterImage.height.toDouble(),
+        );
+        final dst = Rect.fromCenter(
+          center: center,
+          width: funnelW + 6.0,
+          height: funnelH + 4.0,
+        );
+        final paint = Paint()..filterQuality = FilterQuality.none;
+        if (emitter.color != Colors.white) {
+          paint.colorFilter = ColorFilter.mode(
+            emitter.color.withValues(alpha: 0.25),
+            BlendMode.srcATop,
+          );
+        }
+        canvas.drawImageRect(emitterImage, src, dst, paint);
+      } else {
+        // Top mounting collar fallback
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromCenter(
+              center: Offset(center.dx, center.dy - funnelH * 0.5),
+              width: funnelW + 4.0,
+              height: 3.5,
+            ),
+            const Radius.circular(1.5),
           ),
-          const Radius.circular(1.5),
-        ),
-        Paint()
-          ..color = emitter.color.withValues(alpha: 0.40)
-          ..style = PaintingStyle.fill,
-      );
+          Paint()
+            ..color = emitter.color.withValues(alpha: 0.40)
+            ..style = PaintingStyle.fill,
+        );
 
-      // Funnel body
-      final funnelPath = Path()
-        ..moveTo(center.dx - funnelW * 0.5, center.dy - funnelH * 0.5)
-        ..lineTo(center.dx - mouthW * 0.5, center.dy + funnelH * 0.5)
-        ..lineTo(center.dx + mouthW * 0.5, center.dy + funnelH * 0.5)
-        ..lineTo(center.dx + funnelW * 0.5, center.dy - funnelH * 0.5)
-        ..close();
+        // Funnel body
+        final funnelPath = Path()
+          ..moveTo(center.dx - funnelW * 0.5, center.dy - funnelH * 0.5)
+          ..lineTo(center.dx - mouthW * 0.5, center.dy + funnelH * 0.5)
+          ..lineTo(center.dx + mouthW * 0.5, center.dy + funnelH * 0.5)
+          ..lineTo(center.dx + funnelW * 0.5, center.dy - funnelH * 0.5)
+          ..close();
 
-      final funnelRect =
-          Rect.fromCenter(center: center, width: funnelW, height: funnelH);
-      canvas.drawPath(
-        funnelPath,
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white.withValues(alpha: 0.35),
-              emitter.color.withValues(alpha: 0.70),
-              const Color(0xFF0F172A).withValues(alpha: 0.90),
-            ],
-          ).createShader(funnelRect)
-          ..style = PaintingStyle.fill,
-      );
+        final funnelRect =
+            Rect.fromCenter(center: center, width: funnelW, height: funnelH);
+        canvas.drawPath(
+          funnelPath,
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withValues(alpha: 0.35),
+                emitter.color.withValues(alpha: 0.70),
+                const Color(0xFF0F172A).withValues(alpha: 0.90),
+              ],
+            ).createShader(funnelRect)
+            ..style = PaintingStyle.fill,
+        );
 
-      canvas.drawPath(
-        funnelPath,
-        Paint()
-          ..color = emitter.color.withValues(alpha: 0.60)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.2,
-      );
+        canvas.drawPath(
+          funnelPath,
+          Paint()
+            ..color = emitter.color.withValues(alpha: 0.60)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.2,
+        );
 
-      // Spout mouth ellipse
-      final mouthRect = Rect.fromCenter(
-        center: Offset(center.dx, center.dy + funnelH * 0.5),
-        width: mouthW,
-        height: mouthH,
-      );
-      canvas.drawOval(mouthRect,
+        // Spout mouth ellipse
+        final mouthRect = Rect.fromCenter(
+          center: Offset(center.dx, center.dy + funnelH * 0.5),
+          width: mouthW,
+          height: mouthH,
+        );
+        canvas.drawOval(
+          mouthRect,
           Paint()
             ..color = const Color(0xFF05070B)
-            ..style = PaintingStyle.fill);
-      canvas.drawOval(mouthRect,
+            ..style = PaintingStyle.fill,
+        );
+        canvas.drawOval(
+          mouthRect,
           Paint()
             ..color = emitter.color
             ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.4);
+            ..strokeWidth = 1.4,
+        );
+      }
     }
   }
 

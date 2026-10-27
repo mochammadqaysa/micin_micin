@@ -15,6 +15,7 @@ dependencies:
   go_router: ^14.6.0
   google_fonts: ^6.2.1
   flame: ^1.38.2
+  pixel_ui: ^0.5.1
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +35,8 @@ flutter:
     - assets/images/emitters/
     - assets/images/gates/
     - assets/images/cartoon/
+    - assets/images/terrain/
+    - assets/images/spritesheets/
 
   fonts:
     - family: Outfit

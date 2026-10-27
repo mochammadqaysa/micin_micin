@@ -126,7 +126,7 @@ void main() {
           EmitterConfig(x: 200, y: 40, rate: 1, totalToEmit: 1),
         ],
         cups: [
-          CupConfig(x: 160, y: 500, width: 80, height: 70, targetAmount: 1),
+          CupConfig(x: 120, y: 500, width: 160, height: 70, targetAmount: 1),
         ],
       );
 

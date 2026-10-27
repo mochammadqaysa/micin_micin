@@ -1,13 +1,12 @@
 import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:pixel_ui/pixel_ui.dart';
 import '../core/constants.dart';
+import '../core/pixel_terrain_tokens.dart';
 import '../core/theme.dart';
 import '../models/level_ambiance.dart';
 import '../models/level_config.dart';
-import 'cartoon_button.dart';
-import 'cartoon_panel.dart';
 
 
 /// Full-bleed Chunky Arcade victory overlay:
@@ -193,239 +192,268 @@ class _LevelCompleteDialogState extends State<LevelCompleteDialog>
                   SafeArea(
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        child: CartoonPanel(
-                          style: CartoonPanelStyle.cream,
-                          borderRadius: 28,
-                          borderWidth: 3.5,
-                          bevelDepth: 8.0,
-                          padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 20.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // 1. Generated 3D Cartoon Victory Ribbon Banner
-                              Container(
-                                height: 86,
-                                margin: const EdgeInsets.only(bottom: 6),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: Image.asset(
-                                    'assets/images/cartoon/cartoon_victory.jpg',
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: PixelBox(
+                          logicalWidth: 84,
+                          logicalHeight: 116,
+                          style: PixelTerrainTokens.tealBoxStyle,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // 1. Pixel Zen Victory Badge
+                                PixelBox(
+                                  logicalWidth: 16,
+                                  logicalHeight: 14,
+                                  style: PixelTerrainTokens.mossBoxStyle,
+                                  child: const Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    child: Icon(
+                                      Icons.emoji_events_rounded,
+                                      size: 36,
+                                      color: PixelTerrainTokens.sand,
+                                    ),
                                   ),
                                 ),
-                              ),
 
-                              // 2. Three Bubbly Cartoon Star Podiums
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 46,
-                                    height: 46,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: CartoonTokens.amberTop,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 6,
-                                          offset: Offset(0, 3),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Center(
-                                      child: Icon(Icons.star_rounded, size: 28, color: Colors.white),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Container(
-                                    width: 62,
-                                    height: 62,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: CartoonTokens.amberTop,
-                                      border: Border.all(color: Colors.white, width: 2.5),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 10,
-                                          offset: Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Center(
-                                      child: Icon(Icons.star_rounded, size: 40, color: Colors.white),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Container(
-                                    width: 46,
-                                    height: 46,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: CartoonTokens.amberTop,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 6,
-                                          offset: Offset(0, 3),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Center(
-                                      child: Icon(Icons.star_rounded, size: 28, color: Colors.white),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 14),
+                                const SizedBox(height: 10),
 
-                              // 3. Victory Title
-                              Text(
-                                isFinalLevel ? 'Selamat!' : 'Level ${widget.levelId} Selesai!',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.w900,
-                                  color: CartoonTokens.textDarkBrown,
-                                  letterSpacing: 1.2,
-                                  shadows: const [
-                                    Shadow(
-                                      color: Colors.black12,
-                                      offset: Offset(1, 2),
-                                      blurRadius: 2,
-                                    ),
-                                  ],
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 6),
-
-                              // 4. Subtitle
-                              Text(
-                                isFinalLevel
-                                    ? 'Semua 30 level telah berhasil Anda selesaikan!'
-                                    : 'Target butiran berhasil dipenuhi.',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF78350F),
-                                  letterSpacing: 0.5,
-                                  height: 1.3,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // 5. Accuracy & Rating Chip
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFDCFCE7),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: const Color(0xFF86EFAC),
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                // 2. Three Pixel Star Podiums
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(
-                                      Icons.check_circle_rounded,
-                                      size: 16,
-                                      color: Color(0xFF16A34A),
+                                    PixelBox(
+                                      logicalWidth: 8,
+                                      logicalHeight: 8,
+                                      width: 30,
+                                      height: 30,
+                                      style: PixelTerrainTokens.sandBoxStyle,
+                                      child: const Center(
+                                        child: Icon(Icons.star_rounded, size: 18, color: PixelTerrainTokens.slate),
+                                      ),
                                     ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'Akurasi 100% • Sempurna',
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: const Color(0xFF15803D),
-                                        letterSpacing: 0.6,
+                                    const SizedBox(width: 8),
+                                    PixelBox(
+                                      logicalWidth: 10,
+                                      logicalHeight: 10,
+                                      width: 40,
+                                      height: 40,
+                                      style: PixelTerrainTokens.sandBoxStyle,
+                                      child: const Center(
+                                        child: Icon(Icons.star_rounded, size: 26, color: PixelTerrainTokens.slate),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    PixelBox(
+                                      logicalWidth: 8,
+                                      logicalHeight: 8,
+                                      width: 30,
+                                      height: 30,
+                                      style: PixelTerrainTokens.sandBoxStyle,
+                                      child: const Center(
+                                        child: Icon(Icons.star_rounded, size: 18, color: PixelTerrainTokens.slate),
                                       ),
                                     ),
                                   ],
                                 ),
-                              ),
-
-                              const SizedBox(height: 20),
-
-                              // 6. Primary Action Button
-                              if (!isFinalLevel && widget.onNextLevel != null) ...[
-                                CartoonButton(
-                                  key: const Key('dialog_next_level'),
-                                  text: 'Level Berikutnya',
-                                  variant: CartoonButtonVariant.green,
-                                  height: 52,
-                                  fontSize: 16,
-                                  trailing: const Icon(
-                                    Icons.arrow_forward_rounded,
-                                    size: 20,
-                                    color: Colors.white,
-                                  ),
-                                  onPressed: widget.onNextLevel!,
-                                ),
                                 const SizedBox(height: 12),
-                              ],
 
-                              if (isFinalLevel) ...[
-                                CartoonButton(
-                                  key: const Key('dialog_menu'),
-                                  text: 'Kembali ke Menu',
-                                  variant: CartoonButtonVariant.green,
-                                  height: 52,
-                                  fontSize: 16,
-                                  trailing: const Icon(
-                                    Icons.check_circle_outline_rounded,
-                                    size: 20,
-                                    color: Colors.white,
+                                // 3. Victory Title
+                                Text(
+                                  isFinalLevel ? 'Selamat!' : 'Level ${widget.levelId} Selesai!',
+                                  style: PixelText.mulmaru(
+                                    fontSize: 18,
+                                    color: PixelTerrainTokens.sand,
+                                    letterSpacing: 1.0,
                                   ),
-                                  onPressed: widget.onMenu,
+                                  textAlign: TextAlign.center,
                                 ),
-                                const SizedBox(height: 12),
-                              ],
+                                const SizedBox(height: 6),
 
-                              // 7. Secondary Controls: Replay (↺) & Stages (←)
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  CartoonButton(
-                                    key: const Key('dialog_replay'),
-                                    text: 'Ulangi',
-                                    variant: CartoonButtonVariant.amber,
-                                    height: 42,
-                                    fontSize: 13,
-                                    leading: const Icon(
-                                      Icons.refresh_rounded,
-                                      size: 16,
-                                      color: Colors.white,
+                                // 4. Subtitle
+                                Text(
+                                  isFinalLevel
+                                      ? 'Semua 30 level telah berhasil Anda selesaikan!'
+                                      : 'Target butiran berhasil dipenuhi.',
+                                  style: PixelText.mulmaru(
+                                    fontSize: 11,
+                                    color: PixelTerrainTokens.sage.withValues(alpha: 0.9),
+                                    letterSpacing: 0.4,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+
+                                const SizedBox(height: 10),
+
+                                // 5. Accuracy Chip
+                                PixelBox(
+                                  logicalWidth: 42,
+                                  logicalHeight: 9,
+                                  width: 168,
+                                  height: 36,
+                                  style: PixelTerrainTokens.slateBoxStyle,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.check_circle_rounded,
+                                          size: 14,
+                                          color: PixelTerrainTokens.sage,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'Akurasi 100%',
+                                          style: PixelText.mulmaru(
+                                            fontSize: 10,
+                                            color: Colors.white,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    onPressed: widget.onReplay,
                                   ),
-                                  if (!isFinalLevel) ...[
-                                    const SizedBox(width: 12),
-                                    CartoonButton(
-                                      key: const Key('dialog_menu_level'),
-                                      text: 'Level',
-                                      variant: CartoonButtonVariant.cyan,
-                                      height: 42,
-                                      fontSize: 13,
-                                      leading: const Icon(
-                                        Icons.arrow_back_rounded,
-                                        size: 16,
-                                        color: Colors.white,
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                // 6. Primary Action Button
+                                if (!isFinalLevel && widget.onNextLevel != null) ...[
+                                  PixelButton(
+                                    key: const Key('dialog_next_level'),
+                                    logicalWidth: 68,
+                                    logicalHeight: 12,
+                                    width: 272,
+                                    height: 46,
+                                    normalStyle: PixelTerrainTokens.playButtonNormal,
+                                    pressedStyle: PixelTerrainTokens.playButtonPressed,
+                                    pressChildOffset: const Offset(0, 1),
+                                    onPressed: widget.onNextLevel!,
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            'Level Berikutnya',
+                                            style: PixelText.mulmaru(
+                                              fontSize: 13,
+                                              color: Colors.white,
+                                              letterSpacing: 0.8,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          const Icon(
+                                            Icons.arrow_forward_rounded,
+                                            size: 16,
+                                            color: Colors.white,
+                                          ),
+                                        ],
                                       ),
-                                      onPressed: widget.onMenu,
                                     ),
-                                  ],
+                                  ),
+                                  const SizedBox(height: 10),
                                 ],
-                              ),
-                            ],
+
+                                if (isFinalLevel) ...[
+                                  PixelButton(
+                                    key: const Key('dialog_menu'),
+                                    logicalWidth: 68,
+                                    logicalHeight: 12,
+                                    width: 272,
+                                    height: 46,
+                                    normalStyle: PixelTerrainTokens.playButtonNormal,
+                                    pressedStyle: PixelTerrainTokens.playButtonPressed,
+                                    pressChildOffset: const Offset(0, 1),
+                                    onPressed: widget.onMenu,
+                                    child: Center(
+                                      child: Text(
+                                        'Kembali ke Menu',
+                                        style: PixelText.mulmaru(
+                                          fontSize: 13,
+                                          color: Colors.white,
+                                          letterSpacing: 1.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                ],
+
+                                // 7. Secondary Controls: Replay & Level Select
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    PixelButton(
+                                      key: const Key('dialog_replay'),
+                                      logicalWidth: 32,
+                                      logicalHeight: 10,
+                                      width: 128,
+                                      height: 38,
+                                      normalStyle: PixelTerrainTokens.resetButtonNormal,
+                                      pressedStyle: PixelTerrainTokens.resetButtonPressed,
+                                      pressChildOffset: const Offset(0, 1),
+                                      onPressed: widget.onReplay,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.refresh_rounded,
+                                            size: 16,
+                                            color: Colors.white,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Ulangi',
+                                            style: PixelText.mulmaru(
+                                              fontSize: 11,
+                                              color: Colors.white,
+                                              letterSpacing: 0.6,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (!isFinalLevel) ...[
+                                      const SizedBox(width: 12),
+                                      PixelButton(
+                                        key: const Key('dialog_menu_level'),
+                                        logicalWidth: 32,
+                                        logicalHeight: 10,
+                                        width: 128,
+                                        height: 38,
+                                        normalStyle: PixelTerrainTokens.actionButtonNormal,
+                                        pressedStyle: PixelTerrainTokens.actionButtonPressed,
+                                        pressChildOffset: const Offset(0, 1),
+                                        onPressed: widget.onMenu,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.arrow_back_rounded,
+                                              size: 16,
+                                              color: Colors.white,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              'Level',
+                                              style: PixelText.mulmaru(
+                                                fontSize: 11,
+                                                color: Colors.white,
+                                                letterSpacing: 0.6,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

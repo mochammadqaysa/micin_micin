@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../core/theme.dart';
-
+import 'package:pixel_ui/pixel_ui.dart';
+import '../core/pixel_terrain_tokens.dart';
 
 /// Animated preparation countdown overlay shown when a stage begins or restarts.
 /// Gives players a few seconds to inspect the board and draw initial barrier lines
@@ -70,7 +69,7 @@ class _CountdownOverlayState extends State<CountdownOverlay>
         _popController.forward();
       } else if (_remaining == 1) {
         setState(() {
-          _remaining = 0; // "GO!" / "MULAI!"
+          _remaining = 0; // "MULAI!"
         });
         HapticFeedback.mediumImpact();
         _popController.reset();
@@ -101,7 +100,6 @@ class _CountdownOverlayState extends State<CountdownOverlay>
 
     final isGo = _remaining == 0;
     final String displayText = isGo ? 'MULAI!' : '$_remaining';
-    final Color badgeColor = isGo ? CartoonTokens.greenTop : CartoonTokens.amberTop;
 
     return Positioned(
       top: 60,
@@ -112,7 +110,7 @@ class _CountdownOverlayState extends State<CountdownOverlay>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Floating cartoon countdown pill banner
+            // Floating Pixel Zen countdown badge
             AnimatedBuilder(
               animation: _scaleAnimation,
               builder: (context, child) {
@@ -121,54 +119,31 @@ class _CountdownOverlayState extends State<CountdownOverlay>
                   child: child,
                 );
               },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      badgeColor,
-                      isGo ? CartoonTokens.greenBottom : CartoonTokens.amberBottom,
+              child: PixelBox(
+                logicalWidth: 36,
+                logicalHeight: 12,
+                style: isGo ? PixelTerrainTokens.mossBoxStyle : PixelTerrainTokens.tealBoxStyle,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isGo ? Icons.play_arrow_rounded : Icons.timer_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        displayText,
+                        style: PixelText.mulmaru(
+                          fontSize: 24,
+                          color: Colors.white,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 2.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.40),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      isGo ? Icons.play_arrow_rounded : Icons.timer_rounded,
-                      color: Colors.white,
-                      size: 26,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      displayText,
-                      style: GoogleFonts.outfit(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 1.5,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withValues(alpha: 0.45),
-                            offset: const Offset(0, 2),
-                            blurRadius: 3,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ),
@@ -176,22 +151,19 @@ class _CountdownOverlayState extends State<CountdownOverlay>
             const SizedBox(height: 10),
 
             // Tip badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.65),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.3),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                'Gambar garis sekarang sebelum gula mengalir!',
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white.withValues(alpha: 0.9),
+            PixelBox(
+              logicalWidth: 70,
+              logicalHeight: 8,
+              style: PixelTerrainTokens.slateBoxStyle,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                child: Text(
+                  'Gambar garis sekarang sebelum gula mengalir!',
+                  style: PixelText.mulmaru(
+                    fontSize: 10,
+                    color: PixelTerrainTokens.sand.withValues(alpha: 0.95),
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
             ),

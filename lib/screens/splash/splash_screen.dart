@@ -3,10 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/theme.dart';
+import 'package:pixel_ui/pixel_ui.dart';
+import '../../core/pixel_terrain_tokens.dart';
 import '../../providers/audio_provider.dart';
 import '../../widgets/glass_container.dart';
-import '../../widgets/neu_container.dart';
 import '../game/painters/background_painter.dart';
 
 /// Zen animated splash screen featuring a tranquil living sugar stream,
@@ -26,7 +26,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   late final Animation<double> _logoFade;
   late final Animation<double> _textSlide;
   late final Animation<double> _textFade;
-  late final Animation<double> _haloFade;
 
   final List<_SplashParticle> _particles = [];
   final math.Random _random = math.Random(42);
@@ -70,13 +69,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ),
     );
 
-    _haloFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.45, 0.95, curve: Curves.easeInOut),
-      ),
-    );
-
     // Initialize falling sand particles
     for (int i = 0; i < 45; i++) {
       _particles.add(
@@ -87,8 +79,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           radius: 1.0 + _random.nextDouble() * 1.5,
           alpha: 0.25 + _random.nextDouble() * 0.65,
           color: _random.nextBool()
-              ? GlassTokens.radiantGold
-              : GlassTokens.textSpecular,
+              ? PixelTerrainTokens.sand
+              : PixelTerrainTokens.sage,
         ),
       );
     }
@@ -131,7 +123,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GlassTokens.obsidianVoid,
+      backgroundColor: PixelTerrainTokens.slate,
       body: Stack(
         children: [
           // 1. Plane 1: Background Chalk Slate
@@ -146,51 +138,37 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             size: Size.infinite,
           ),
 
-          // 3. Central Zen Emblem and Typography
+          // 3. Central Pixel Zen Emblem and Typography
           Center(
             child: AnimatedBuilder(
               animation: _entranceController,
               builder: (context, child) {
-                final double pulse =
-                    math.sin(_entranceController.value * math.pi * 3).abs();
-
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Glowing Zen Vessel Emblem with Staggered Scale & Fade
+                    // Pixel Plaque with Staggered Scale & Fade
                     Transform.scale(
                       scale: _logoScale.value,
                       child: Opacity(
                         opacity: _logoFade.value,
                         child: GlassContainer(
-                          width: 88,
-                          height: 88,
-                          shape: BoxShape.circle,
                           enableLiveBlur: false,
-                          backgroundColor: GlassTokens.surfaceLight,
-                          borderWidth: 1.8,
-                          borderGradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              GlassTokens.radiantGold.withValues(alpha: 0.65 + pulse * 0.35),
-                              GlassTokens.radiantGold.withValues(alpha: 0.20),
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: GlassTokens.radiantGold
-                                  .withValues(alpha: 0.12 * _haloFade.value + pulse * 0.18),
-                              blurRadius: 28 + pulse * 14,
-                              spreadRadius: 2 + pulse * 4,
-                            ),
-                          ],
-                          child: Center(
-                            child: Icon(
-                              Icons.grain_rounded,
-                              size: 46,
-                              color: GlassTokens.radiantGold
-                                  .withValues(alpha: 0.90 + pulse * 0.10),
+                          borderRadius: 0,
+                          borderWidth: 0,
+                          backgroundColor: Colors.transparent,
+                          boxShadow: const [],
+                          child: PixelBox(
+                            logicalWidth: 22,
+                            logicalHeight: 22,
+                            width: 88,
+                            height: 88,
+                            style: PixelTerrainTokens.tealBoxStyle,
+                            child: const Center(
+                              child: Icon(
+                                Icons.grain_rounded,
+                                size: 48,
+                                color: PixelTerrainTokens.sand,
+                              ),
                             ),
                           ),
                         ),
@@ -206,59 +184,46 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         opacity: _textFade.value,
                         child: Column(
                           children: [
-                            const Text(
+                            Text(
                               'Micin, Micin',
-                              style: TextStyle(
-                                fontFamily: 'Outfit',
-                                fontSize: 38,
-                                fontWeight: FontWeight.w600,
-                                color: GlassTokens.textSpecular,
-                                letterSpacing: 2.8,
+                              style: PixelText.mulmaru(
+                                fontSize: 32,
+                                color: PixelTerrainTokens.sand,
+                                letterSpacing: 2.0,
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
+                            Text(
                               'Teka-teki Garis & Butiran Gula',
-                              style: TextStyle(
-                                fontFamily: 'Outfit',
-                                fontSize: 14,
-                                color: GlassTokens.textMuted,
-                                letterSpacing: 1.8,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Sebuah Penghormatan untuk Sugar, Sugar',
-                              style: TextStyle(
-                                fontFamily: 'Outfit',
-                                fontSize: 11,
-                                color: GlassTokens.textDim,
+                              style: PixelText.mulmaru(
+                                fontSize: 13,
+                                color: PixelTerrainTokens.sage,
                                 letterSpacing: 1.2,
                               ),
                             ),
-                            const SizedBox(height: 32),
-                            NeuContainer(
+                            const SizedBox(height: 6),
+                            Text(
+                              'Sebuah Penghormatan untuk Sugar, Sugar',
+                              style: PixelText.mulmaru(
+                                fontSize: 10,
+                                color: PixelTerrainTokens.sand.withValues(alpha: 0.60),
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                            const SizedBox(height: 28),
+                            // Stepped Pixel Progress Indicator
+                            PixelBox(
+                              logicalWidth: 35,
+                              logicalHeight: 2,
                               width: 140,
-                              height: 6,
-                              borderRadius: 3,
-                              style: NeuStyle.inset,
-                              depth: 2.5,
-                              blur: 4.0,
-                              padding: const EdgeInsets.all(1.5),
+                              height: 8,
+                              style: PixelTerrainTokens.slateBoxStyle,
                               child: Align(
                                 alignment: Alignment.centerLeft,
                                 child: FractionallySizedBox(
                                   widthFactor: _entranceController.value.clamp(0.05, 1.0),
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(2),
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          NeuTokens.accentAmber,
-                                          NeuTokens.accentCyan,
-                                        ],
-                                      ),
-                                    ),
+                                  child: Container(
+                                    color: PixelTerrainTokens.sage,
                                   ),
                                 ),
                               ),

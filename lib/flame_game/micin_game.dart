@@ -1,8 +1,10 @@
+import 'dart:async' show unawaited;
 import 'dart:math' as math;
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart' show Color, Offset, Size;
 import '../core/constants.dart';
+import '../core/pixel_sprites.dart';
 import '../engine/drawing/virtual_coordinate_adapter.dart';
 import '../engine/game_engine.dart';
 import '../models/level_visual_theme.dart';
@@ -36,8 +38,6 @@ class MicinGame extends FlameGame with DragCallbacks {
 
   // ── Viewport metrics (computed in onGameResize) ───────────────────────────
   double _scale = 1.0;
-  double _offsetX = 0.0;
-  double _offsetY = 0.0;
 
   // ── Overlay keys ──────────────────────────────────────────────────────────
   static const String kOverlayHud = 'hud';
@@ -55,6 +55,13 @@ class MicinGame extends FlameGame with DragCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
     camera.moveTo(Vector2(kVirtualWidth / 2, kVirtualHeight / 2));
+
+    // Show countdown overlay — HUD is always visible
+    overlays.add(kOverlayHud);
+    overlays.add(kOverlayCountdown);
+
+    // Asynchronously preload pixel art sprites
+    unawaited(PixelSprites.loadAll());
 
     // Layer 0: Background (chromatic chalkboard + parallax grain + diegetic label)
     _backgroundComponent = BackgroundFlameComponent(
@@ -89,10 +96,6 @@ class MicinGame extends FlameGame with DragCallbacks {
     await world.add(LineDrawingFlameComponent(
       linesGetter: () => engine.lineController.lines,
     ));
-
-    // Show countdown overlay — HUD is always visible
-    overlays.add(kOverlayHud);
-    overlays.add(kOverlayCountdown);
   }
 
   @override
@@ -100,15 +103,12 @@ class MicinGame extends FlameGame with DragCallbacks {
     super.onGameResize(size);
     final flutterSize = Size(size.x, size.y);
     _scale = VirtualCoordinateAdapter.computeScale(flutterSize);
-    final off = VirtualCoordinateAdapter.computeOffset(flutterSize, _scale);
-    _offsetX = off.dx;
-    _offsetY = off.dy;
 
-    // Align camera so (0,0) maps to the top-left of the virtual canvas.
+    // Center camera on the 400x700 virtual canvas.
     camera.viewfinder.zoom = _scale;
     camera.viewfinder.position = Vector2(
-      -_offsetX / _scale,
-      -_offsetY / _scale,
+      kVirtualWidth / 2,
+      kVirtualHeight / 2,
     );
   }
 
