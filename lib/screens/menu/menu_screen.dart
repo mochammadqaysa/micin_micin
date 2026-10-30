@@ -2,18 +2,19 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pixel_ui/pixel_ui.dart';
 import '../../audio/audio_manager.dart';
 import '../../core/constants.dart';
-import '../../core/pixel_terrain_tokens.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/player_progress_provider.dart';
 import '../game/painters/background_painter.dart';
 
-/// Micin Micin Main Menu — authentic 16-bit Pixel Zen aesthetic.
+/// Authentic Bart Bonte Main Menu for Micin Micin (Sugar, Sugar).
 ///
-/// Features PixelButton tactile interactions, zen pixel logo plaque,
-/// falling sugar-grain rain, and Mulmaru pixel typography.
+/// Features:
+/// - Hero typography: "sugar, sugar" lowercase authentic branding.
+/// - Autoplay background acoustic guitar loop (`sugar_song.mp3`).
+/// - Gentle fluttering sugar-grain rain in the background.
+/// - Tactile minimalist rounded action buttons (PLAY, LEVELS, CREDITS, AUDIO).
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
 
@@ -32,8 +33,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   final math.Random _rng = math.Random(42);
   bool _isNavigating = false;
 
-  static const _bgColor = PixelTerrainTokens.slate;
-  static const _dotColor = PixelTerrainTokens.sand;
+  // Authentic Deep Blue Slate background palette per StageVisualTheme.menu
+  static const _bgColor = Color(0xFF07456B);
+  static const _dotColor = Color(0xFFFFFFFF);
 
   @override
   void initState() {
@@ -48,7 +50,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       duration: const Duration(milliseconds: 16),
     )..addListener(_tickSugar);
 
-    _logoSlide = Tween<double>(begin: -40.0, end: 0.0).animate(
+    _logoSlide = Tween<double>(begin: -35.0, end: 0.0).animate(
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOutBack),
     );
     _fadeIn = CurvedAnimation(
@@ -67,13 +69,13 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
   void _spawnDots() {
     final w = MediaQuery.of(context).size.width;
     _dots.clear();
-    for (int i = 0; i < 80; i++) {
+    for (int i = 0; i < 90; i++) {
       _dots.add(_SugarDot(
         x: _rng.nextDouble() * w,
         y: -_rng.nextDouble() * 200.0,
-        speed: 0.8 + _rng.nextDouble() * 1.4,
-        size: 1.5 + _rng.nextDouble() * 2.0,
-        opacity: 0.4 + _rng.nextDouble() * 0.6,
+        speed: 0.8 + _rng.nextDouble() * 1.5,
+        size: 2.0 + _rng.nextDouble() * 1.8,
+        opacity: 0.35 + _rng.nextDouble() * 0.55,
       ));
     }
   }
@@ -86,7 +88,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       for (final dot in _dots) {
         dot.y += dot.speed;
         if (dot.y > h + 4.0) {
-          dot.y = -_rng.nextDouble() * 60.0;
+          dot.y = -_rng.nextDouble() * 50.0;
           dot.x = _rng.nextDouble() * w;
         }
       }
@@ -121,7 +123,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
       backgroundColor: _bgColor,
       body: Stack(
         children: [
-          // 1. Chalkboard background texture
+          // 1. Solid background canvas with preserved BackgroundPainter
           Positioned.fill(
             child: CustomPaint(
               painter: BackgroundPainter(
@@ -133,7 +135,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
             ),
           ),
 
-          // 2. Animated falling sugar grain dots
+          // 2. Soft animated falling sugar crystals
           Positioned.fill(
             child: RepaintBoundary(
               child: CustomPaint(
@@ -154,91 +156,65 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
                     offset: Offset(0, _logoSlide.value),
                     child: Column(
                       children: [
-                        const Spacer(flex: 2),
+                        const Spacer(flex: 3),
 
-                        // Logo
-                        _ChalkLogo(),
+                        // Authentic "sugar, sugar" hero title & subtitle
+                        const _SugarSugarLogo(),
 
                         const Spacer(flex: 3),
 
-                        // Primary PLAY button
+                        // Primary PLAY button (Bart Bonte bold clean white pill)
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 40.0),
                           child: Center(
-                            child: PixelButton(
+                            child: _MenuActionButton(
                               key: const Key('menu_play_button'),
-                              logicalWidth: 64,
-                              logicalHeight: 13,
-                              width: 260,
-                              height: 52,
-                              normalStyle: PixelTerrainTokens.playButtonNormal,
-                              pressedStyle: PixelTerrainTokens.playButtonPressed,
-                              pressChildOffset: const Offset(0, 2),
+                              width: 250,
+                              height: 54,
+                              backgroundColor: const Color(0xFFF8FAFC),
+                              foregroundColor: _bgColor,
+                              label: 'PLAY',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 3.0,
+                              elevation: 4.0,
                               onPressed: () => _navigate('/game/$lastLevel'),
-                              child: Center(
-                                child: Text(
-                                  'PLAY',
-                                  style: PixelText.mulmaru(
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                    letterSpacing: 2.0,
-                                  ),
-                                ),
-                              ),
                             ),
                           ),
                         ),
 
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 16),
 
-                        // Secondary buttons row
+                        // Secondary action buttons (LEVELS & CREDITS)
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 40.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              PixelButton(
+                              _MenuActionButton(
                                 key: const Key('menu_levels_button'),
-                                logicalWidth: 31,
-                                logicalHeight: 11,
-                                width: 124,
+                                width: 120,
                                 height: 46,
-                                normalStyle: PixelTerrainTokens.actionButtonNormal,
-                                pressedStyle: PixelTerrainTokens.actionButtonPressed,
-                                pressChildOffset: const Offset(0, 2),
+                                backgroundColor: Colors.white.withValues(alpha: 0.15),
+                                foregroundColor: Colors.white,
+                                borderColor: Colors.white.withValues(alpha: 0.35),
+                                label: 'LEVELS',
+                                fontSize: 13,
+                                letterSpacing: 2.0,
                                 onPressed: () => _navigate('/levels'),
-                                child: Center(
-                                  child: Text(
-                                    'LEVELS',
-                                    style: PixelText.mulmaru(
-                                      fontSize: 13,
-                                      color: Colors.white,
-                                      letterSpacing: 1.5,
-                                    ),
-                                  ),
-                                ),
                               ),
                               const SizedBox(width: 12),
-                              PixelButton(
+                              _MenuActionButton(
                                 key: const Key('menu_credits_button'),
-                                logicalWidth: 31,
-                                logicalHeight: 11,
-                                width: 124,
+                                width: 120,
                                 height: 46,
-                                normalStyle: PixelTerrainTokens.pauseButtonNormal,
-                                pressedStyle: PixelTerrainTokens.pauseButtonPressed,
-                                pressChildOffset: const Offset(0, 2),
+                                backgroundColor: Colors.white.withValues(alpha: 0.15),
+                                foregroundColor: Colors.white,
+                                borderColor: Colors.white.withValues(alpha: 0.35),
+                                label: 'CREDITS',
+                                fontSize: 13,
+                                letterSpacing: 2.0,
                                 onPressed: () => _navigate('/credits'),
-                                child: Center(
-                                  child: Text(
-                                    'CREDITS',
-                                    style: PixelText.mulmaru(
-                                      fontSize: 13,
-                                      color: Colors.white,
-                                      letterSpacing: 1.5,
-                                    ),
-                                  ),
-                                ),
                               ),
                             ],
                           ),
@@ -246,60 +222,32 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
 
                         const Spacer(flex: 2),
 
-                        // Bottom controls row: audio toggle + version
+                        // Bottom controls row: audio toggle + version indicator
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 24.0, vertical: 12.0),
+                              horizontal: 24.0, vertical: 14.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              PixelButton(
+                              _MenuAudioToggle(
                                 key: const Key('menu_audio_toggle'),
-                                logicalWidth: 32,
-                                logicalHeight: 11,
-                                width: 128,
-                                height: 44,
-                                normalStyle: ref.watch(audioManagerProvider).isMusicEnabled
-                                    ? PixelTerrainTokens.audioButtonNormal
-                                    : PixelTerrainTokens.pauseButtonNormal,
-                                pressedStyle: PixelTerrainTokens.audioButtonPressed,
-                                pressChildOffset: const Offset(0, 1),
-                                onPressed: () {
+                                isMusicEnabled:
+                                    ref.watch(audioManagerProvider).isMusicEnabled,
+                                onToggle: () {
                                   ref
                                       .read(audioManagerProvider)
                                       .playSfx(SoundType.buttonClick);
                                   ref.read(audioManagerProvider).toggleMusic();
                                   setState(() {});
                                 },
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      ref.watch(audioManagerProvider).isMusicEnabled
-                                          ? Icons.graphic_eq_rounded
-                                          : Icons.volume_off_rounded,
-                                      color: Colors.white,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      ref.watch(audioManagerProvider).isMusicEnabled
-                                          ? 'MUSIC ON'
-                                          : 'MUTED',
-                                      style: PixelText.mulmaru(
-                                        fontSize: 10,
-                                        color: Colors.white,
-                                        letterSpacing: 1.0,
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ),
                               Text(
                                 'v1.0.0',
-                                style: PixelText.mulmaru(
-                                  fontSize: 10,
-                                  color: PixelTerrainTokens.sage.withValues(alpha: 0.6),
+                                style: TextStyle(
+                                  fontFamily: 'Outfit',
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white.withValues(alpha: 0.45),
                                   letterSpacing: 1.2,
                                 ),
                               ),
@@ -320,49 +268,65 @@ class _MenuScreenState extends ConsumerState<MenuScreen>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Chalk Logo Widget
+// Authentic "sugar, sugar" Typography Hero Logo
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _ChalkLogo extends StatelessWidget {
+class _SugarSugarLogo extends StatelessWidget {
+  const _SugarSugarLogo();
+
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Image.asset(
-          'assets/images/cartoon/zen_pixel_logo.png',
-          width: 280,
-          height: 94,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.none,
-          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+        const Text(
+          'sugar, sugar',
+          style: TextStyle(
+            fontFamily: 'Outfit',
+            fontSize: 44,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 2.0,
+            color: Colors.white,
+            shadows: [
+              Shadow(
+                color: Color(0x66000000),
+                offset: Offset(0, 3),
+                blurRadius: 8,
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               'micin',
-              style: PixelText.mulmaru(
-                fontSize: 14,
-                letterSpacing: 2.0,
-                color: PixelTerrainTokens.sand,
+              style: TextStyle(
+                fontFamily: 'Outfit',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 2.5,
+                color: Colors.white.withValues(alpha: 0.85),
               ),
             ),
             const SizedBox(width: 8),
             Text(
               '•',
               style: TextStyle(
-                color: PixelTerrainTokens.sage.withValues(alpha: 0.6),
+                color: Colors.white.withValues(alpha: 0.5),
                 fontSize: 12,
               ),
             ),
             const SizedBox(width: 8),
             Text(
               'micin',
-              style: PixelText.mulmaru(
-                fontSize: 14,
-                letterSpacing: 2.0,
-                color: PixelTerrainTokens.sage,
+              style: TextStyle(
+                fontFamily: 'Outfit',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 2.5,
+                color: Colors.white.withValues(alpha: 0.85),
               ),
             ),
           ],
@@ -370,13 +334,190 @@ class _ChalkLogo extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           'draw · guide · fill',
-          style: PixelText.mulmaru(
+          style: TextStyle(
+            fontFamily: 'Outfit',
             fontSize: 11,
+            fontWeight: FontWeight.w500,
             letterSpacing: 2.0,
-            color: PixelTerrainTokens.sage.withValues(alpha: 0.75),
+            color: Colors.white.withValues(alpha: 0.65),
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Minimalist Menu Action Button
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _MenuActionButton extends StatefulWidget {
+  final double width;
+  final double height;
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final Color? borderColor;
+  final String label;
+  final double fontSize;
+  final FontWeight fontWeight;
+  final double letterSpacing;
+  final double elevation;
+  final VoidCallback onPressed;
+
+  const _MenuActionButton({
+    super.key,
+    required this.width,
+    required this.height,
+    required this.backgroundColor,
+    required this.foregroundColor,
+    this.borderColor,
+    required this.label,
+    required this.fontSize,
+    this.fontWeight = FontWeight.w700,
+    required this.letterSpacing,
+    this.elevation = 0.0,
+    required this.onPressed,
+  });
+
+  @override
+  State<_MenuActionButton> createState() => _MenuActionButtonState();
+}
+
+class _MenuActionButtonState extends State<_MenuActionButton> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: widget.label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) {
+          setState(() => _pressed = false);
+          widget.onPressed();
+        },
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.93 : 1.0,
+          duration: const Duration(milliseconds: 70),
+          curve: Curves.easeOutCubic,
+          child: Container(
+            width: widget.width,
+            height: widget.height,
+            decoration: BoxDecoration(
+              color: widget.backgroundColor,
+              borderRadius: BorderRadius.circular(widget.height / 2),
+              border: widget.borderColor != null
+                  ? Border.all(color: widget.borderColor!, width: 1.5)
+                  : null,
+              boxShadow: widget.elevation > 0
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: widget.elevation * 2,
+                        offset: Offset(0, widget.elevation),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Center(
+              child: Text(
+                widget.label,
+                style: TextStyle(
+                  fontFamily: 'Outfit',
+                  fontSize: widget.fontSize,
+                  fontWeight: widget.fontWeight,
+                  letterSpacing: widget.letterSpacing,
+                  color: widget.foregroundColor,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Minimalist Audio Toggle Pill
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _MenuAudioToggle extends StatefulWidget {
+  final bool isMusicEnabled;
+  final VoidCallback onToggle;
+
+  const _MenuAudioToggle({
+    super.key,
+    required this.isMusicEnabled,
+    required this.onToggle,
+  });
+
+  @override
+  State<_MenuAudioToggle> createState() => _MenuAudioToggleState();
+}
+
+class _MenuAudioToggleState extends State<_MenuAudioToggle> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = widget.isMusicEnabled ? 'MUSIC ON' : 'MUTED';
+
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) {
+          setState(() => _pressed = false);
+          widget.onToggle();
+        },
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.92 : 1.0,
+          duration: const Duration(milliseconds: 70),
+          curve: Curves.easeOutCubic,
+          child: Container(
+            height: 42,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(21),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.25),
+                width: 1.2,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  widget.isMusicEnabled
+                      ? Icons.volume_up_rounded
+                      : Icons.volume_off_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -395,7 +536,7 @@ class _SugarRainPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
     for (final dot in dots) {
-      paint.color = color.withValues(alpha: dot.opacity * 0.7);
+      paint.color = color.withValues(alpha: dot.opacity * 0.75);
       canvas.drawRect(
         Rect.fromLTWH(dot.x, dot.y, dot.size, dot.size),
         paint,

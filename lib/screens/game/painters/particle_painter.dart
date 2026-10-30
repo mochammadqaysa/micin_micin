@@ -15,15 +15,17 @@ class ParticlePainter extends CustomPainter {
 
   ParticlePainter(this.particles, {this.cups});
 
+  static final Paint _sharedPaint = Paint()
+    ..strokeWidth = kParticleRadius * 2.0
+    ..strokeCap = StrokeCap.square;
+
   @override
   void paint(Canvas canvas, Size size) {
     final hasParticles = particles.isNotEmpty;
     final hasSettled = cups != null && cups!.any((c) => c.settledParticleOffsets.isNotEmpty);
     if (!hasParticles && !hasSettled) return;
 
-    final paint = Paint()
-      ..strokeWidth = kParticleRadius * 2.0
-      ..strokeCap = StrokeCap.square;
+    final paint = _sharedPaint;
 
     // 1. Batch group active particle offsets by color and crystalline opacity (PRN-001)
     if (hasParticles) {

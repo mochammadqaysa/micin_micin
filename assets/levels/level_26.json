@@ -62,5 +62,15 @@
       "height": 25.0,
       "targetColor": "#E8C547"
     }
+  ],
+  "obstacles": [
+    {
+      "x": 191.0,
+      "y": 0.0,
+      "width": 18.0,
+      "height": 700.0,
+      "rotation": 0.0,
+      "color": "#7ACAED"
+    }
   ]
 }

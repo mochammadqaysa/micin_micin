@@ -76,23 +76,28 @@ class CupHitbox {
   /// Indicates if this cup has satisfied its target quota of sugar.
   bool get isFull => capturedCount >= targetAmount;
 
-  /// Determines whether a point (particle coordinates) is inside the cup collection area.
-  bool contains(double x, double y) => bounds.contains(Offset(x, y));
+  /// Determines whether a point (particle coordinates) is inside the cup collection area without heap allocation.
+  bool contains(double x, double y) =>
+      x >= bounds.left && x <= bounds.right && y >= bounds.top && y <= bounds.bottom;
 
-  /// Swept continuous check to catch fast particles entering cup across frame boundaries.
-  bool intersectsSegment(Offset p1, Offset p2) {
-    if (contains(p1.dx, p1.dy) || contains(p2.dx, p2.dy)) return true;
+  /// Swept continuous check using raw scalar coordinates to prevent heap allocations.
+  bool intersectsCoords(double x1, double y1, double x2, double y2) {
+    if (contains(x1, y1) || contains(x2, y2)) return true;
 
-    final double minX = p1.dx < p2.dx ? p1.dx : p2.dx;
-    final double maxX = p1.dx > p2.dx ? p1.dx : p2.dx;
-    final double minY = p1.dy < p2.dy ? p1.dy : p2.dy;
-    final double maxY = p1.dy > p2.dy ? p1.dy : p2.dy;
+    final double minX = x1 < x2 ? x1 : x2;
+    final double maxX = x1 > x2 ? x1 : x2;
+    final double minY = y1 < y2 ? y1 : y2;
+    final double maxY = y1 > y2 ? y1 : y2;
 
     if (maxX < bounds.left || minX > bounds.right) return false;
     if (maxY < bounds.top || minY > bounds.bottom) return false;
 
     return true;
   }
+
+  /// Swept continuous check to catch fast particles entering cup across frame boundaries.
+  bool intersectsSegment(Offset p1, Offset p2) =>
+      intersectsCoords(p1.dx, p1.dy, p2.dx, p2.dy);
 
   /// Checks if a [SugarParticle] meets the cup's color acceptance criteria.
   ///

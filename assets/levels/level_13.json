@@ -54,5 +54,6 @@
       "height": 25.0,
       "targetColor": "#70C1B3"
     }
-  ]
+  ],
+  "obstacles": []
 }

@@ -62,5 +62,39 @@
       "height": 25.0,
       "targetColor": "#70C1B3"
     }
+  ],
+  "obstacles": [
+    {
+      "x": 300.0,
+      "y": 516.0,
+      "width": 100.0,
+      "height": 18.0,
+      "rotation": 0.0,
+      "color": "#FF0021"
+    },
+    {
+      "x": 0.0,
+      "y": 341.0,
+      "width": 100.0,
+      "height": 18.0,
+      "rotation": 0.0,
+      "color": "#FF0021"
+    },
+    {
+      "x": 0.0,
+      "y": 516.0,
+      "width": 100.0,
+      "height": 18.0,
+      "rotation": 0.0,
+      "color": "#FF0021"
+    },
+    {
+      "x": 300.0,
+      "y": 341.0,
+      "width": 100.0,
+      "height": 18.0,
+      "rotation": 0.0,
+      "color": "#FF0021"
+    }
   ]
 }

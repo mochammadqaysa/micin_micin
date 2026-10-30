@@ -5,6 +5,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart' show Color, Offset, Size;
 import '../core/constants.dart';
 import '../core/pixel_sprites.dart';
+import '../core/stage_visual_theme.dart';
 import '../engine/drawing/virtual_coordinate_adapter.dart';
 import '../engine/game_engine.dart';
 import '../models/level_visual_theme.dart';
@@ -24,6 +25,7 @@ import 'components/silhouette_component.dart';
 class MicinGame extends FlameGame with DragCallbacks {
   final GameEngine engine;
   final LevelVisualTheme visualTheme;
+  final StageVisualTheme stageTheme;
 
   // ── Screen-shake (trauma model) ───────────────────────────────────────────
   double _trauma = 0.0;
@@ -43,13 +45,18 @@ class MicinGame extends FlameGame with DragCallbacks {
   static const String kOverlayHud = 'hud';
   static const String kOverlayPause = 'pause';
   static const String kOverlayCountdown = 'countdown';
+  static const String kOverlayVictory = 'victory';
 
-  MicinGame({required this.engine, required this.visualTheme});
+  MicinGame({
+    required this.engine,
+    required this.visualTheme,
+    StageVisualTheme? stageTheme,
+  }) : stageTheme = stageTheme ?? StageVisualTheme.forLevel(visualTheme.levelId);
 
   // ── Flame lifecycle ───────────────────────────────────────────────────────
 
   @override
-  Color backgroundColor() => visualTheme.backgroundColor;
+  Color backgroundColor() => stageTheme.backgroundColor;
 
   @override
   Future<void> onLoad() async {
@@ -63,11 +70,11 @@ class MicinGame extends FlameGame with DragCallbacks {
     // Asynchronously preload pixel art sprites
     unawaited(PixelSprites.loadAll());
 
-    // Layer 0: Background (chromatic chalkboard + parallax grain + diegetic label)
+    // Layer 0: Background (authentic flat solid color per stage theme)
     _backgroundComponent = BackgroundFlameComponent(
-      backgroundColor: visualTheme.backgroundColor,
+      backgroundColor: stageTheme.backgroundColor,
       canvasLabel: visualTheme.stageLabel,
-      canvasLabelColor: visualTheme.canvasLabelColor,
+      canvasLabelColor: stageTheme.accentColor,
       canvasLabelOpacity: visualTheme.canvasLabelOpacity,
       canvasLabelPositionVirtual: visualTheme.canvasLabelPosition,
     );
@@ -80,10 +87,11 @@ class MicinGame extends FlameGame with DragCallbacks {
       ));
     }
 
-    // Layer 2: Level geometry (cups, emitters, filter zones)
+    // Layer 2: Level geometry (cups, emitters, filter zones, obstacles)
     await world.add(LevelGeometryFlameComponent(
       levelConfig: engine.levelConfig,
       liveCupsGetter: () => engine.cups,
+      defaultObstacleColor: stageTheme.obstacleColor,
     ));
 
     // Layer 3: Particles (batch drawPoints — zero allocation)
@@ -147,7 +155,7 @@ class MicinGame extends FlameGame with DragCallbacks {
     super.onDragStart(event);
     if (engine.isPaused) return;
     final vp = _toVirtual(event.canvasPosition);
-    engine.lineController.onPanStart(vp);
+    engine.lineController.onPanStart(vp, color: stageTheme.lineColor);
     _updateParallax(event.canvasPosition);
   }
 
@@ -199,6 +207,7 @@ class MicinGame extends FlameGame with DragCallbacks {
     engine.reset();
     engine.isSpawningActive = false;
     overlays.remove(kOverlayPause);
+    overlays.remove(kOverlayVictory);
     overlays.remove(kOverlayCountdown);
     overlays.add(kOverlayCountdown);
     camera.viewfinder.angle = 0.0;

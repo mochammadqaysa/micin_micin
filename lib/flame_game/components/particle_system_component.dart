@@ -14,6 +14,11 @@ class ParticleSystemFlameComponent extends Component {
   final Iterable<SugarParticle> Function() particlesGetter;
   final List<CupHitbox> Function() cupsGetter;
 
+  // Pre-allocated reusable Paint instance ensuring zero-allocation on 60/120 FPS render loop
+  late final Paint _particlePaint = Paint()
+    ..strokeWidth = kParticleRadius * 2.0
+    ..strokeCap = StrokeCap.square;
+
   ParticleSystemFlameComponent({
     required this.particlesGetter,
     required this.cupsGetter,
@@ -30,10 +35,6 @@ class ParticleSystemFlameComponent extends Component {
     final hasParticles = particles.isNotEmpty;
     final hasSettled = cups.any((c) => c.settledParticleOffsets.isNotEmpty);
     if (!hasParticles && !hasSettled) return;
-
-    final paint = Paint()
-      ..strokeWidth = kParticleRadius * 2.0
-      ..strokeCap = StrokeCap.square;
 
     // 1. Active particles grouped by color (zero-allocation batch)
     if (hasParticles) {
@@ -58,8 +59,8 @@ class ParticleSystemFlameComponent extends Component {
 
       for (final entry in _sharedColorBatches.entries) {
         if (entry.value.isEmpty) continue;
-        paint.color = Color(entry.key);
-        canvas.drawPoints(ui.PointMode.points, entry.value, paint);
+        _particlePaint.color = Color(entry.key);
+        canvas.drawPoints(ui.PointMode.points, entry.value, _particlePaint);
       }
     }
 
@@ -67,8 +68,8 @@ class ParticleSystemFlameComponent extends Component {
     if (hasSettled) {
       for (final cup in cups) {
         if (cup.settledParticleOffsets.isNotEmpty) {
-          paint.color = cup.color;
-          canvas.drawPoints(ui.PointMode.points, cup.settledParticleOffsets, paint);
+          _particlePaint.color = cup.color;
+          canvas.drawPoints(ui.PointMode.points, cup.settledParticleOffsets, _particlePaint);
         }
       }
     }

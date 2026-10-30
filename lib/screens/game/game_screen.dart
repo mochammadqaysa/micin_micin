@@ -13,6 +13,7 @@ import '../../providers/audio_provider.dart';
 import '../../providers/player_progress_provider.dart';
 import '../../widgets/countdown_overlay.dart';
 import '../../widgets/pause_overlay.dart';
+import '../../widgets/victory_overlay.dart';
 import '../../flame_game/micin_game.dart';
 import '../../flame_game/components/level_geometry_component.dart';
 import '../../flame_game/components/particle_system_component.dart';
@@ -110,7 +111,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       _audioManager.updateProgress(ratio);
     }
 
-    // Level completion handler
+    // Level completion handler (Bart Bonte authentic centered NEXT dialog)
     if (_gameEngine?.isComplete == true && !_hasHandledCompletion) {
       _hasHandledCompletion = true;
       _game?.addTrauma(0.45);
@@ -119,18 +120,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       if (widget.levelId < kTotalLevels) {
         ref.read(playerProgressProvider.notifier).unlockLevel(widget.levelId + 1);
       }
-      Future.delayed(const Duration(milliseconds: 1100), () {
-        if (!mounted) return;
-        if (widget.levelId < kTotalLevels) {
-          context.pushReplacement('/game/${widget.levelId + 1}');
-        } else {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/levels');
-          }
-        }
-      });
+      _game?.overlays.add(MicinGame.kOverlayVictory);
     }
 
     // Defer setState to post-frame to avoid calling it during Flame's update
@@ -258,6 +248,25 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               onFinished: () {
                 if (!mounted) return;
                 game.onCountdownComplete();
+              },
+            ),
+
+            // ── Victory overlay (Bart Bonte circular NEXT dialog) ──────────────
+            MicinGame.kOverlayVictory: (context, _) => VictoryOverlay(
+              levelId: widget.levelId,
+              isLastLevel: widget.levelId >= kTotalLevels,
+              onNext: () {
+                _audioManager.playSfx(SoundType.buttonClick);
+                game.overlays.remove(MicinGame.kOverlayVictory);
+                if (widget.levelId < kTotalLevels) {
+                  context.pushReplacement('/game/${widget.levelId + 1}');
+                } else {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/levels');
+                  }
+                }
               },
             ),
           },

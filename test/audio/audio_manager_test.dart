@@ -12,7 +12,8 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(ReleaseMode.loop);
-    registerFallbackValue(AssetSource('audio/bgm.mp3'));
+    registerFallbackValue(AssetSource('audio/sugar_song.mp3'));
+    registerFallbackValue(AssetSource('audio/ok_sound.mp3'));
   });
 
   late MockAudioPlayer mockBgmPlayer;
@@ -102,7 +103,7 @@ void main() {
       expect(manager.interactionBus.gainDb, equals(-4.0));
     });
 
-    test('init() sets initialized status and configures looping on both stems', () async {
+    test('init() sets initialized status and configures looping on bgm player', () async {
       final manager = AudioManager(
         bgmPlayer: mockBgmPlayer,
         chimesPlayer: mockChimesPlayer,
@@ -113,7 +114,21 @@ void main() {
 
       expect(manager.isInitialized, isTrue);
       verify(() => mockBgmPlayer.setReleaseMode(ReleaseMode.loop)).called(1);
-      verify(() => mockChimesPlayer.setReleaseMode(ReleaseMode.loop)).called(1);
+    });
+
+    test('playBgm() plays authentic sugar_song.mp3 in loop', () async {
+      final manager = AudioManager(
+        bgmPlayer: mockBgmPlayer,
+        chimesPlayer: mockChimesPlayer,
+        sfxPlayer: mockSfxPlayer,
+        interactionPlayers: [mockInteractionPlayer],
+      );
+      await manager.init();
+
+      await manager.playBgm();
+      verify(() => mockBgmPlayer.play(any(
+        that: isA<AssetSource>().having((s) => s.path, 'path', 'audio/sugar_song.mp3'),
+      ))).called(1);
     });
 
     test('toggleMusic() flips music state and mutes music bus', () {
@@ -156,7 +171,7 @@ void main() {
       expect(manager.interactionBus.isMuted, isFalse);
     });
 
-    test('updateProgress() automates Layer 2 chimes volume along progress curve', () async {
+    test('updateProgress() updates progress ratio clamp in Option A', () async {
       final manager = AudioManager(
         bgmPlayer: mockBgmPlayer,
         chimesPlayer: mockChimesPlayer,
@@ -165,15 +180,29 @@ void main() {
       );
       await manager.init();
 
-      // At 0% progress, chimes should be inaudible
       await manager.updateProgress(0.0);
       expect(manager.currentProgressRatio, equals(0.0));
-      verify(() => mockChimesPlayer.setVolume(any(that: closeTo(0.0, 0.01)))).called(greaterThanOrEqualTo(1));
 
-      // At 100% progress, chimes should reach full presence
-      await manager.updateProgress(1.0);
+      await manager.updateProgress(0.65);
+      expect(manager.currentProgressRatio, equals(0.65));
+
+      await manager.updateProgress(1.5);
       expect(manager.currentProgressRatio, equals(1.0));
-      verify(() => mockChimesPlayer.setVolume(any())).called(1);
+    });
+
+    test('playSfx(SoundType.levelComplete) plays ok_sound.mp3 with ducking', () async {
+      final manager = AudioManager(
+        bgmPlayer: mockBgmPlayer,
+        chimesPlayer: mockChimesPlayer,
+        sfxPlayer: mockSfxPlayer,
+        interactionPlayers: [mockInteractionPlayer],
+      );
+      await manager.init();
+
+      await manager.playSfx(SoundType.levelComplete);
+      verify(() => mockSfxPlayer.play(any(
+        that: isA<AssetSource>().having((s) => s.path, 'path', 'audio/ok_sound.mp3'),
+      ))).called(1);
     });
 
     test('playParticleCapture() triggers pentatonic pitch scaling', () async {

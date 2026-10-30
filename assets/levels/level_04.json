@@ -24,5 +24,23 @@
       "targetAmount": 100
     }
   ],
-  "filters": []
+  "filters": [],
+  "obstacles": [
+    {
+      "x": 266.7,
+      "y": 420.0,
+      "width": 400.0,
+      "height": 18.0,
+      "rotation": 0.0,
+      "color": "#30D30B"
+    },
+    {
+      "x": 0.0,
+      "y": 140.0,
+      "width": 266.7,
+      "height": 18.0,
+      "rotation": 0.0,
+      "color": "#30D30B"
+    }
+  ]
 }

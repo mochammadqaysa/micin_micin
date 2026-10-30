@@ -39,5 +39,6 @@
       "targetAmount": 100
     }
   ],
-  "filters": []
+  "filters": [],
+  "obstacles": []
 }

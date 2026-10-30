@@ -30,6 +30,7 @@ flutter:
     - assets/fonts/
     - assets/levels/
     - assets/audio/
+    - assets/images/branding/
     - assets/images/icons/
     - assets/images/vessels/
     - assets/images/emitters/

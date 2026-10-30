@@ -1,7 +1,7 @@
 ---
 goal: Repository Architecture and Structure Documentation
 date_created: 2026-09-07
-last_updated: 2026-10-19
+last_updated: 2026-10-30
 status: 'Active'
 ---
 
@@ -172,7 +172,7 @@ d:/kayzz/flutter/micin/
     │   └── levels/                 # 30 Level definition JSONs (level_01.json .. level_30.json)
     ├── lib/
     │   ├── audio/                  # Central AudioManager & AudioBus hierarchical mixer models
-    │   ├── core/                   # Global constants, extensions, theme (CartoonTokens - Chunky Arcade tokens), and GameState enum
+    │   ├── core/                   # Global constants, extensions, StageVisualTheme (30-stage Bart Bonte palettes), CartoonTokens, and GameState enum
     │   ├── data/                   # Level and Progress repositories
     │   ├── engine/                 # Headless physics, particle simulation, and collision engine
     │   │   ├── collision/          # CupHitbox, LineSegment, and SilhouetteColliderFactory collision logic
@@ -180,16 +180,17 @@ d:/kayzz/flutter/micin/
     │   │   ├── drawing/            # DrawnLine, LineController, VirtualCoordinateAdapter
     │   │   ├── particle/           # ParticlePool, ParticleEmitter, ParticleController
     │   │   └── game_engine.dart    # Central ticker-driven game loop orchestrator
-    │   ├── models/                 # Immutable domain data models (LevelConfig, CupConfig, LevelVisualTheme, SilhouettePropConfig)
+    │   ├── flame_game/             # Flame rendering bridge (MicinGame, Background, Geometry, Particles, Lines)
+    │   ├── models/                 # Immutable domain data models (LevelConfig, CupConfig, ObstacleConfig, LevelVisualTheme, SilhouettePropConfig)
     │   ├── providers/              # Riverpod StateNotifier, Future, and AudioBus gain providers
     │   ├── screens/                # UI screens (Splash, Menu, LevelSelect, Game)
     │   │   ├── game/               # GameScreen, GameHud, and CustomPainters (Particle, Line, Level, Background, Silhouette)
     │   │   ├── level_select/       # LevelSelectScreen and LevelButton tile
     │   │   └── menu/               # MenuScreen and CreditsScreen
-    │   ├── widgets/                # Reusable UI widgets (CartoonButton, CartoonIconButton, LevelCompleteDialog, CountdownOverlay, PauseOverlay)
+    │   ├── widgets/                # Reusable UI widgets (VictoryOverlay, CartoonButton, CartoonIconButton, LevelCompleteDialog, CountdownOverlay, PauseOverlay)
     │   ├── app.dart                # MaterialApp.router and GoRouter route declarations
     │   └── main.dart               # Main entry point with ProviderScope and font initialization
-    ├── test/                       # Comprehensive automated test suite (190 passing tests, 0 failures)
+    ├── test/                       # Comprehensive automated test suite (211 passing tests, 0 failures)
     │   ├── audio/                  # AudioManager and AudioBus hierarchical mixer unit tests
     │   ├── data/                   # Repository serialization and asset loading tests
     │   ├── engine/                 # Physics, collision, silhouette props, and pool unit tests
@@ -210,14 +211,14 @@ d:/kayzz/flutter/micin/
 |---|---|---|---|
 | `micin_micin/lib/audio/` | Hierarchical Audio Mixer & playback | `AudioManager`, `AudioBus` | Hierarchical logarithmic gain math, headroom control (-16 LUFS), sidechain ducking, vertical stem layering, and low-latency interaction pool. |
 | `micin_micin/lib/engine/` | Headless 2D physics & game mechanics | Particle controller, pool, emitters, line collision, silhouette colliders, cup hitbox | **Zero UI dependency**. Must remain 100% testable in headless Dart unit tests without Flutter UI. |
-| `micin_micin/lib/models/` | Domain entity models | `SugarParticle`, `LevelConfig`, `CupConfig`, `LevelVisualTheme`, `SilhouettePropConfig`, `PlayerProgress` | Pure immutable models. Must support bidirectional JSON serialization. |
+| `micin_micin/lib/models/` | Domain entity models | `SugarParticle`, `LevelConfig`, `CupConfig`, `ObstacleConfig`, `LevelVisualTheme`, `SilhouettePropConfig`, `PlayerProgress` | Pure immutable models. Must support bidirectional JSON serialization. |
 | `micin_micin/lib/data/` | Asset & persistence access | `LevelRepository`, `ProgressRepository` | Handles local I/O. `ProgressRepository` must NOT implement `bestScore` (deferred to v1.1 per CON-004). |
 | `micin_micin/lib/providers/` | Dependency injection & state | Riverpod providers for audio, progress, and configs | Exposes reactive state to UI screens. |
 | `micin_micin/lib/screens/game/painters/` | High-performance rendering | `ParticlePainter`, `LinePainter`, `LevelPainter`, `BackgroundPainter`, `SilhouettePainter` | Batch render with `drawRect` / `drawPoints` where applicable. No object allocations inside `paint()`. |
 | `micin_micin/lib/screens/` | Full-screen views | Splash, Menu, Level Select, Game, Credits | Interacts with engine and navigation routes via GoRouter. |
-| `micin_micin/lib/widgets/` | Chunky 3D arcade buttons, panels, and modal dialogs | `CartoonButton`, `CartoonIconButton`, `LevelCompleteDialog`, `PauseOverlay`, `CountdownOverlay` | Reusable Chunky Arcade components and overlays displayed across game or selection screens. |
-| `micin_micin/assets/levels/` | Game level blueprints | `level_01.json` through `level_30.json` | Must strictly match `LevelConfig` schema. Total sugar quota equals 150% supply formula (150 * N_cups), minimum 40px cup apertures, and bilateral geometric symmetry. |
-| `micin_micin/test/` | Automated test suite | Unit, widget, and integration test files | 100% test pass rate required. Minimum 70% line coverage on `lib/engine/` and `lib/models/`. |
+| `micin_micin/lib/widgets/` | Minimalist vector dialogs and tactile HUD glyphs | `VictoryOverlay`, `CartoonButton`, `CartoonIconButton`, `LevelCompleteDialog`, `PauseOverlay`, `CountdownOverlay` | Reusable Bart Bonte minimalist and arcade components and overlays displayed across game or selection screens. |
+| `micin_micin/assets/levels/` | Game level blueprints | `level_01.json` through `level_30.json` | Must strictly match `LevelConfig` schema with calibrated `obstacles`. Total sugar quota equals 150% supply formula (150 * N_cups), minimum 40px cup apertures, and bilateral geometric symmetry. |
+| `micin_micin/test/` | Automated test suite | Unit, widget, and integration test files | 100% test pass rate required (211 tests across 34 files passing). Minimum 70% line coverage on `lib/engine/` and `lib/models/`. |
 
 ---
 

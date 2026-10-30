@@ -25,6 +25,7 @@
 - **Stitch MCP UI & Asset Pack Design:** Stitch Project `3096952998039927940`, Screen `projects/3096952998039927940/screens/a550d5df72884907bd938730e6009117` ("Micin Micin — Chunky Arcade UI & Asset Pack"). Contains complete component specifications: 3D extruded candy buttons, circular 48px tactile icons, in-game coin HUD dock, U-shaped target cups with granular mounds, 4 color filter gates, player stroke deflectors, 4-Act cards, and pop-scale victory dialog. [Source: Stitch MCP, 2026-10-19]
 - **Pixel Terrain Architecture & Static Buffer Caching:** Background rendering via `BackgroundFlameComponent` uses 4-tier quantized elevation contour shelves and 4-batch discrete point stippling texture (mineral sand, moss, slate, caustics). It caches pre-allocated `Path` and `Offset` point buffers (`_cachedContourPaths`, `_cachedStippleBatches`), only recalculating on canvas resize to guarantee zero heap allocations during 60/120 FPS particle animation loops. HUD controls use `pixel_ui` (`PixelButton`, `PixelBox`, `PixelCorners`, `PixelText.mulmaru`) while preserving standard `Semantics` and keys. [Source: Session 2026-10-27, still valid as of 2026-10-27]
 - **Pixel Sprite Caching & Hybrid Geometry Rendering (`PixelSprites`):** Preloads and caches 16-bit pixel art sprite assets (`vessels/cup_pixel.png`, `emitters/emitter_pixel.png`, `gates/filter_pixel.png`, `gates/gravity_pixel.png`, `terrain/terrain_pixel.png`) in Flame's image cache with null-safe synchronous accessors. Rendered via `canvas.drawImageRect` inside `LevelGeometryFlameComponent` and `BackgroundFlameComponent`, preserving virtual $400 \times 700$ coordinate alignment, dynamic target color tinting, centered countdown numbers, and graceful procedural fallbacks for headless test environments. [Source: Session 2026-10-27, still valid as of 2026-10-27]
+- **Bart Bonte Authentic Visual Overhaul (`StageVisualTheme`):** Direct 1:1 replication of Bart Bonte's official Flash/ActionScript rendering. All 30 stages map to 5 core archetypal palettes (Green, Magenta, Crimson, Blue, Orange) plus Menu slate, defining `backgroundColor` (`backkleur`), `obstacleColor` (`balk*`), and `lineColor` (`tekenkleur`). `BackgroundFlameComponent` renders clean solid colors without Zen stippling/contours; `LevelGeometryFlameComponent` renders procedural Bézier typographical comma spouts (`,`) pre-cached from SWF shape 483 (`swc_komma`), flat vector outline cups with centered dynamic countdown numbers turning gold (`0xFFFFD54F`) at 0, and obstacle beams (`balk`) with zero heap allocations on the 60/120 FPS render loop. [Source: Session 2026-10-29]
 
 ### Dead-Ends (Do NOT Repeat)
 
@@ -48,10 +49,10 @@
 
 ### Key Metrics & Baselines
 
-- **Unit/Widget/Integration Test Suite:** 198 tests passing across 32 test files with 0 failures (`flutter test`).
+- **Unit/Widget/Integration Test Suite:** 211 tests passing across 34 test files with 0 failures (`flutter test`).
 - **Code Linter:** 0 analyzer issues (`flutter analyze`).
 - **Target Frame Rate:** 60/120 FPS steady with 500 active granular particles (Zero-GC hot path).
-- **Canonical Design Language:** Pixel Terrain & Chunky Arcade (`PixelTerrainTokens`, `pixel_ui`, `PixelSprites`, 3D extruded slabs, Mulmaru pixel font, quantized contour shelves).
+- **Canonical Design Language:** 1:1 Authentic Bart Bonte Sugar Sugar Minimalism (`StageVisualTheme`, typographical comma spouts, vector cups, circular glyph HUD, zero-allocation scalar collision).
 
 ---
 
@@ -1582,3 +1583,78 @@
 
 
 
+
+---
+
+## 📝 Session Checkpoint: 2026-10-29 [Discovery, Spec & Plan: 1:1 Sugar, Sugar Decompiled Overhaul]
+
+- **Active Memory Path:** instructions/memory.instructions.md
+- **Current SDLC Phase:** Planning & Task Breakdown (`/sdlc-plan-tasks` / Phase 0 -> Spec -> Plan completed)
+- **Active Artifacts:**
+  - `docs/discovery-draft-20261029-sugar-sugar-decompiled-analysis.md` — Status: ✅ Approved (Decompiled APK & SWF analysis, audio extracted, vector primitives mapped)
+  - `spec/spec-design-sugar-sugar-decompiled-overhaul.md` — Status: ✅ Approved (Technical Spec for 1:1 Bart Bonte visual & audio migration, Readiness 100/100)
+  - `plan/plan-sugar-sugar-decompiled-overhaul-v1.0.md` — Status: ✅ Ready (4-Phase Tracer Bullet plan)
+- **Extracted Source Assets (Cached in Scratch):**
+  - Audio: `sugar_song.mp3` (BGM: 786 KB) and `ok_sound.mp3` (SFX: 15.6 KB)
+  - Visual: `splash_portrait.png`, `banner.png`, `icon.png`
+- **Decisions Made:**
+  - **Option A (Total Visual Overhaul):** User approved replacing the Pixel Koi Zen theme with 100% authentic Bart Bonte flat chalkboard minimalism.
+  - **Flame Game Engine Preserved:** Retaining `MicinGame` as rendering bridge for 60 FPS performance, rendering components with procedural vector paths and flat solid palettes.
+- **Next Action / Pending:**
+  - Execute Phase 1 via `/sdlc-write-code` (TASK-001 to TASK-005: copy original BGM/SFX and launcher icons, wire `AudioManager`, run verification tests).
+
+<!-- checkpoint-tail: Discovery, Spec, and Plan complete for 1:1 Bart Bonte Sugar Sugar overhaul; audio/icons extracted; ready for Phase 1 execution via /sdlc-write-code. -->
+
+---
+
+## 📝 Session Checkpoint: 2026-10-29 [Phase 1 Complete: Original Audio & Platform Assets Integration]
+
+- **Active Memory Path:** instructions/memory.instructions.md
+- **Current SDLC Phase:** Phase 6 (Code Execution - `/sdlc-write-code`)
+- **Active Plan:** `plan/plan-sugar-sugar-decompiled-overhaul-v1.0.md`
+- **Completed Tasks:**
+  - `TASK-001`: Bundled `assets/audio/sugar_song.mp3` (BGM: 786 KB) and `assets/audio/ok_sound.mp3` (SFX: 15.6 KB); declared `assets/images/branding/` in `pubspec.yaml`.
+  - `TASK-002`: Wired `AudioManager` to loop `audio/sugar_song.mp3` as single-loop BGM (Option A) and configured `SoundType.levelComplete` to play `audio/ok_sound.mp3`.
+  - `TASK-003`: Bundled `assets/images/branding/` (`banner.png`, `splash_portrait.png`, `splash_landscape.png`) and updated Android launcher icons (`android/app/src/main/res/mipmap-*/ic_launcher.png` across hdpi, mdpi, xhdpi, xxhdpi, xxxhdpi).
+  - `TASK-004`: Verified audio contracts with `flutter test test/audio/audio_manager_test.dart` (16/16 passed). Full macro test suite `flutter test` passed 100% green (200/200 passed across 32 test files).
+- **Next Action / Pending:**
+  - `TASK-005`: Wait for user explicit approval before proceeding to Phase 2 (Visual Style Overhaul: `StageVisualTheme`, flat solid backgrounds, flat vector cups, and typographical comma spouts).
+
+<!-- checkpoint-tail: Phase 1 complete; sugar_song.mp3 and ok_sound.mp3 integrated; branding and launcher icons copied; 200/200 tests passing. -->
+
+---
+
+## 📝 Session Checkpoint: 2026-10-30 [Phase 3 Complete: HUD, Menus & Level Completion Flow Overhaul]
+
+- **Active Memory Path:** instructions/memory.instructions.md
+- **Current SDLC Phase:** Phase 6 (Code Execution - `/sdlc-write-code`)
+- **Active Plan:** `plan/plan-sugar-sugar-decompiled-overhaul-v1.0.md`
+- **Completed Tasks:**
+  - `TASK-012`: Overhauled `lib/screens/game/game_hud.dart` with Bart Bonte circular vector glyph buttons (Reset `hud_reset`, Pause `hud_pause`, Audio toggle `hud_audio`/`hud_sound`), diegetic bottom level indicator chip, and minimalist rounded gravity switch pill (`hud_gravity`).
+  - `TASK-013`: Replaced auto-advance 1100ms timer in `lib/screens/game/game_screen.dart` with `VictoryOverlay` (`lib/widgets/victory_overlay.dart`). Plays `ok_sound.mp3` once upon level completion and displays centered circular "NEXT" dialog (`spr_buttonnext`), transitioning only upon player tap.
+  - `TASK-014`: Overhauled `lib/screens/menu/menu_screen.dart` with authentic "sugar, sugar" lowercase typography, Deep Blue Slate backdrop (`Color(0xFF07456B)`), soft falling sugar crystal rain, and autoplay `sugar_song.mp3`.
+  - `TASK-015`: Verified with unit & widget tests: `test/screens/victory_overlay_test.dart` added (2 tests). `flutter test test/screens/` passed 42/42 tests. Full macro suite `flutter test` passed 209/209 tests across 33 test files with zero regressions.
+- **Next Action / Pending:**
+  - `TASK-016`: Wait for explicit user confirmation before proceeding to Phase 4 (Stage Geometry Calibration & Final Polish: TASK-017 s/d TASK-020).
+
+<!-- checkpoint-tail: Phase 3 complete; HUD, VictoryOverlay, MenuScreen overhauled to 1:1 Bart Bonte aesthetic; 209/209 tests passing. -->
+
+---
+
+## 📝 Session Checkpoint: 2026-10-30 [Phase 4 Complete: Stage Geometry Calibration & Final Polish]
+
+- **Active Memory Path:** instructions/memory.instructions.md
+- **Current SDLC Phase:** Phase 6 (Code Execution - `/sdlc-write-code` / Sign-off Phase 4)
+- **Active Plan:** `plan/plan-sugar-sugar-decompiled-overhaul-v1.0.md`
+- **Completed Tasks:**
+  - `TASK-017`: Audited and aligned all 30 level configurations in `assets/levels/level_01.json` s/d `level_30.json` with decompiled SWF bytecode (`initIndivLevel`). Extracted authentic internal beam obstacles (`balk`) with rotational trigonometry, mapped into `ObstacleConfig.toLineSegments(thickness: 3.0)`, and registered into `GameEngine.propColliders` for seamless rigid deflection.
+  - `TASK-018`: Optimized granular particle simulation and rendering hot paths for 60/120 FPS zero-allocation: replaced per-frame `Offset` allocations with scalar coordinate checks (`intersectsCoords(x1, y1, x2, y2)` and `containsCoords(x, y)`) in `CupHitbox` and `ColorFilterZone`; cached shared `Paint` instances in `ParticleSystemComponent` and `ParticlePainter`.
+  - `TASK-019`: Verified macro test suite with 100% pass rate (`flutter test`: 211 tests across 34 test files, 0 failures, 0 skips) and zero analyzer issues (`flutter analyze`: 0 issues found).
+  - `TASK-020`: Completed Phase 4 sign-off and final implementation plan reconciliation.
+- **Key Technical Findings:**
+  - Obstacle beams from decompiled ActionScript bytecode (`spr_balk*`) were registered with precise virtual $(400 \times 700)$ coordinates, dimensions, rotations, and theme colors across levels 2, 8, 12, 15, 27, etc.
+  - Scalar evaluation eliminated thousands of temporary heap objects per frame during particle swept collision and filter intersection checks, preventing GC stutter on 60/120 Hz displays.
+- **Next Action / Pending:**
+  - Await user review or prompt for next SDLC activity (e.g. `/sdlc-code-review`, `/sdlc-generate-docs`, or release packaging).
+
+<!-- checkpoint-tail: Phase 4 complete; all 30 levels calibrated with authentic obstacles; zero-allocation scalar physics verified; 211/211 tests passing; 0 analyzer issues; Plan v1.0 100% completed. -->

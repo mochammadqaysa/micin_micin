@@ -4,6 +4,7 @@ import 'package:micin_micin/engine/game_engine.dart';
 import 'package:micin_micin/models/cup_config.dart';
 import 'package:micin_micin/models/emitter_config.dart';
 import 'package:micin_micin/models/level_config.dart';
+import 'package:micin_micin/models/obstacle_config.dart';
 
 void main() {
   group('GameEngine', () {
@@ -197,6 +198,50 @@ void main() {
 
       expect(engine.cups.first.capturedCount, greaterThan(0));
       expect(engine.particleController.capturedCount, equals(engine.cups.first.capturedCount));
+    });
+
+    test('rigid obstacle beam in levelConfig deflects falling sugar particles', () {
+      const level = LevelConfig(
+        id: 102,
+        name: 'Obstacle Beam Deflection Test',
+        totalSugar: 5,
+        gravity: 0.25,
+        canvasHeight: 500,
+        emitters: [
+          EmitterConfig(x: 200, y: 50, rate: 1, totalToEmit: 1),
+        ],
+        cups: [
+          CupConfig(x: 200, y: 400, width: 40, height: 40, targetAmount: 1),
+        ],
+        obstacles: [
+          ObstacleConfig(
+            x: 150,
+            y: 150,
+            width: 100,
+            height: 20,
+          ),
+        ],
+      );
+
+      final engine = GameEngine(levelConfig: level);
+      expect(engine.propColliders.length, equals(4)); // 4 perimeter segments
+
+      // Spawn a particle directly above obstacle beam
+      final p = engine.particleController.pool.acquire()!;
+      p.x = 200.0;
+      p.y = 130.0;
+      p.vx = 0.0;
+      p.vy = 3.0; // Falling toward top of obstacle at y = 150
+
+      // Step simulation
+      for (int i = 0; i < 15; i++) {
+        engine.tickManual(const Duration(milliseconds: 16));
+      }
+
+      // Particle should have collided with the top of the obstacle beam and rebounded
+      expect(p.isActive, isTrue);
+      // Particle y should remain near or above the beam rather than passing straight through to y=400
+      expect(p.y, lessThan(170.0));
     });
   });
 }

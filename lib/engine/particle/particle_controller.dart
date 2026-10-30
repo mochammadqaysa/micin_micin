@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../collision/cup_hitbox.dart';
 import '../collision/line_segment.dart';
@@ -61,7 +60,7 @@ class ParticleController {
       for (final filter in filters) {
         final nextX = p.x + p.vx;
         final nextY = p.y + p.vy;
-        if (filter.intersectsSegment(Offset(p.x, p.y), Offset(nextX, nextY))) {
+        if (filter.intersectsCoords(p.x, p.y, nextX, nextY)) {
           if (p.color != filter.targetColor) {
             p.color = filter.targetColor;
             onFilterPassed?.call(filter, p);

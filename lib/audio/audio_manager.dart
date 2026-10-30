@@ -36,9 +36,8 @@ class AudioManager {
   bool _isSoundEnabled = true;
   bool _isInitialized = false;
 
-  // Adaptive Layer 2 Automation
+  // Stage progress ratio [0.0..1.0]
   double _currentProgressRatio = 0.0;
-  double _layer2GainDb = -40.0;
 
   // Debounce Clocks
   DateTime _lastParticleSoundTime = DateTime.fromMillisecondsSinceEpoch(0);
@@ -109,7 +108,6 @@ class AudioManager {
     if (_isInitialized) return;
     try {
       await _bgmPlayer.setReleaseMode(ReleaseMode.loop);
-      await _chimesPlayer.setReleaseMode(ReleaseMode.loop);
       await _applyBusVolumes();
       _isInitialized = true;
     } catch (e) {
@@ -122,11 +120,8 @@ class AudioManager {
     try {
       if (_isMusicEnabled) {
         await _bgmPlayer.setVolume(musicBus.effectiveLinearVolume);
-        final layer2Vol = AudioBus.dbToLinear(musicBus.effectiveGainDb + _layer2GainDb);
-        await _chimesPlayer.setVolume(layer2Vol);
       } else {
         await _bgmPlayer.setVolume(0.0);
-        await _chimesPlayer.setVolume(0.0);
       }
 
       final sfxVol = _isSoundEnabled ? sfxBus.effectiveLinearVolume : 0.0;
@@ -141,20 +136,12 @@ class AudioManager {
     }
   }
 
-  /// Starts background music: Layer 1 (Base Ambience) + Layer 2 (Adaptive Chimes).
+  /// Starts background music: Single-loop BGM (sugar_song.mp3) per Option A.
   Future<void> playBgm() async {
     if (!_isMusicEnabled) return;
     try {
-      await _bgmPlayer.play(AssetSource('audio/bgm.mp3'));
+      await _bgmPlayer.play(AssetSource('audio/sugar_song.mp3'));
       await _applyBusVolumes();
-
-      // Start Layer 2 stem if available
-      try {
-        await _chimesPlayer.play(AssetSource('audio/chimes_loop.wav'));
-        await _chimesPlayer.setVolume(AudioBus.dbToLinear(musicBus.effectiveGainDb + _layer2GainDb));
-      } catch (_) {
-        // Graceful fallback if chimes stem is not present
-      }
     } catch (e) {
       debugPrint('AudioManager playBgm warning: $e');
     }
@@ -164,30 +151,15 @@ class AudioManager {
   Future<void> stopBgm() async {
     try {
       await _bgmPlayer.stop();
-      await _chimesPlayer.stop();
     } catch (e) {
       debugPrint('AudioManager stopBgm warning: $e');
     }
   }
 
-  /// Updates target progress ratio [0.0..1.0] and adapts Layer 2 chimes volume.
+  /// Updates target progress ratio [0.0..1.0].
+  /// In Option A (Authentic Sugar Sugar), Layer 2 chimes automation is deactivated.
   Future<void> updateProgress(double completionRatio) async {
     _currentProgressRatio = completionRatio.clamp(0.0, 1.0);
-    // Smooth logarithmic fade-in curve: -40 dB (silent) up to 0 dB relative to MusicBus
-    if (_currentProgressRatio <= 0.05) {
-      _layer2GainDb = -40.0;
-    } else {
-      _layer2GainDb = -40.0 + (40.0 * math.pow(_currentProgressRatio, 0.7));
-    }
-
-    if (_isMusicEnabled) {
-      final layer2Linear = AudioBus.dbToLinear(musicBus.effectiveGainDb + _layer2GainDb);
-      try {
-        await _chimesPlayer.setVolume(layer2Linear);
-      } catch (e) {
-        debugPrint('AudioManager updateProgress warning: $e');
-      }
-    }
   }
 
   /// Plays a short sound effect with automatic sidechain ducking on level complete.
@@ -196,7 +168,7 @@ class AudioManager {
     try {
       final fileName = switch (type) {
         SoundType.buttonClick => 'audio/click.wav',
-        SoundType.levelComplete => 'audio/ok.mp3',
+        SoundType.levelComplete => 'audio/ok_sound.mp3',
         SoundType.particlePing => 'audio/particle_ping.wav',
         SoundType.filterPass => 'audio/filter_pass.wav',
         SoundType.gravityInvert => 'audio/gravity_invert.wav',

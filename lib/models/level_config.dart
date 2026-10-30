@@ -3,6 +3,7 @@ import '../core/constants.dart';
 import 'color_filter_config.dart';
 import 'cup_config.dart';
 import 'emitter_config.dart';
+import 'obstacle_config.dart';
 
 /// Complete configuration for a level loaded from JSON assets.
 class LevelConfig {
@@ -11,6 +12,7 @@ class LevelConfig {
   final List<EmitterConfig> emitters;
   final List<CupConfig> cups;
   final List<ColorFilterConfig> filters;
+  final List<ObstacleConfig> obstacles;
   final int totalSugar;
   final double gravity;
   final bool hasGravityToggle;
@@ -22,6 +24,7 @@ class LevelConfig {
     required this.emitters,
     required this.cups,
     this.filters = const [],
+    this.obstacles = const [],
     required this.totalSugar,
     this.gravity = kGravityDefault,
     this.hasGravityToggle = false,
@@ -63,6 +66,15 @@ class LevelConfig {
                       ))
               .toList() ??
           const [],
+      obstacles: (json['obstacles'] as List<dynamic>?)
+              ?.map(
+                  (o) => ObstacleConfig.fromJson(
+                        o as Map<String, dynamic>,
+                        scaleX: scaleX,
+                        scaleY: scaleY,
+                      ))
+              .toList() ??
+          const [],
       totalSugar: (json['totalSugar'] as num?)?.toInt() ?? 100,
       gravity: (json['gravity'] as num?)?.toDouble() ?? kGravityDefault,
       hasGravityToggle: json['hasGravityToggle'] as bool? ?? false,
@@ -76,6 +88,7 @@ class LevelConfig {
         'emitters': emitters.map((e) => e.toJson()).toList(),
         'cups': cups.map((c) => c.toJson()).toList(),
         'filters': filters.map((f) => f.toJson()).toList(),
+        'obstacles': obstacles.map((o) => o.toJson()).toList(),
         'totalSugar': totalSugar,
         'gravity': gravity,
         'hasGravityToggle': hasGravityToggle,
@@ -92,6 +105,7 @@ class LevelConfig {
           listEquals(emitters, other.emitters) &&
           listEquals(cups, other.cups) &&
           listEquals(filters, other.filters) &&
+          listEquals(obstacles, other.obstacles) &&
           totalSugar == other.totalSugar &&
           gravity == other.gravity &&
           hasGravityToggle == other.hasGravityToggle &&
@@ -104,6 +118,7 @@ class LevelConfig {
         Object.hashAll(emitters),
         Object.hashAll(cups),
         Object.hashAll(filters),
+        Object.hashAll(obstacles),
         totalSugar,
         gravity,
         hasGravityToggle,

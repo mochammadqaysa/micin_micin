@@ -17,13 +17,13 @@ class _TestFlameGame extends FlameGame {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('BackgroundFlameComponent Tests', () {
-    testWidgets('mounts and renders pixel terrain background with stepped shelves',
+  group('BackgroundFlameComponent Tests (TASK-007, REQ-003, AC-003)', () {
+    testWidgets('mounts and renders authentic flat solid background per stage theme',
         (WidgetTester tester) async {
       final bg = BackgroundFlameComponent(
-        backgroundColor: const Color(0xFF1E3F3B),
+        backgroundColor: const Color(0xFF076B07),
         canvasLabel: 'STAGE 01',
-        canvasLabelColor: const Color(0xFFE8DFCC),
+        canvasLabelColor: const Color(0xFF30D30B),
         canvasLabelOpacity: 0.25,
       );
 
@@ -42,7 +42,7 @@ void main() {
       expect(bg.isMounted, isTrue);
       expect(bg.priority, -10);
 
-      // Verify parallax updates smoothly and does not throw
+      // Verify setParallax is safely callable and does not throw
       bg.setParallax(15.0, -10.0);
       await tester.pump(const Duration(milliseconds: 50));
 
@@ -53,7 +53,7 @@ void main() {
     testWidgets('handles null or empty canvasLabel gracefully',
         (WidgetTester tester) async {
       final bg = BackgroundFlameComponent(
-        backgroundColor: const Color(0xFF263238),
+        backgroundColor: const Color(0xFF6B256B),
         canvasLabel: null,
         canvasLabelColor: Colors.transparent,
       );

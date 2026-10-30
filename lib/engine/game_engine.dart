@@ -47,7 +47,10 @@ class GameEngine with ChangeNotifier {
             levelConfig.cups.map(CupHitbox.fromConfig).toList(),
         filters = filters ??
             levelConfig.filters.map(ColorFilterZone.fromConfig).toList(),
-        propColliders = propColliders ?? const [];
+        propColliders = [
+          ...?propColliders,
+          ...levelConfig.obstacles.expand((o) => o.toLineSegments()),
+        ];
 
   /// Starts the game loop using Flutter's [TickerProvider] (CON-001).
   void start(TickerProvider vsync) {
